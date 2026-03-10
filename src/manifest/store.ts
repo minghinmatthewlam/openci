@@ -1,48 +1,80 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
-import { ManifestSchema, type Manifest, type ManifestInstallation } from './schema.js';
+import { ManifestInstallationSchema, type ManifestInstallation } from './schema.js';
 
-export function getManifestPath(repoRoot: string): string {
+export function getLegacyManifestPath(repoRoot: string): string {
   return join(repoRoot, '.openci.json');
 }
 
-export async function readManifest(repoRoot: string): Promise<Manifest | undefined> {
+export function getInstallationMetadataDir(repoRoot: string): string {
+  return join(repoRoot, '.github', 'workflows', '.openci');
+}
+
+export function getInstallationMetadataPath(repoRoot: string, workflowName: string): string {
+  return join(getInstallationMetadataDir(repoRoot), `${workflowName}.json`);
+}
+
+export async function listInstallationMetadata(repoRoot: string): Promise<ManifestInstallation[]> {
+  const sidecarDir = getInstallationMetadataDir(repoRoot);
   try {
-    const raw = await readFile(getManifestPath(repoRoot), 'utf8');
-    const parsed = JSON.parse(raw);
-    const result = ManifestSchema.safeParse(parsed);
-    return result.success ? result.data : undefined;
+    const { readdir } = await import('node:fs/promises');
+    const entries = await readdir(sidecarDir);
+    const items = await Promise.all(
+      entries
+        .filter((entry) => entry.endsWith('.json'))
+        .map(async (entry) => {
+          const raw = await readFile(join(sidecarDir, entry), 'utf8');
+          const parsed = JSON.parse(raw);
+          const result = ManifestInstallationSchema.safeParse(parsed);
+          return result.success ? result.data : undefined;
+        }),
+    );
+
+    const valid = items.filter((item): item is ManifestInstallation => Boolean(item));
+    if (valid.length > 0) {
+      return valid.sort((left, right) => left.name.localeCompare(right.name));
+    }
   } catch {
-    return undefined;
+    // fall through to legacy manifest support
+  }
+
+  return readLegacyManifest(repoRoot);
+}
+
+async function readLegacyManifest(repoRoot: string): Promise<ManifestInstallation[]> {
+  try {
+    const raw = await readFile(getLegacyManifestPath(repoRoot), 'utf8');
+    const parsed = JSON.parse(raw) as { installations?: unknown[] };
+    const items = Array.isArray(parsed.installations) ? parsed.installations : [];
+    return items
+      .map((item) => ManifestInstallationSchema.safeParse(item))
+      .filter((result) => result.success)
+      .map((result) => result.data)
+      .sort((left, right) => left.name.localeCompare(right.name));
+  } catch {
+    return [];
   }
 }
 
-async function writeManifest(repoRoot: string, manifest: Manifest): Promise<void> {
-  const manifestPath = getManifestPath(repoRoot);
-  await mkdir(dirname(manifestPath), { recursive: true });
-  await writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
+export async function readInstallationMetadata(
+  repoRoot: string,
+  workflowName: string,
+): Promise<ManifestInstallation | undefined> {
+  const installation = (await listInstallationMetadata(repoRoot)).find((item) => item.name === workflowName);
+  return installation;
 }
 
-export async function upsertManifestInstallation(
+export async function upsertInstallationMetadata(
   repoRoot: string,
   installation: Omit<ManifestInstallation, 'targetPath'> & { targetPath: string },
 ): Promise<void> {
-  const manifest = (await readManifest(repoRoot)) ?? {
-    version: 1 as const,
-    installations: [],
-  };
-
   const relativeTargetPath = relative(repoRoot, installation.targetPath);
   const nextInstallation: ManifestInstallation = {
     ...installation,
     targetPath: relativeTargetPath,
   };
 
-  const installations = manifest.installations.filter((item) => item.name !== installation.name);
-  installations.push(nextInstallation);
-
-  await writeManifest(repoRoot, {
-    version: 1,
-    installations,
-  });
+  const metadataPath = getInstallationMetadataPath(repoRoot, installation.name);
+  await mkdir(dirname(metadataPath), { recursive: true });
+  await writeFile(metadataPath, JSON.stringify(nextInstallation, null, 2), 'utf8');
 }

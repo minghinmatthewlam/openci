@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "npm run build && vitest run",
     "test:watch": "vitest",
     "web:dev": "npm --prefix web run dev",
     "web:build": "npm --prefix web run build",

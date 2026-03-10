@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { readManifest } from '../manifest/store.js';
+import { listInstallationMetadata } from '../manifest/store.js';
 import { getGitRepoRoot } from '../utils/git.js';
 
 export function registerStatusCommand(program: Command): void {
@@ -10,7 +10,7 @@ export function registerStatusCommand(program: Command): void {
     .description('Show installed workflows and their health')
     .action(async () => {
       const repoRoot = getGitRepoRoot(process.cwd());
-      const manifest = await readManifest(repoRoot);
+      const installations = await listInstallationMetadata(repoRoot);
       const workflowsDir = join(repoRoot, '.github', 'workflows');
 
       let workflowFiles: string[] = [];
@@ -24,7 +24,7 @@ export function registerStatusCommand(program: Command): void {
 
       process.stdout.write('name\tprovider\tsource\tversion\tfile\tstatus\n');
 
-      if (!manifest) {
+      if (installations.length === 0) {
         for (const file of workflowFiles) {
           const name = file.replace(/^\.github\/workflows\//, '').replace(/\.ya?ml$/, '');
           process.stdout.write(`${name}\tunknown\tunknown\tunknown\t${file}\tuntracked-file\n`);
@@ -32,8 +32,8 @@ export function registerStatusCommand(program: Command): void {
         return;
       }
 
-      const trackedFiles = new Set(manifest.installations.map((item) => item.targetPath));
-      for (const installation of manifest.installations) {
+      const trackedFiles = new Set(installations.map((item) => item.targetPath));
+      for (const installation of installations) {
         const status = workflowFiles.includes(installation.targetPath) ? 'installed' : 'missing-file';
         process.stdout.write(
           `${installation.name}\t${installation.provider}\t${installation.source}\t${installation.workflowVersion}\t${installation.targetPath}\t${status}\n`,

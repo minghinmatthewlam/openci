@@ -9,7 +9,8 @@ const cliPath = join(workspaceRoot, 'dist', 'index.js');
 let built = false;
 
 export function ensureBuiltCli(): void {
-  if (built && existsSync(cliPath)) {
+  if (existsSync(cliPath)) {
+    built = true;
     return;
   }
 

@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import { access, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { detectRepo } from '../detection/index.js';
-import { upsertManifestInstallation } from '../manifest/store.js';
+import { upsertInstallationMetadata } from '../manifest/store.js';
 import { resolveSupportedProvider } from '../provider/resolve.js';
 import { resolveWorkflowBundle } from '../registry/source.js';
 import { isGhAuthenticated, isGhAvailable } from '../secrets/check.js';
@@ -123,10 +123,13 @@ export function registerAddCommand(program: Command): void {
         } else {
           await mkdir(dirname(targetPath), { recursive: true });
           await writeFile(targetPath, output, 'utf8');
-          await upsertManifestInstallation(repoRoot, {
+          await upsertInstallationMetadata(repoRoot, {
             name: bundle.metadata.name,
             source: bundle.sourceLabel,
             provider: selectedProvider,
+            model: globals.model,
+            trigger: globals.trigger,
+            branch: globals.branch,
             smart: bundle.metadata.smart,
             workflowVersion: bundle.metadata.version,
             targetPath,

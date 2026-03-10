@@ -11,13 +11,13 @@ describe('integration: add official workflow', () => {
     });
 
     const targetPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');
-    const manifestPath = join(repo, '.openci.json');
+    const sidecarPath = join(repo, '.github', 'workflows', '.openci', 'ai-pr-review.json');
 
     expect(result.status).toBe(0);
     expect(normalizePath(result.stdout.trim())).toBe(normalizePath(targetPath));
     expect(result.stderr).toContain('Required secret: ANTHROPIC_API_KEY');
     expect(existsSync(targetPath)).toBe(true);
     expect(readFileSync(targetPath, 'utf8')).toContain('pnpm install --frozen-lockfile');
-    expect(readFileSync(manifestPath, 'utf8')).toContain('"source": "/Users/matthewlam/dev/openci/test/fixtures/registry"');
+    expect(readFileSync(sidecarPath, 'utf8')).toContain('"source": "/Users/matthewlam/dev/openci/test/fixtures/registry"');
   });
 });

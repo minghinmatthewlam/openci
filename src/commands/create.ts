@@ -40,7 +40,7 @@ export function registerCreateCommand(program: Command): void {
       process.stdout.write(`Created ${targetDir}\n`);
       process.stdout.write('Next steps:\n');
       process.stdout.write(`1. Edit the files in ${targetDir}\n`);
-      process.stdout.write(`2. Test: npx openci add ${name} --from . --dry-run\n`);
+      process.stdout.write(`2. Test: npx openci add . --workflow ${name} --dry-run\n`);
       process.stdout.write('3. Submit a PR to the registry\n');
     });
 }

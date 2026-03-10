@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import { runCli } from '../helpers/cli.js';
+import { upsertInstallationMetadata } from '../../src/manifest/store.js';
 
 function git(cwd: string, args: string[]): void {
   execFileSync('git', args, { cwd, stdio: 'ignore' });
@@ -15,24 +16,15 @@ describe('status command', () => {
     await mkdir(join(repo, '.github', 'workflows'), { recursive: true });
     await writeFile(join(repo, '.github', 'workflows', 'ai-pr-review.yml'), 'name: AI PR Review', 'utf8');
     await writeFile(join(repo, '.github', 'workflows', 'extra.yml'), 'name: Extra', 'utf8');
-    await writeFile(
-      join(repo, '.openci.json'),
-      JSON.stringify({
-        version: 1,
-        installations: [
-          {
-            name: 'ai-pr-review',
-            source: 'official',
-            provider: 'claude',
-            smart: true,
-            workflowVersion: '1.0.0',
-            targetPath: '.github/workflows/ai-pr-review.yml',
-            installedAt: '2026-03-09T12:34:56Z',
-          },
-        ],
-      }),
-      'utf8',
-    );
+    await upsertInstallationMetadata(repo, {
+      name: 'ai-pr-review',
+      source: 'official',
+      provider: 'claude',
+      smart: true,
+      workflowVersion: '1.0.0',
+      targetPath: join(repo, '.github', 'workflows', 'ai-pr-review.yml'),
+      installedAt: '2026-03-09T12:34:56Z',
+    });
     git(repo, ['init', '--initial-branch=main']);
     git(repo, ['config', 'user.name', 'OpenCI Test']);
     git(repo, ['config', 'user.email', 'test@example.com']);

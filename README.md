@@ -14,13 +14,14 @@ Common commands:
 
 ```bash
 openci list
-openci search review
-openci info ai-pr-review
 openci add ./workflows --workflow ai-pr-review --provider codex
 openci add ./workflows --workflow ai-pr-review --model codex-mini --yes
 openci add git@github.com:your-org/private-workflows.git --workflow ai-pr-review --yes
 openci add ./workflows --workflow ai-pr-review --yes
 openci status
+openci update
+openci search review
+openci info ai-pr-review
 openci create my-workflow --smart --yes
 ```
 
@@ -31,6 +32,9 @@ openci create my-workflow --smart --yes
 - `--trigger <event>` and `--branch <name>` override smart workflow placeholders.
 - `add <source>` accepts a local path, a GitHub shorthand like `owner/repo`, or a git URL.
 - `--workflow <name>` selects a workflow from a multi-workflow source.
+- `list` shows locally installed workflows.
+- `status` shows the local installed-workflow health view.
+- `update` refreshes installed workflows from their stored sidecar metadata.
 - `--yes` enables non-interactive mode. For `add` and `create`, stdout contains only the created target path.
 - `--dry-run` shows the target path without writing files.
 - `--verbose` prints detection and substitution details to stderr.

@@ -1,35 +1,33 @@
-import { describe, expect, it, vi } from 'vitest';
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { describe, expect, it } from 'vitest';
 import { runCli } from '../helpers/cli.js';
-import * as registryResolve from '../../src/registry/resolve.js';
+import { upsertInstallationMetadata } from '../../src/manifest/store.js';
 
 describe('list command', () => {
-  it('prints workflows alphabetically with a count footer', async () => {
-    vi.spyOn(registryResolve, 'searchRegistry').mockResolvedValue([
-      {
-        name: 'ai-pr-review',
-        displayName: 'AI Pull Request Review',
-        description: 'Automated code review',
-        tags: ['code-review'],
-        provider: ['claude'],
-        smart: true,
-        stacks: ['any'],
-      },
-      {
-        name: 'claude-pr-review-nextjs-pnpm',
-        displayName: 'Claude PR Review',
-        description: 'Static workflow',
-        tags: ['nextjs'],
-        provider: ['claude'],
-        smart: false,
-        stacks: ['nextjs'],
-      },
-    ]);
+  it('prints locally installed workflows with provider and source', async () => {
+    const repo = await mkdtemp(join(tmpdir(), 'openci-list-'));
+    execFileSync('git', ['init', '--initial-branch=main'], { cwd: repo, stdio: 'ignore' });
+    execFileSync('git', ['config', 'user.name', 'OpenCI Test'], { cwd: repo, stdio: 'ignore' });
+    execFileSync('git', ['config', 'user.email', 'test@example.com'], { cwd: repo, stdio: 'ignore' });
+    execFileSync('git', ['commit', '--allow-empty', '-m', 'init'], { cwd: repo, stdio: 'ignore' });
 
-    const result = await runCli(['list']);
+    await upsertInstallationMetadata(repo, {
+      name: 'ai-pr-review',
+      source: 'minghinmatthewlam/openci',
+      provider: 'claude',
+      smart: true,
+      workflowVersion: '1.0.0',
+      targetPath: join(repo, '.github', 'workflows', 'ai-pr-review.yml'),
+      installedAt: '2026-03-09T12:34:56Z',
+    });
+
+    const result = await runCli(['list'], { cwd: repo });
 
     expect(result.error).toBeUndefined();
-    expect(result.stdout).toContain('ai-pr-review\tAutomated code review');
-    expect(result.stdout).toContain('claude-pr-review-nextjs-pnpm\tStatic workflow');
-    expect(result.stdout).toContain('2 workflows found.');
+    expect(result.stdout).toContain('ai-pr-review\tclaude\tminghinmatthewlam/openci');
+    expect(result.stdout).toContain('1 workflows installed.');
   });
 });
