@@ -51,9 +51,6 @@ export function LeaderboardControls({
           placeholder="Search workflows..."
           aria-label="Search workflows"
         />
-        <button className="search-button" type="submit">
-          Search
-        </button>
       </form>
 
       <div className="view-tabs" role="tablist" aria-label="Leaderboard views">

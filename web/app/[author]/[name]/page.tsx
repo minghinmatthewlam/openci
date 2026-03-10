@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -27,15 +28,16 @@ export default async function WorkflowDetailPage({
   }
 
   return (
-    <main className="page-shell">
+    <>
       <SiteHeader />
 
-      <div className="detail-layout">
+      <main className="page-shell">
+        <div className="detail-layout">
         <section className="detail-main">
           <div className="breadcrumbs">
-            <span>workflows</span>
+            <Link href="/">workflows</Link>
             <span>/</span>
-            <span>{bundle.metadata.author}</span>
+            <Link href={`/${bundle.metadata.author}`}>{bundle.metadata.author}</Link>
             <span>/</span>
             <span>{bundle.metadata.name}</span>
           </div>
@@ -112,8 +114,9 @@ export default async function WorkflowDetailPage({
             </div>
           </div>
         </aside>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
 

@@ -29,7 +29,7 @@ export function LeaderboardTable({
 
       {items.map((item, index) => (
         <Link key={item.workflow.name} href={item.href as Route} className="leaderboard-row">
-          <span>{index + 1}</span>
+          <span className="row-rank">{index + 1}</span>
           <span className="row-copy">
             <strong>{item.workflow.name}</strong>
             <span className="row-meta">{item.workflow.author ?? item.workflow.displayName}</span>
