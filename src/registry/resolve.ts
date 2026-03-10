@@ -2,6 +2,7 @@ import { CliError } from '../core/errors.js';
 import { fetchText } from '../utils/http.js';
 import { fetchRegistry, getOfficialWorkflowFileUrl } from './fetch.js';
 import { WorkflowMetadataSchema, type RegistryWorkflow, type WorkflowMetadata } from './schemas.js';
+import { OpenCiConfigSchema, type OpenCiConfig } from '../template/schemas.js';
 
 function scoreWorkflow(workflow: RegistryWorkflow, query: string): number {
   const normalizedQuery = query.toLowerCase();
@@ -60,6 +61,45 @@ export async function fetchOfficialWorkflowReadme(name: string): Promise<string>
   return fetchText(getOfficialWorkflowFileUrl(name, 'README.md'));
 }
 
+export interface OfficialWorkflowBundle {
+  metadata: WorkflowMetadata;
+  readme: string;
+  workflow?: string;
+  workflowTemplate?: string;
+  config?: OpenCiConfig;
+}
+
+export async function fetchOfficialWorkflowBundle(name: string): Promise<OfficialWorkflowBundle> {
+  const metadata = await fetchOfficialWorkflowMetadata(name);
+  const readmePromise = fetchOfficialWorkflowReadme(name);
+
+  if (metadata.smart) {
+    const [readme, workflowTemplate, configRaw] = await Promise.all([
+      readmePromise,
+      fetchText(getOfficialWorkflowFileUrl(name, 'workflow.yml.tmpl')),
+      fetchText(getOfficialWorkflowFileUrl(name, 'openci.config.json')),
+    ]);
+
+    return {
+      metadata,
+      readme,
+      workflowTemplate,
+      config: parseOpenCiConfig(name, configRaw),
+    };
+  }
+
+  const [readme, workflow] = await Promise.all([
+    readmePromise,
+    fetchText(getOfficialWorkflowFileUrl(name, 'workflow.yml')),
+  ]);
+
+  return {
+    metadata,
+    readme,
+    workflow,
+  };
+}
+
 async function fetchJsonLikeMetadata(url: string): Promise<WorkflowMetadata> {
   const raw = await fetchText(url);
 
@@ -73,6 +113,22 @@ async function fetchJsonLikeMetadata(url: string): Promise<WorkflowMetadata> {
   const result = WorkflowMetadataSchema.safeParse(parsed);
   if (!result.success) {
     throw new CliError(`Invalid metadata for '${url}'.`);
+  }
+
+  return result.data;
+}
+
+function parseOpenCiConfig(name: string, raw: string): OpenCiConfig {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new CliError(`Invalid OpenCI config for workflow '${name}'.`);
+  }
+
+  const result = OpenCiConfigSchema.safeParse(parsed);
+  if (!result.success) {
+    throw new CliError(`Invalid OpenCI config for workflow '${name}'.`);
   }
 
   return result.data;

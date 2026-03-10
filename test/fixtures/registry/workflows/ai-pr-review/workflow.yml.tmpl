@@ -1,0 +1,21 @@
+name: AI Pull Request Review
+
+on:
+  {{TRIGGER_EVENT}}:
+    branches: [{{TARGET_BRANCH}}]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '{{NODE_VERSION}}'
+      - run: {{INSTALL_CMD}}
+      - run: {{VALIDATION_CMD}}
+      - uses: {{AGENT_ACTION}}
+        with:
+          {{AGENT_AUTH_KEY}}: ${{ secrets.{{AGENT_SECRET_NAME}} }}
+          {{AGENT_EXTRA_ARGS}}
+          prompt: Review a {{FRAMEWORK}} project using {{PACKAGE_MANAGER}}.

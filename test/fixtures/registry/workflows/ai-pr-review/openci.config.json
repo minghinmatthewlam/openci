@@ -1,0 +1,53 @@
+{
+  "detect": {
+    "packageManager": true,
+    "nodeVersion": true,
+    "defaultBranch": true,
+    "validationCommand": true,
+    "framework": true
+  },
+  "providers": {
+    "claude": {
+      "AGENT_ACTION": "anthropics/claude-code-action@v1",
+      "AGENT_AUTH_KEY": "anthropic_api_key",
+      "AGENT_SECRET_NAME": "ANTHROPIC_API_KEY",
+      "AGENT_EXTRA_ARGS": "model: claude-sonnet-4-6"
+    },
+    "codex": {
+      "AGENT_ACTION": "openai/codex-action@v1",
+      "AGENT_AUTH_KEY": "openai-api-key",
+      "AGENT_SECRET_NAME": "OPENAI_API_KEY",
+      "AGENT_EXTRA_ARGS": "model: codex-mini"
+    }
+  },
+  "substitutions": {
+    "INSTALL_CMD": {
+      "npm": "npm ci",
+      "pnpm": "pnpm install --frozen-lockfile",
+      "yarn": "yarn install --frozen-lockfile",
+      "bun": "bun install --frozen-lockfile"
+    },
+    "VALIDATION_CMD": {
+      "_default": "npm test"
+    },
+    "TRIGGER_EVENT": {
+      "_default": "pull_request"
+    },
+    "TARGET_BRANCH": {
+      "_default": "main",
+      "_detect": "defaultBranch"
+    },
+    "NODE_VERSION": {
+      "_default": "20",
+      "_detect": "nodeVersion"
+    },
+    "FRAMEWORK": {
+      "_default": "Node.js",
+      "_detect": "framework"
+    },
+    "PACKAGE_MANAGER": {
+      "_default": "npm",
+      "_detect": "packageManager"
+    }
+  }
+}
