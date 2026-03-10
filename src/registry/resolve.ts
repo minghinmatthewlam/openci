@@ -61,15 +61,16 @@ export async function fetchOfficialWorkflowReadme(name: string): Promise<string>
   return fetchText(getOfficialWorkflowFileUrl(name, 'README.md'));
 }
 
-export interface OfficialWorkflowBundle {
+export interface WorkflowBundle {
   metadata: WorkflowMetadata;
   readme: string;
   workflow?: string;
   workflowTemplate?: string;
   config?: OpenCiConfig;
+  sourceLabel: string;
 }
 
-export async function fetchOfficialWorkflowBundle(name: string): Promise<OfficialWorkflowBundle> {
+export async function fetchOfficialWorkflowBundle(name: string): Promise<WorkflowBundle> {
   const metadata = await fetchOfficialWorkflowMetadata(name);
   const readmePromise = fetchOfficialWorkflowReadme(name);
 
@@ -85,6 +86,7 @@ export async function fetchOfficialWorkflowBundle(name: string): Promise<Officia
       readme,
       workflowTemplate,
       config: parseOpenCiConfig(name, configRaw),
+      sourceLabel: 'official',
     };
   }
 
@@ -97,6 +99,7 @@ export async function fetchOfficialWorkflowBundle(name: string): Promise<Officia
     metadata,
     readme,
     workflow,
+    sourceLabel: 'official',
   };
 }
 
@@ -118,7 +121,7 @@ async function fetchJsonLikeMetadata(url: string): Promise<WorkflowMetadata> {
   return result.data;
 }
 
-function parseOpenCiConfig(name: string, raw: string): OpenCiConfig {
+export function parseOpenCiConfig(name: string, raw: string): OpenCiConfig {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);

@@ -2,8 +2,9 @@ import type { Command } from 'commander';
 import { access, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { detectRepo } from '../detection/index.js';
-import { fetchOfficialWorkflowBundle } from '../registry/resolve.js';
+import { upsertManifestInstallation } from '../manifest/store.js';
 import { resolveSupportedProvider } from '../provider/resolve.js';
+import { resolveWorkflowBundle } from '../registry/source.js';
 import { isGhAuthenticated, isGhAvailable } from '../secrets/check.js';
 import { buildSecretInstructions } from '../secrets/prompt.js';
 import { resolveTemplateContext } from '../template/resolve.js';
@@ -39,6 +40,7 @@ export function registerAddCommand(program: Command): void {
         yes?: boolean;
         dryRun?: boolean;
         verbose?: boolean;
+        from?: string;
       }>();
 
       const explicitProvider = hasRawFlag(command, '--provider') ? globals.provider : undefined;
@@ -49,7 +51,18 @@ export function registerAddCommand(program: Command): void {
       const cwd = process.cwd();
       const repoRoot = getGitRepoRoot(cwd);
       const remoteUrl = getGitRemoteUrl(repoRoot);
-      const bundle = await fetchOfficialWorkflowBundle(workflowName);
+      const bundle = await resolveWorkflowBundle(
+        globals.from
+          ? {
+              cwd,
+              workflowArg: workflowName,
+              from: globals.from,
+            }
+          : {
+              cwd,
+              workflowArg: workflowName,
+            },
+      );
       const targetPath = join(repoRoot, '.github', 'workflows', `${bundle.metadata.name}.yml`);
 
       let selectedProvider = resolveSupportedProvider(bundle.metadata, explicitProvider);
@@ -113,6 +126,15 @@ export function registerAddCommand(program: Command): void {
       } else {
         await mkdir(dirname(targetPath), { recursive: true });
         await writeFile(targetPath, output, 'utf8');
+        await upsertManifestInstallation(repoRoot, {
+          name: bundle.metadata.name,
+          source: bundle.sourceLabel,
+          provider: selectedProvider,
+          smart: bundle.metadata.smart,
+          workflowVersion: bundle.metadata.version,
+          targetPath,
+          installedAt: new Date().toISOString(),
+        });
 
         if (yes) {
           logger.machineResult(targetPath);
