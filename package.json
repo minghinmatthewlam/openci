@@ -19,6 +19,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "web:dev": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build",
+    "web:start": "npm --prefix web run start",
+    "web:test": "npm --prefix web run test",
     "pack:check": "npm pack --dry-run",
     "prepublishOnly": "npm run typecheck && npm run test && npm run build && npm run pack:check"
   },

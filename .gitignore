@@ -3,6 +3,9 @@ node_modules/
 coverage/
 .DS_Store
 .next/
+web/.next/
+web/node_modules/
+web/tsconfig.tsbuildinfo
 .chrome-agent-profile/
 plans/
 .openci.json
