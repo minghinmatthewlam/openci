@@ -1,17 +1,12 @@
-import Link from 'next/link';
 import { CopyCommand } from '../components/copy-command';
+import { LeaderboardControls } from '../components/leaderboard-controls';
 import { LeaderboardTable } from '../components/leaderboard-table';
 import { SiteHeader } from '../components/site-header';
 import { getLeaderboard, type LeaderboardView } from '../lib/leaderboard';
 import { buildInstallCommand, featuredAgents } from '../lib/site';
 
 export const dynamic = 'force-dynamic';
-
-const views: Array<{ label: string; value: LeaderboardView }> = [
-  { label: 'All Time', value: 'all-time' },
-  { label: 'Trending (24h)', value: 'trending' },
-  { label: 'Hot', value: 'hot' },
-];
+const validViews: LeaderboardView[] = ['all-time', 'trending', 'hot'];
 
 export default async function HomePage({
   searchParams,
@@ -19,7 +14,7 @@ export default async function HomePage({
   searchParams: Promise<{ q?: string; view?: LeaderboardView }>;
 }): Promise<React.ReactNode> {
   const params = await searchParams;
-  const view = views.some((entry) => entry.value === params.view) ? (params.view as LeaderboardView) : 'all-time';
+  const view = params.view && validViews.includes(params.view) ? params.view : 'all-time';
   const items = await getLeaderboard(view, params.q);
 
   return (
@@ -28,14 +23,9 @@ export default async function HomePage({
 
       <section className="hero-grid">
         <div className="hero-logo-wrap">
-          <pre className="hero-logo" aria-hidden="true">
-            {` ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗
-██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔════╝██║
-██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║     ██║
-██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║     ██║
-╚██████╔╝██║     ███████╗██║ ╚████║╚██████╗██║
- ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝`}
-          </pre>
+          <div className="hero-wordmark" aria-hidden="true">
+            OPENCI
+          </div>
           <p className="eyebrow">THE OPEN WORKFLOW ECOSYSTEM</p>
         </div>
 
@@ -67,32 +57,7 @@ export default async function HomePage({
 
       <section className="leaderboard-section">
         <p className="section-label">Workflow leaderboard</p>
-        <form className="search-form">
-          <input
-            className="search-input"
-            type="search"
-            name="q"
-            defaultValue={params.q}
-            placeholder="Search workflows..."
-            aria-label="Search workflows"
-          />
-          <input type="hidden" name="view" value={view} />
-          <button className="search-button" type="submit">
-            /
-          </button>
-        </form>
-
-        <div className="view-tabs">
-          {views.map((entry) => (
-            <Link
-              key={entry.value}
-              href={`/?view=${entry.value}${params.q ? `&q=${encodeURIComponent(params.q)}` : ''}`}
-              className={entry.value === view ? 'view-tab active' : 'view-tab'}
-            >
-              {entry.label}
-            </Link>
-          ))}
-        </div>
+        <LeaderboardControls initialQuery={params.q} initialView={view} />
 
         <LeaderboardTable items={items} emptyState="No workflows match that search yet." />
       </section>

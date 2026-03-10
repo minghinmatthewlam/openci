@@ -1,3 +1,4 @@
+import { CopyCommand } from '../../components/copy-command';
 import { SiteHeader } from '../../components/site-header';
 import { docsSections } from '../../lib/site';
 
@@ -32,7 +33,7 @@ export default function DocsPage(): React.ReactNode {
           <section id="cli">
             <h2>Getting started</h2>
             <p>Install a workflow with the `openci` CLI:</p>
-            <div className="docs-command">$ npx openci add ai-pr-review --provider claude</div>
+            <CopyCommand value="$ npx openci add ai-pr-review --provider claude" />
             <p>
               This installs the workflow and generates the GitHub Actions file in <code>.github/workflows/</code>.
             </p>

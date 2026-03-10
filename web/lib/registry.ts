@@ -99,6 +99,15 @@ export async function readWorkflowBundle(name: string): Promise<WorkflowBundle |
   }
 }
 
+export async function readWorkflowBundleByAuthor(author: string, name: string): Promise<WorkflowBundle | undefined> {
+  const bundle = await readWorkflowBundle(name);
+  if (!bundle) {
+    return undefined;
+  }
+
+  return bundle.metadata.author === author ? bundle : undefined;
+}
+
 async function readOptional(filePath: string): Promise<string | undefined> {
   try {
     return await readFile(filePath, 'utf8');

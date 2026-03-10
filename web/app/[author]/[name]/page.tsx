@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { CopyCommand } from '../../../components/copy-command';
 import { SiteHeader } from '../../../components/site-header';
 import { getWorkflowChecks } from '../../../lib/checks';
-import { readWorkflowBundle } from '../../../lib/registry';
+import { readWorkflowBundleByAuthor } from '../../../lib/registry';
 import { buildInstallCommand, formatInstallCount } from '../../../lib/site';
 import { getWorkflowMetrics } from '../../../lib/telemetry';
 
@@ -15,8 +15,12 @@ export default async function WorkflowDetailPage({
 }: {
   params: Promise<{ author: string; name: string }>;
 }): Promise<React.ReactNode> {
-  const { name } = await params;
-  const [bundle, checks, metrics] = await Promise.all([readWorkflowBundle(name), getWorkflowChecks(name), getWorkflowMetrics(name)]);
+  const { author, name } = await params;
+  const [bundle, checks, metrics] = await Promise.all([
+    readWorkflowBundleByAuthor(author, name),
+    getWorkflowChecks(name),
+    getWorkflowMetrics(name),
+  ]);
 
   if (!bundle) {
     notFound();
@@ -41,7 +45,14 @@ export default async function WorkflowDetailPage({
 
           <div className="content-card">
             <div className="content-label">{bundle.metadata.smart ? 'SMART WORKFLOW' : 'BASIC WORKFLOW'}</div>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{bundle.readme}</ReactMarkdown>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ children }) => <h2>{children}</h2>,
+              }}
+            >
+              {stripLeadingTitle(bundle.readme)}
+            </ReactMarkdown>
           </div>
         </section>
 
@@ -104,4 +115,8 @@ export default async function WorkflowDetailPage({
       </div>
     </main>
   );
+}
+
+function stripLeadingTitle(markdown: string): string {
+  return markdown.replace(/^# .+\n+/, '');
 }

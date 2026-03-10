@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { listRegistryWorkflows, readRegistry, readWorkflowBundle } from '../lib/registry';
+import { listRegistryWorkflows, readRegistry, readWorkflowBundle, readWorkflowBundleByAuthor } from '../lib/registry';
 
 describe('registry loader', () => {
   afterEach(() => {
@@ -32,5 +32,13 @@ describe('registry loader', () => {
     expect(bundle?.metadata.displayName).toBe('AI Pull Request Review');
     expect(bundle?.readme).toContain('AI Pull Request Review');
     expect(bundle?.metadata.repository).toBe('openci/workflows');
+  });
+
+  it('requires author and name to match for detail lookups', async () => {
+    const ok = await readWorkflowBundleByAuthor('openci', 'ai-pr-review');
+    const mismatch = await readWorkflowBundleByAuthor('wrong-author', 'ai-pr-review');
+
+    expect(ok?.metadata.author).toBe('openci');
+    expect(mismatch).toBeUndefined();
   });
 });

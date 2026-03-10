@@ -30,7 +30,7 @@ export async function getWorkflowChecks(workflowName: string): Promise<WorkflowC
   return [
     { label: 'metadata', status: 'pass' },
     { label: 'readme', status: bundle.readme.trim() ? 'pass' : 'warn' },
-    { label: 'install surface', status: bundle.template || bundle.workflow ? 'pass' : 'warn' },
+    { label: 'registry entry', status: 'pass' },
     {
       label: 'provider secrets',
       status: Object.keys(bundle.metadata.requiredSecrets).length > 0 ? 'pass' : 'warn',
