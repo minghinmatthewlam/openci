@@ -1,0 +1,11 @@
+{
+  "name": "npm-basic",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "vitest run"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "bun-svelte",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "svelte": "^5.0.0"
+  }
+}

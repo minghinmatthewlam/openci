@@ -1,0 +1,11 @@
+{
+  "name": "pnpm-next",
+  "version": "1.0.0",
+  "scripts": {
+    "check": "biome check ."
+  },
+  "dependencies": {
+    "next": "^16.0.0",
+    "react": "^19.0.0"
+  }
+}
