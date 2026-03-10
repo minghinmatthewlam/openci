@@ -15,11 +15,11 @@ export interface DetectionResult {
 }
 
 export interface DetectionOptions {
-  packageManager?: boolean;
-  nodeVersion?: boolean;
-  defaultBranch?: boolean;
-  framework?: boolean;
-  validationCommand?: boolean;
+  packageManager?: boolean | undefined;
+  nodeVersion?: boolean | undefined;
+  defaultBranch?: boolean | undefined;
+  framework?: boolean | undefined;
+  validationCommand?: boolean | undefined;
 }
 
 function warningMessage(key: string, error: unknown): string {
