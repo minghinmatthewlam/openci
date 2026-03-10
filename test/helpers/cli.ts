@@ -11,12 +11,14 @@ export async function runCli(
   args: string[],
   options: {
     cwd?: string;
+    env?: NodeJS.ProcessEnv;
   } = {},
 ): Promise<CliRunResult> {
   let stdout = '';
   let stderr = '';
   let error: unknown;
   const previousCwd = process.cwd();
+  const previousEnv = { ...process.env };
 
   const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(((chunk: string | Uint8Array) => {
     stdout += String(chunk);
@@ -32,11 +34,20 @@ export async function runCli(
     if (options.cwd) {
       process.chdir(options.cwd);
     }
+    if (options.env) {
+      Object.assign(process.env, options.env);
+    }
     await buildCli('0.1.0').parseAsync(args, { from: 'user' });
   } catch (caught) {
     error = caught;
   } finally {
     process.chdir(previousCwd);
+    for (const key of Object.keys(process.env)) {
+      if (!(key in previousEnv)) {
+        delete process.env[key];
+      }
+    }
+    Object.assign(process.env, previousEnv);
     stdoutSpy.mockRestore();
     stderrSpy.mockRestore();
   }

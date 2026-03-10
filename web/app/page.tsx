@@ -5,6 +5,8 @@ import { SiteHeader } from '../components/site-header';
 import { getLeaderboard, type LeaderboardView } from '../lib/leaderboard';
 import { buildInstallCommand, featuredAgents } from '../lib/site';
 
+export const dynamic = 'force-dynamic';
+
 const views: Array<{ label: string; value: LeaderboardView }> = [
   { label: 'All Time', value: 'all-time' },
   { label: 'Trending (24h)', value: 'trending' },

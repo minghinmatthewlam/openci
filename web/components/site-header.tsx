@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 
 export function SiteHeader(): React.ReactNode {
   return (
@@ -12,7 +13,8 @@ export function SiteHeader(): React.ReactNode {
       </div>
 
       <nav className="top-nav">
-        <Link href="/docs">Docs</Link>
+        <Link href={'/audits' as Route}>Audits</Link>
+        <Link href={'/docs' as Route}>Docs</Link>
       </nav>
     </header>
   );

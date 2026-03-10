@@ -265,6 +265,79 @@ pre {
   grid-template-columns: minmax(0, 1fr) 260px;
 }
 
+.audits-page {
+  display: grid;
+  gap: 28px;
+}
+
+.audits-header h1 {
+  margin: 0 0 10px;
+  font-size: 52px;
+  letter-spacing: -0.05em;
+}
+
+.audits-header p {
+  margin: 0;
+  color: #a7a7a7;
+  max-width: 720px;
+  line-height: 1.7;
+}
+
+.audits-table {
+  display: grid;
+}
+
+.audits-table-head,
+.audits-row {
+  display: grid;
+  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.audits-table-head {
+  padding: 10px 0 14px;
+  color: var(--dim);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.audits-row {
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.check-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.check-strip.vertical {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.check-badge {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #d5d5d5;
+}
+
+.check-badge.pass {
+  background: rgba(33, 94, 53, 0.35);
+  border-color: rgba(64, 178, 102, 0.45);
+}
+
+.check-badge.warn {
+  background: rgba(110, 72, 18, 0.3);
+  border-color: rgba(217, 153, 46, 0.45);
+}
+
 .docs-sidebar {
   display: grid;
   gap: 10px;
@@ -378,6 +451,14 @@ pre {
   line-height: 1.6;
 }
 
+.sidebar-stat {
+  margin: 6px 0 0;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--foreground);
+}
+
 .sidebar-block ul {
   padding-left: 18px;
   margin: 8px 0 0;
@@ -387,7 +468,9 @@ pre {
   .hero-grid,
   .top-panels,
   .docs-layout,
-  .detail-layout {
+  .detail-layout,
+  .audits-table-head,
+  .audits-row {
     grid-template-columns: 1fr;
   }
 

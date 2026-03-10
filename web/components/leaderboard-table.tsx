@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import type { RegistryEntry } from '../lib/registry';
 
 export interface LeaderboardItem {
@@ -27,7 +28,7 @@ export function LeaderboardTable({
       </div>
 
       {items.map((item, index) => (
-        <Link key={item.workflow.name} href={item.href} className="leaderboard-row">
+        <Link key={item.workflow.name} href={item.href as Route} className="leaderboard-row">
           <span>{index + 1}</span>
           <span>
             <strong>{item.workflow.name}</strong>

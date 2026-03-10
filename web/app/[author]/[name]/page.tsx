@@ -3,8 +3,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CopyCommand } from '../../../components/copy-command';
 import { SiteHeader } from '../../../components/site-header';
+import { getWorkflowChecks } from '../../../lib/checks';
 import { readWorkflowBundle } from '../../../lib/registry';
-import { buildInstallCommand } from '../../../lib/site';
+import { buildInstallCommand, formatInstallCount } from '../../../lib/site';
+import { getWorkflowMetrics } from '../../../lib/telemetry';
+
+export const dynamic = 'force-dynamic';
 
 export default async function WorkflowDetailPage({
   params,
@@ -12,7 +16,7 @@ export default async function WorkflowDetailPage({
   params: Promise<{ author: string; name: string }>;
 }): Promise<React.ReactNode> {
   const { name } = await params;
-  const bundle = await readWorkflowBundle(name);
+  const [bundle, checks, metrics] = await Promise.all([readWorkflowBundle(name), getWorkflowChecks(name), getWorkflowMetrics(name)]);
 
   if (!bundle) {
     notFound();
@@ -43,6 +47,10 @@ export default async function WorkflowDetailPage({
 
         <aside className="detail-sidebar">
           <div className="sidebar-block">
+            <p className="sidebar-label">Weekly installs</p>
+            <p className="sidebar-stat">{formatInstallCount(metrics.weeklyInstalls)}</p>
+          </div>
+          <div className="sidebar-block">
             <p className="sidebar-label">Providers</p>
             <p>{bundle.metadata.provider.join(', ')}</p>
           </div>
@@ -67,6 +75,30 @@ export default async function WorkflowDetailPage({
           <div className="sidebar-block">
             <p className="sidebar-label">First seen</p>
             <p>{bundle.metadata.publishedAt ?? '2026-03-09'}</p>
+          </div>
+          <div className="sidebar-block">
+            <p className="sidebar-label">Installed on</p>
+            <ul>
+              {Object.entries(metrics.providerBreakdown).length > 0 ? (
+                Object.entries(metrics.providerBreakdown).map(([provider, count]) => (
+                  <li key={provider}>
+                    <strong>{provider}</strong>: {formatInstallCount(count)}
+                  </li>
+                ))
+              ) : (
+                <li>No telemetry yet</li>
+              )}
+            </ul>
+          </div>
+          <div className="sidebar-block">
+            <p className="sidebar-label">Registry checks</p>
+            <div className="check-strip vertical">
+              {checks.map((check) => (
+                <span key={check.label} className={`check-badge ${check.status}`}>
+                  {check.label}: {check.status.toUpperCase()}
+                </span>
+              ))}
+            </div>
           </div>
         </aside>
       </div>

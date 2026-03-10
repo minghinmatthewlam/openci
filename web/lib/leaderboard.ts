@@ -1,30 +1,28 @@
 import { buildWorkflowHref, formatInstallCount } from './site';
 import { listRegistryWorkflows, type RegistryEntry } from './registry';
-import counts from '../data/install-counts.seed.json';
+import { getLeaderboardMetrics } from './telemetry';
 
 export type LeaderboardView = 'all-time' | 'trending' | 'hot';
 
-interface SeedCounts {
-  allTime: Record<string, number>;
-  trending24h: Record<string, number>;
-  hotScore: Record<string, number>;
-}
-
-const seedCounts = counts as SeedCounts;
-
-function scoreFor(view: LeaderboardView, workflow: RegistryEntry): number {
+function scoreFor(
+  view: LeaderboardView,
+  workflow: RegistryEntry,
+  metrics: Awaited<ReturnType<typeof getLeaderboardMetrics>>,
+): number {
+  const workflowMetrics = metrics[workflow.name];
   switch (view) {
     case 'trending':
-      return seedCounts.trending24h[workflow.name] ?? 0;
+      return workflowMetrics?.trending24h ?? 0;
     case 'hot':
-      return seedCounts.hotScore[workflow.name] ?? 0;
+      return workflowMetrics?.hotScore ?? 0;
     case 'all-time':
-      return seedCounts.allTime[workflow.name] ?? 0;
+      return workflowMetrics?.allTime ?? 0;
   }
 }
 
 export async function getLeaderboard(view: LeaderboardView, query?: string) {
   const workflows = await listRegistryWorkflows();
+  const metrics = await getLeaderboardMetrics();
   const normalizedQuery = query?.trim().toLowerCase();
 
   return workflows
@@ -38,10 +36,10 @@ export async function getLeaderboard(view: LeaderboardView, query?: string) {
         .toLowerCase()
         .includes(normalizedQuery);
     })
-    .sort((left, right) => scoreFor(view, right) - scoreFor(view, left) || left.name.localeCompare(right.name))
+    .sort((left, right) => scoreFor(view, right, metrics) - scoreFor(view, left, metrics) || left.name.localeCompare(right.name))
     .map((workflow) => ({
       workflow,
-      installs: formatInstallCount(scoreFor(view, workflow)),
+      installs: formatInstallCount(scoreFor(view, workflow, metrics)),
       href: buildWorkflowHref(workflow),
     }));
 }
