@@ -9,9 +9,6 @@ async function runCommand(args: string[]): Promise<void> {
 describe('CLI placeholder commands', () => {
   it.each([
     ['add', ['add', 'ai-pr-review']],
-    ['search', ['search', 'review']],
-    ['list', ['list']],
-    ['info', ['info', 'ai-pr-review']],
     ['status', ['status']],
     ['create', ['create', 'my-workflow']],
   ])('%s exits with a placeholder error', async (_name, args) => {

@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "updatedAt": "2026-03-09T00:00:00Z",
+  "workflows": [
+    {
+      "name": "ai-pr-review",
+      "displayName": "AI Pull Request Review",
+      "description": "Automated code review on pull requests using an AI coding agent.",
+      "tags": ["code-review", "pull-request", "ai-agent"],
+      "provider": ["claude", "codex"],
+      "smart": true,
+      "stacks": ["any"]
+    },
+    {
+      "name": "ai-security-scan",
+      "displayName": "AI Security Scan",
+      "description": "AI agent scans pull requests for security vulnerabilities.",
+      "tags": ["security", "pull-request"],
+      "provider": ["claude", "codex"],
+      "smart": true,
+      "stacks": ["any"]
+    },
+    {
+      "name": "claude-pr-review-nextjs-pnpm",
+      "displayName": "Claude PR Review (Next.js + pnpm)",
+      "description": "Static workflow for Claude-powered PR review on Next.js projects using pnpm.",
+      "tags": ["code-review", "pull-request", "nextjs", "pnpm"],
+      "provider": ["claude"],
+      "smart": false,
+      "stacks": ["nextjs"]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { CliError } from '../../src/core/errors.js';
+import { runCli } from '../helpers/cli.js';
+
+const registryUrl = 'file:///Users/matthewlam/dev/openci/test/fixtures/registry';
+
+describe('info command', () => {
+  beforeEach(async () => {
+    process.env.XDG_CACHE_HOME = await mkdtemp(join(tmpdir(), 'openci-info-'));
+  });
+
+  afterEach(() => {
+    delete process.env.OPENCI_REGISTRY_URL;
+    delete process.env.XDG_CACHE_HOME;
+  });
+
+  it('prints metadata and README for a workflow', async () => {
+    process.env.OPENCI_REGISTRY_URL = registryUrl;
+
+    const result = await runCli(['info', 'ai-pr-review']);
+
+    expect(result.error).toBeUndefined();
+    expect(result.stdout).toContain('AI Pull Request Review');
+    expect(result.stdout).toContain('Type: smart');
+    expect(result.stdout).toContain('claude: ANTHROPIC_API_KEY');
+    expect(result.stdout).toContain('# AI Pull Request Review');
+  });
+
+  it('errors for a missing workflow', async () => {
+    process.env.OPENCI_REGISTRY_URL = registryUrl;
+
+    const result = await runCli(['info', 'missing-workflow']);
+
+    expect(result.error).toBeInstanceOf(CliError);
+    expect((result.error as CliError).message).toBe("Workflow 'missing-workflow' not found. Run `openci search` to browse.");
+  });
+});
