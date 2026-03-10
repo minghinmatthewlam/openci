@@ -1,0 +1,18 @@
+{
+  "name": "claude-pr-review-nextjs-pnpm",
+  "displayName": "Claude PR Review (Next.js + pnpm)",
+  "description": "Static workflow for Claude-powered PR review on Next.js projects using pnpm.",
+  "version": "1.0.0",
+  "author": "community-contributor",
+  "tags": ["code-review", "pull-request", "nextjs", "pnpm"],
+  "provider": ["claude"],
+  "smart": false,
+  "requiredSecrets": {
+    "claude": ["ANTHROPIC_API_KEY"]
+  },
+  "triggers": ["pull_request"],
+  "stacks": ["nextjs"],
+  "minGitHubActionsVersion": null,
+  "repository": "community-contributor/workflows",
+  "publishedAt": "2026-03-08"
+}

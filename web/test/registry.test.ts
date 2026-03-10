@@ -17,7 +17,10 @@ describe('registry loader', () => {
     const workflows = await listRegistryWorkflows();
 
     expect(workflows.map((workflow) => workflow.name)).toEqual([
+      'ai-commit-lint',
+      'ai-issue-resolver',
       'ai-pr-review',
+      'ai-release-notes',
       'ai-security-scan',
       'claude-pr-review-nextjs-pnpm',
     ]);
@@ -28,6 +31,6 @@ describe('registry loader', () => {
 
     expect(bundle?.metadata.displayName).toBe('AI Pull Request Review');
     expect(bundle?.readme).toContain('AI Pull Request Review');
-    expect(bundle?.template).toContain('{{TRIGGER_EVENT}}');
+    expect(bundle?.metadata.repository).toBe('openci/workflows');
   });
 });

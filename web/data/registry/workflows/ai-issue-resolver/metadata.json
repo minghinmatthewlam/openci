@@ -1,0 +1,19 @@
+{
+  "name": "ai-issue-resolver",
+  "displayName": "AI Issue Resolver",
+  "description": "Turn labeled issues into draft pull requests with an autonomous coding agent.",
+  "version": "1.0.0",
+  "author": "openci",
+  "tags": ["issues", "automation", "triage"],
+  "provider": ["claude", "codex"],
+  "smart": true,
+  "requiredSecrets": {
+    "claude": ["ANTHROPIC_API_KEY"],
+    "codex": ["OPENAI_API_KEY"]
+  },
+  "triggers": ["issues"],
+  "stacks": ["any"],
+  "minGitHubActionsVersion": null,
+  "repository": "openci/workflows",
+  "publishedAt": "2026-03-09"
+}

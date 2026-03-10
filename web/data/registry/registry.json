@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "updatedAt": "2026-03-10T00:00:00Z",
+  "workflows": [
+    {
+      "name": "ai-pr-review",
+      "displayName": "AI Pull Request Review",
+      "description": "Automated code review on pull requests using an AI coding agent.",
+      "tags": ["code-review", "pull-request", "ai-agent", "automation"],
+      "provider": ["claude", "codex"],
+      "smart": true,
+      "stacks": ["any"]
+    },
+    {
+      "name": "ai-issue-resolver",
+      "displayName": "AI Issue Resolver",
+      "description": "Turn labeled issues into draft pull requests with an autonomous coding agent.",
+      "tags": ["issues", "automation", "triage"],
+      "provider": ["claude", "codex"],
+      "smart": true,
+      "stacks": ["any"]
+    },
+    {
+      "name": "ai-commit-lint",
+      "displayName": "AI Commit Lint",
+      "description": "Review commit messages and PR descriptions for clarity and consistency.",
+      "tags": ["commit", "pull-request", "copy-editing"],
+      "provider": ["claude", "codex"],
+      "smart": true,
+      "stacks": ["any"]
+    },
+    {
+      "name": "ai-security-scan",
+      "displayName": "AI Security Scan",
+      "description": "Scan pull requests for security vulnerabilities, unsafe patterns, and secret leaks.",
+      "tags": ["security", "pull-request", "review"],
+      "provider": ["claude", "codex"],
+      "smart": true,
+      "stacks": ["any"]
+    },
+    {
+      "name": "ai-release-notes",
+      "displayName": "AI Release Notes",
+      "description": "Generate release notes from merged pull requests and linked issues.",
+      "tags": ["release", "changelog", "automation"],
+      "provider": ["claude", "codex"],
+      "smart": true,
+      "stacks": ["any"]
+    },
+    {
+      "name": "claude-pr-review-nextjs-pnpm",
+      "displayName": "Claude PR Review (Next.js + pnpm)",
+      "description": "Static workflow for Claude-powered PR review on Next.js projects using pnpm.",
+      "tags": ["code-review", "pull-request", "nextjs", "pnpm"],
+      "provider": ["claude"],
+      "smart": false,
+      "stacks": ["nextjs"]
+    }
+  ]
+}

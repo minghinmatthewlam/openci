@@ -1,0 +1,19 @@
+{
+  "name": "ai-security-scan",
+  "displayName": "AI Security Scan",
+  "description": "Scan pull requests for security vulnerabilities, unsafe patterns, and secret leaks.",
+  "version": "1.0.0",
+  "author": "openci",
+  "tags": ["security", "pull-request", "review"],
+  "provider": ["claude", "codex"],
+  "smart": true,
+  "requiredSecrets": {
+    "claude": ["ANTHROPIC_API_KEY"],
+    "codex": ["OPENAI_API_KEY"]
+  },
+  "triggers": ["pull_request"],
+  "stacks": ["any"],
+  "minGitHubActionsVersion": null,
+  "repository": "openci/workflows",
+  "publishedAt": "2026-03-09"
+}

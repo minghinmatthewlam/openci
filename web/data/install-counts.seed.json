@@ -1,0 +1,26 @@
+{
+  "allTime": {
+    "ai-pr-review": 470900,
+    "ai-security-scan": 189800,
+    "ai-issue-resolver": 148600,
+    "ai-release-notes": 136600,
+    "ai-commit-lint": 133600,
+    "claude-pr-review-nextjs-pnpm": 84100
+  },
+  "trending24h": {
+    "ai-security-scan": 6200,
+    "ai-pr-review": 5800,
+    "ai-release-notes": 5400,
+    "ai-issue-resolver": 5100,
+    "ai-commit-lint": 4200,
+    "claude-pr-review-nextjs-pnpm": 1800
+  },
+  "hotScore": {
+    "ai-security-scan": 91,
+    "ai-pr-review": 88,
+    "ai-release-notes": 81,
+    "ai-issue-resolver": 79,
+    "ai-commit-lint": 74,
+    "claude-pr-review-nextjs-pnpm": 61
+  }
+}

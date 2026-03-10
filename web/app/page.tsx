@@ -1,62 +1,98 @@
-import { listRegistryWorkflows } from '../lib/registry';
+import Link from 'next/link';
+import { CopyCommand } from '../components/copy-command';
+import { LeaderboardTable } from '../components/leaderboard-table';
+import { SiteHeader } from '../components/site-header';
+import { getLeaderboard, type LeaderboardView } from '../lib/leaderboard';
+import { buildInstallCommand, featuredAgents } from '../lib/site';
 
-export default async function HomePage(): Promise<React.ReactNode> {
-  const workflows = await listRegistryWorkflows();
+const views: Array<{ label: string; value: LeaderboardView }> = [
+  { label: 'All Time', value: 'all-time' },
+  { label: 'Trending (24h)', value: 'trending' },
+  { label: 'Hot', value: 'hot' },
+];
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; view?: LeaderboardView }>;
+}): Promise<React.ReactNode> {
+  const params = await searchParams;
+  const view = views.some((entry) => entry.value === params.view) ? (params.view as LeaderboardView) : 'all-time';
+  const items = await getLeaderboard(view, params.q);
 
   return (
-    <main
-      style={{
-        maxWidth: 1120,
-        margin: '0 auto',
-        padding: '32px 24px 80px',
-      }}
-    >
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 48,
-          color: 'var(--muted)',
-          fontSize: 14,
-        }}
-      >
-        <div>OpenCI</div>
-        <nav style={{ display: 'flex', gap: 16 }}>
-          <span>Workflows</span>
-          <span>Docs</span>
-        </nav>
-      </header>
+    <main className="page-shell">
+      <SiteHeader />
 
-      <section style={{ marginBottom: 40 }}>
-        <p style={{ fontSize: 14, color: 'var(--muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          The Open Workflow Directory
-        </p>
-        <h1 style={{ fontSize: 56, lineHeight: 1, margin: '8px 0 16px' }}>OpenCI</h1>
-        <p style={{ fontSize: 28, lineHeight: 1.3, maxWidth: 760, color: 'var(--muted)' }}>
-          Discover and install AI-powered GitHub Actions workflows with a single command.
-        </p>
+      <section className="hero-grid">
+        <div className="hero-logo-wrap">
+          <pre className="hero-logo" aria-hidden="true">
+            {` ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗
+██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔════╝██║
+██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║     ██║
+██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║     ██║
+╚██████╔╝██║     ███████╗██║ ╚████║╚██████╗██║
+ ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝`}
+          </pre>
+          <p className="eyebrow">THE OPEN WORKFLOW ECOSYSTEM</p>
+        </div>
+
+        <div className="hero-copy">
+          <p>
+            Workflows are reusable GitHub Actions automations for AI agents. Install them with a single command to
+            enhance your repositories with review, security, and release automation.
+          </p>
+        </div>
       </section>
 
-      <section
-        style={{
-          borderTop: '1px solid var(--border)',
-          paddingTop: 24,
-        }}
-      >
-        <p style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '0.08em' }}>
-          Local Registry Harness
-        </p>
-        <p style={{ margin: '8px 0 24px', color: 'var(--muted)' }}>
-          Phase 1 reads workflow data directly from the local registry fixtures.
-        </p>
-        <ul style={{ margin: 0, paddingLeft: 20, display: 'grid', gap: 8 }}>
-          {workflows.map((workflow) => (
-            <li key={workflow.name}>
-              <strong>{workflow.name}</strong> <span style={{ color: 'var(--muted)' }}>{workflow.description}</span>
-            </li>
+      <section className="top-panels">
+        <div>
+          <p className="section-label">Try it now</p>
+          <CopyCommand value={buildInstallCommand('ai-pr-review')} />
+        </div>
+
+        <div>
+          <p className="section-label">Available for these agents</p>
+          <div className="agent-strip">
+            {featuredAgents.map((agent) => (
+              <span key={agent} className="agent-pill">
+                {agent}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="leaderboard-section">
+        <p className="section-label">Workflow leaderboard</p>
+        <form className="search-form">
+          <input
+            className="search-input"
+            type="search"
+            name="q"
+            defaultValue={params.q}
+            placeholder="Search workflows..."
+            aria-label="Search workflows"
+          />
+          <input type="hidden" name="view" value={view} />
+          <button className="search-button" type="submit">
+            /
+          </button>
+        </form>
+
+        <div className="view-tabs">
+          {views.map((entry) => (
+            <Link
+              key={entry.value}
+              href={`/?view=${entry.value}${params.q ? `&q=${encodeURIComponent(params.q)}` : ''}`}
+              className={entry.value === view ? 'view-tab active' : 'view-tab'}
+            >
+              {entry.label}
+            </Link>
           ))}
-        </ul>
+        </div>
+
+        <LeaderboardTable items={items} emptyState="No workflows match that search yet." />
       </section>
     </main>
   );

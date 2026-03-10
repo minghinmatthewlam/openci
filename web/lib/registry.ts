@@ -10,6 +10,9 @@ export interface RegistryEntry {
   provider: string[];
   smart: boolean;
   stacks: string[];
+  author?: string;
+  repository?: string;
+  publishedAt?: string;
 }
 
 export interface WorkflowMetadata extends RegistryEntry {
@@ -35,7 +38,7 @@ export interface RegistryDocument {
 }
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const defaultRegistryRoot = path.resolve(currentDir, '../../test/fixtures/registry');
+const defaultRegistryRoot = path.resolve(currentDir, '../data/registry');
 
 function getRegistryRoot(): string {
   return process.env.OPENCI_WEB_REGISTRY_PATH
@@ -51,7 +54,19 @@ export async function readRegistry(): Promise<RegistryDocument> {
 
 export async function listRegistryWorkflows(): Promise<RegistryEntry[]> {
   const registry = await readRegistry();
-  return [...registry.workflows].sort((left, right) => left.name.localeCompare(right.name));
+  return Promise.all(
+    [...registry.workflows]
+      .sort((left, right) => left.name.localeCompare(right.name))
+      .map(async (workflow) => {
+        const bundle = await readWorkflowBundle(workflow.name);
+        return {
+          ...workflow,
+          author: bundle?.metadata.author,
+          repository: bundle?.metadata.repository,
+          publishedAt: bundle?.metadata.publishedAt,
+        };
+      }),
+  );
 }
 
 export async function readWorkflowBundle(name: string): Promise<WorkflowBundle | undefined> {
