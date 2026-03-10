@@ -20,44 +20,45 @@ export default function DocsPage(): React.ReactNode {
           <article className="docs-content">
             <h1>Documentation</h1>
             <p className="docs-intro">
-              Learn how to discover, install, and use OpenCI workflows in your repositories.
+              Learn how to browse, install, and manage OpenCI workflows in your repositories.
             </p>
 
             <section>
-              <h2>What are workflows?</h2>
+              <h2>What is OpenCI?</h2>
               <p>
-                OpenCI workflows are reusable GitHub Actions automations for AI agents. They provide procedural
-                automation that helps repositories ship review, security, and release workflows faster.
+                OpenCI is an open-source CLI for installing AI-agent GitHub Actions workflows from official, local, or
+                git-based sources.
               </p>
             </section>
 
             <section id="cli">
               <h2>Getting started</h2>
-              <p>Install a workflow with the `openci` CLI:</p>
-              <CopyCommand value="$ npx openci add ai-pr-review --provider claude" />
+              <p>Install a workflow from a source:</p>
+              <CopyCommand value="$ npx openci add ./workflows --workflow ai-pr-review" />
               <p>
-                This installs the workflow and generates the GitHub Actions file in <code>.github/workflows/</code>.
+                This generates a workflow file in <code>.github/workflows/</code> and records sidecar metadata for
+                later updates.
               </p>
             </section>
 
             <section>
-              <h2>How workflows are ranked</h2>
+              <h2>How discovery works</h2>
               <p>
-                The leaderboard ranks workflows using anonymous install counts collected by the OpenCI CLI. The signal is
-                limited to workflow popularity and does not require repository or user identifiers.
+                The Phase 3 site lists official workflows from the public repository. It is a simple OSS directory,
+                without hosted search or telemetry-backed rankings.
               </p>
             </section>
 
             <section>
               <h2>Browse workflows</h2>
-              <p>Visit the homepage to search the workflow leaderboard and inspect each workflow detail page.</p>
+              <p>Use the homepage to filter official workflows and inspect their detail pages before installing them.</p>
             </section>
 
             <section id="faq">
               <h2>FAQ</h2>
               <p>
-                OpenCI supports official registry installs, local workflow sources, and GitHub repo sources. Smart
-                workflows use <code>openci.config.json</code> for substitution and provider-specific defaults.
+                OpenCI supports smart and basic workflows. Smart workflows use <code>openci.config.json</code> for local
+                detection and substitution when generating the installed YAML.
               </p>
             </section>
           </article>

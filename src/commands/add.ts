@@ -9,7 +9,6 @@ import { isGhAuthenticated, isGhAvailable } from '../secrets/check.js';
 import { buildSecretInstructions } from '../secrets/prompt.js';
 import { resolveTemplateContext } from '../template/resolve.js';
 import { substituteTemplate } from '../template/substitute.js';
-import { reportInstallEvent } from '../telemetry/report.js';
 import { getGitRemoteUrl, getGitRepoRoot } from '../utils/git.js';
 import { createLogger } from '../utils/logger.js';
 
@@ -141,13 +140,6 @@ export function registerAddCommand(program: Command): void {
           } else {
             process.stdout.write(`Created ${targetPath}\n`);
           }
-
-          await reportInstallEvent({
-            workflow: bundle.metadata.name,
-            provider: selectedProvider,
-            workflowVersion: bundle.metadata.version,
-            installedAt: new Date().toISOString(),
-          });
         }
 
         const ghReady = isGhAvailable() && isGhAuthenticated();

@@ -1,21 +1,34 @@
 import { CopyCommand } from '../components/copy-command';
-import { LeaderboardControls } from '../components/leaderboard-controls';
 import { LeaderboardTable } from '../components/leaderboard-table';
 import { SiteHeader } from '../components/site-header';
-import { getLeaderboard, type LeaderboardView } from '../lib/leaderboard';
+import { listRegistryWorkflows } from '../lib/registry';
 import { buildInstallCommand, featuredAgents } from '../lib/site';
 
 export const dynamic = 'force-dynamic';
-const validViews: LeaderboardView[] = ['all-time', 'trending', 'hot'];
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; view?: LeaderboardView }>;
+  searchParams: Promise<{ q?: string }>;
 }): Promise<React.ReactNode> {
   const params = await searchParams;
-  const view = params.view && validViews.includes(params.view) ? params.view : 'all-time';
-  const items = await getLeaderboard(view, params.q);
+  const query = params.q?.trim().toLowerCase() ?? '';
+  const items = (await listRegistryWorkflows())
+    .filter((workflow) => {
+      if (!query) {
+        return true;
+      }
+
+      return [workflow.name, workflow.displayName, workflow.description, ...workflow.tags, ...workflow.provider, ...workflow.stacks]
+        .join(' ')
+        .toLowerCase()
+        .includes(query);
+    })
+    .map((workflow) => ({
+      workflow,
+      href: `/${workflow.author ?? 'openci'}/${workflow.name}`,
+      providers: workflow.provider,
+    }));
 
   return (
     <>
@@ -32,8 +45,8 @@ export default async function HomePage({
 
           <div className="hero-copy">
             <p>
-              Workflows are reusable GitHub Actions automations for AI agents. Install them with a single command to
-              enhance your repositories with review, security, and release automation.
+              Discover official GitHub Actions workflows for AI agents and install them into your repositories with a
+              single command.
             </p>
           </div>
         </section>
@@ -57,10 +70,22 @@ export default async function HomePage({
         </section>
 
         <section className="leaderboard-section">
-          <p className="section-label">Workflow leaderboard</p>
-          <LeaderboardControls initialQuery={params.q} initialView={view} />
+          <p className="section-label">Official workflows</p>
+          <form className="search-form">
+            <input
+              className="search-input"
+              type="search"
+              name="q"
+              defaultValue={params.q}
+              placeholder="Search workflows..."
+              aria-label="Search workflows"
+            />
+            <button className="search-button" type="submit">
+              Search
+            </button>
+          </form>
 
-          <LeaderboardTable items={items} emptyState="No workflows match that search yet." />
+          <LeaderboardTable items={items} emptyState="No official workflows match that query yet." />
         </section>
       </main>
     </>

@@ -1,11 +1,10 @@
 import Link from 'next/link';
-import type { Route } from 'next';
 import type { RegistryEntry } from '../lib/registry';
 
 export interface LeaderboardItem {
-  workflow: RegistryEntry;
-  installs: string;
   href: string;
+  providers: string[];
+  workflow: RegistryEntry;
 }
 
 export function LeaderboardTable({
@@ -22,19 +21,17 @@ export function LeaderboardTable({
   return (
     <div className="leaderboard-table">
       <div className="leaderboard-header">
-        <span>#</span>
         <span>Workflow</span>
-        <span>Installs</span>
+        <span>Providers</span>
       </div>
 
-      {items.map((item, index) => (
-        <Link key={item.workflow.name} href={item.href as Route} className="leaderboard-row">
-          <span className="row-rank">{index + 1}</span>
+      {items.map((item) => (
+        <Link key={item.workflow.name} href={item.href} className="leaderboard-row">
           <span className="row-copy">
             <strong>{item.workflow.name}</strong>
-            <span className="row-meta">{item.workflow.author ?? item.workflow.displayName}</span>
+            <span className="row-meta">{item.workflow.description}</span>
           </span>
-          <span>{item.installs}</span>
+          <span>{item.providers.join(', ')}</span>
         </Link>
       ))}
     </div>
