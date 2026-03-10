@@ -9,9 +9,9 @@ describe('integration: add local basic workflow', () => {
     const result = runCli(
       [
         'add',
-        'claude-pr-review-nextjs-pnpm',
-        '--from',
         localRegistryRoot(),
+        '--workflow',
+        'claude-pr-review-nextjs-pnpm',
         '--model',
         'claude-opus-4-6',
         '--trigger',

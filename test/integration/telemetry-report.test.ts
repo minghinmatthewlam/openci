@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { describe, expect, it } from 'vitest';
-import { detectionFixture, makeTempRepo, registryEnv, runCli } from './helpers.js';
+import { detectionFixture, localRegistryRoot, makeTempRepo, runCli } from './helpers.js';
 
 describe('integration: telemetry reporting', () => {
   it('reports anonymous install events when analytics are enabled', async () => {
@@ -25,10 +25,9 @@ describe('integration: telemetry reporting', () => {
 
     try {
       const repo = makeTempRepo({ fixturePath: detectionFixture('pnpm-next') });
-      const result = runCli(['add', 'ai-pr-review', '--yes'], {
+      const result = runCli(['add', localRegistryRoot(), '--workflow', 'ai-pr-review', '--yes'], {
         cwd: repo,
         env: {
-          ...registryEnv(),
           OPENCI_ANALYTICS_URL: 'http://127.0.0.1:3299/api/installs',
         },
       });
@@ -57,10 +56,9 @@ describe('integration: telemetry reporting', () => {
 
     try {
       const repo = makeTempRepo({ fixturePath: detectionFixture('pnpm-next') });
-      const result = runCli(['add', 'ai-pr-review', '--yes'], {
+      const result = runCli(['add', localRegistryRoot(), '--workflow', 'ai-pr-review', '--yes'], {
         cwd: repo,
         env: {
-          ...registryEnv(),
           OPENCI_ANALYTICS_URL: 'http://127.0.0.1:3300/api/installs',
           DO_NOT_TRACK: '1',
         },

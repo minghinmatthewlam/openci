@@ -14,6 +14,7 @@ function git(cwd: string, args: string[]): void {
 
 describe('add basic workflow', () => {
   let repo: string;
+  const sourceRoot = '/Users/matthewlam/dev/openci/test/fixtures/registry';
 
   beforeEach(async () => {
     repo = await mkdtemp(join(tmpdir(), 'openci-add-basic-'));
@@ -36,6 +37,8 @@ describe('add basic workflow', () => {
     const result = await runCli(
       [
         'add',
+        sourceRoot,
+        '--workflow',
         'claude-pr-review-nextjs-pnpm',
         '--model',
         'claude-opus-4-6',

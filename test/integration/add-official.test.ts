@@ -1,14 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { detectionFixture, makeTempRepo, normalizePath, registryEnv, runCli } from './helpers.js';
+import { detectionFixture, localRegistryRoot, makeTempRepo, normalizePath, runCli } from './helpers.js';
 
 describe('integration: add official workflow', () => {
-  it('installs a smart workflow from the official registry override', () => {
+  it('installs a smart workflow from a source-first official registry path', () => {
     const repo = makeTempRepo({ fixturePath: detectionFixture('pnpm-next') });
-    const result = runCli(['add', 'ai-pr-review', '--yes'], {
+    const result = runCli(['add', localRegistryRoot(), '--workflow', 'ai-pr-review', '--yes'], {
       cwd: repo,
-      env: registryEnv(),
     });
 
     const targetPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');
@@ -19,6 +18,6 @@ describe('integration: add official workflow', () => {
     expect(result.stderr).toContain('Required secret: ANTHROPIC_API_KEY');
     expect(existsSync(targetPath)).toBe(true);
     expect(readFileSync(targetPath, 'utf8')).toContain('pnpm install --frozen-lockfile');
-    expect(readFileSync(manifestPath, 'utf8')).toContain('"source": "official"');
+    expect(readFileSync(manifestPath, 'utf8')).toContain('"source": "/Users/matthewlam/dev/openci/test/fixtures/registry"');
   });
 });

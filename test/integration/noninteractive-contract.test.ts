@@ -1,14 +1,13 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { detectionFixture, makeTempRepo, normalizeTempPath, registryEnv, runCli } from './helpers.js';
+import { detectionFixture, localRegistryRoot, makeTempRepo, normalizeTempPath, runCli } from './helpers.js';
 
 describe('integration: non-interactive contract', () => {
   it('keeps stdout machine-clean for add --yes --dry-run', () => {
     const repo = makeTempRepo({ fixturePath: detectionFixture('pnpm-next') });
-    const result = runCli(['add', 'ai-pr-review', '--yes', '--dry-run'], {
+    const result = runCli(['add', localRegistryRoot(), '--workflow', 'ai-pr-review', '--yes', '--dry-run'], {
       cwd: repo,
-      env: registryEnv(),
     });
 
     const targetPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');

@@ -2,41 +2,45 @@ import { describe, expect, it } from 'vitest';
 import { normalizeInstallRequest } from '../../src/registry/source.js';
 
 describe('normalizeInstallRequest', () => {
-  it('defaults to the official registry for plain workflow names', () => {
+  it('parses a local source path and explicit workflow', () => {
     expect(
       normalizeInstallRequest({
         cwd: '/tmp/project',
-        workflowArg: 'ai-pr-review',
+        sourceArg: './fixtures',
+        workflow: 'ai-pr-review',
       }),
     ).toEqual({
-      source: { kind: 'official' },
+      source: { kind: 'local', root: '/tmp/project/fixtures' },
       requestedWorkflow: 'ai-pr-review',
     });
   });
 
-  it('parses local paths from --from', () => {
+  it('parses GitHub shorthand sources', () => {
     const result = normalizeInstallRequest({
       cwd: '/tmp/project',
-      workflowArg: 'ai-pr-review',
-      from: './fixtures',
+      sourceArg: 'acme/workflows',
+      workflow: 'ai-pr-review',
     });
 
-    expect(result.source.kind).toBe('local');
+    expect(result.source.kind).toBe('git');
+    expect(result.source).toMatchObject({
+      repoUrl: 'https://github.com/acme/workflows.git',
+      sourceLabel: 'acme/workflows',
+    });
     expect(result.requestedWorkflow).toBe('ai-pr-review');
   });
 
-  it('parses GitHub shorthand with workflow fragments', () => {
+  it('parses workflow fragments on the source itself', () => {
     expect(
       normalizeInstallRequest({
         cwd: '/tmp/project',
-        from: 'acme/workflows#ai-pr-review',
+        sourceArg: 'acme/workflows#ai-pr-review',
       }),
     ).toEqual({
       source: {
-        kind: 'github',
-        owner: 'acme',
-        repo: 'workflows',
-        workflowName: 'ai-pr-review',
+        kind: 'git',
+        repoUrl: 'https://github.com/acme/workflows.git',
+        sourceLabel: 'acme/workflows',
       },
       requestedWorkflow: 'ai-pr-review',
     });

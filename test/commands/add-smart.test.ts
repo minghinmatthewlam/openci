@@ -15,6 +15,7 @@ function git(cwd: string, args: string[]): void {
 
 describe('add smart workflow', () => {
   let repo: string;
+  const sourceRoot = '/Users/matthewlam/dev/openci/test/fixtures/registry';
 
   beforeEach(async () => {
     repo = await mkdtemp(join(tmpdir(), 'openci-add-smart-'));
@@ -36,7 +37,7 @@ describe('add smart workflow', () => {
   });
 
   it('renders and writes a smart workflow', async () => {
-    const result = await runCli(['add', 'ai-pr-review', '--yes'], { cwd: repo });
+    const result = await runCli(['add', sourceRoot, '--workflow', 'ai-pr-review', '--yes'], { cwd: repo });
     const workflowPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');
     const written = await readFile(workflowPath, 'utf8');
 
@@ -49,7 +50,9 @@ describe('add smart workflow', () => {
   });
 
   it('infers the provider from --model when --provider is omitted', async () => {
-    const result = await runCli(['add', 'ai-pr-review', '--model', 'codex-mini', '--yes'], { cwd: repo });
+    const result = await runCli(['add', sourceRoot, '--workflow', 'ai-pr-review', '--model', 'codex-mini', '--yes'], {
+      cwd: repo,
+    });
     const workflowPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');
     const written = await readFile(workflowPath, 'utf8');
 

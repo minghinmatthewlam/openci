@@ -29,7 +29,7 @@ describe('create command', () => {
     git(cwd, ['commit', '--allow-empty', '-m', 'init']);
 
     const createResult = await runCli(['create', 'my-workflow', '--smart', '--yes'], { cwd });
-    const addResult = await runCli(['add', 'my-workflow', '--from', '.', '--dry-run', '--yes'], { cwd });
+    const addResult = await runCli(['add', '.', '--workflow', 'my-workflow', '--dry-run', '--yes'], { cwd });
     const template = await readFile(join(cwd, 'workflows', 'my-workflow', 'workflow.yml.tmpl'), 'utf8');
 
     expect(createResult.error).toBeUndefined();

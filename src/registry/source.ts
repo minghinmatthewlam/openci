@@ -1,17 +1,30 @@
 import { access, readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { CliError } from '../core/errors.js';
-import { fetchOfficialWorkflowBundle, parseOpenCiConfig, type WorkflowBundle } from './resolve.js';
+import { cloneGitRepo } from './github.js';
+import { parseOpenCiConfig, type WorkflowBundle } from './resolve.js';
 import { WorkflowMetadataSchema } from './schemas.js';
-import { fetchGitHubWorkflowBundle } from './github.js';
 
 export type InstallSource =
-  | { kind: 'official' }
-  | { kind: 'local'; root: string; workflowName?: string | undefined }
-  | { kind: 'github'; owner: string; repo: string; workflowName?: string | undefined };
+  | { kind: 'local'; root: string }
+  | { kind: 'git'; repoUrl: string; sourceLabel: string };
 
-const GITHUB_SOURCE_RE =
-  /^(?:github:)?(?<owner>[A-Za-z0-9_.-]+)\/(?<repo>[A-Za-z0-9_.-]+?)(?:\.git)?(?:#(?<workflow>[a-z0-9-]+))?$/;
+const GITHUB_SOURCE_RE = /^(?:github:)?(?<owner>[A-Za-z0-9_.-]+)\/(?<repo>[A-Za-z0-9_.-]+?)(?:\.git)?$/;
+
+function parseWorkflowFragment(input: string): { source: string; workflowName?: string } {
+  const hashIndex = input.lastIndexOf('#');
+  if (hashIndex === -1) {
+    return { source: input };
+  }
+
+  const source = input.slice(0, hashIndex);
+  const workflowName = input.slice(hashIndex + 1).trim();
+
+  return {
+    source,
+    ...(workflowName ? { workflowName } : {}),
+  };
+}
 
 function isLocalPath(input: string): boolean {
   return (
@@ -23,11 +36,25 @@ function isLocalPath(input: string): boolean {
   );
 }
 
+function isGitUrl(input: string): boolean {
+  return (
+    input.startsWith('git@') ||
+    input.startsWith('git://') ||
+    input.startsWith('ssh://') ||
+    input.startsWith('https://') ||
+    input.startsWith('http://') ||
+    input.startsWith('file://') ||
+    input.endsWith('.git')
+  );
+}
+
 function parseSource(input: string, cwd: string): InstallSource {
+  const { source } = parseWorkflowFragment(input);
+
   if (isLocalPath(input)) {
-    const normalized = input.startsWith('~/')
-      ? path.join(process.env.HOME ?? '', input.slice(2))
-      : input;
+    const normalized = source.startsWith('~/')
+      ? path.join(process.env.HOME ?? '', source.slice(2))
+      : source;
 
     return {
       kind: 'local',
@@ -35,49 +62,41 @@ function parseSource(input: string, cwd: string): InstallSource {
     };
   }
 
-  const match = input.match(GITHUB_SOURCE_RE);
+  const match = source.match(GITHUB_SOURCE_RE);
   if (match?.groups?.owner && match.groups.repo) {
-    const workflowName = match.groups.workflow;
     return {
-      kind: 'github',
-      owner: match.groups.owner,
-      repo: match.groups.repo,
-      ...(workflowName ? { workflowName } : {}),
+      kind: 'git',
+      repoUrl: `https://github.com/${match.groups.owner}/${match.groups.repo}.git`,
+      sourceLabel: `${match.groups.owner}/${match.groups.repo}`,
+    };
+  }
+
+  if (isGitUrl(source)) {
+    return {
+      kind: 'git',
+      repoUrl: source,
+      sourceLabel: source,
     };
   }
 
   throw new CliError(
-    `Unsupported source '${input}'. Use owner/repo, github:owner/repo, owner/repo#workflow-name, or a local path.`,
+    `Unsupported source '${input}'. Use owner/repo, github:owner/repo, a git URL, or a local path.`,
   );
 }
 
 export function normalizeInstallRequest(params: {
   cwd: string;
-  workflowArg?: string | undefined;
-  from?: string | undefined;
+  sourceArg?: string | undefined;
+  workflow?: string | undefined;
 }): { source: InstallSource; requestedWorkflow?: string | undefined } {
-  if (!params.from && !params.workflowArg) {
-    throw new CliError('A workflow name is required.');
+  if (!params.sourceArg) {
+    throw new CliError('A source is required.');
   }
 
-  if (!params.from && params.workflowArg) {
-    try {
-      const source = parseSource(params.workflowArg, params.cwd);
-      const requestedWorkflow = source.kind === 'official' ? params.workflowArg : source.workflowName;
-      return {
-        source,
-        ...(requestedWorkflow ? { requestedWorkflow } : {}),
-      };
-    } catch {
-      return {
-        source: { kind: 'official' },
-        ...(params.workflowArg ? { requestedWorkflow: params.workflowArg } : {}),
-      };
-    }
-  }
+  const parsed = parseWorkflowFragment(params.sourceArg);
+  const source = parseSource(parsed.source, params.cwd);
+  const requestedWorkflow = params.workflow ?? parsed.workflowName;
 
-  const source = parseSource(params.from!, params.cwd);
-  const requestedWorkflow = source.kind === 'official' ? params.workflowArg : source.workflowName ?? params.workflowArg;
   return {
     source,
     ...(requestedWorkflow ? { requestedWorkflow } : {}),
@@ -155,22 +174,31 @@ async function loadWorkflowBundleFromDirectory(dir: string, sourceLabel: string)
 
 export async function resolveWorkflowBundle(params: {
   cwd: string;
-  workflowArg?: string | undefined;
-  from?: string | undefined;
-}): Promise<WorkflowBundle> {
+  sourceArg?: string | undefined;
+  workflow?: string | undefined;
+}): Promise<{ bundle: WorkflowBundle; cleanup?: () => Promise<void> }> {
   const request = normalizeInstallRequest(params);
 
   switch (request.source.kind) {
-    case 'official':
-      if (!request.requestedWorkflow) {
-        throw new CliError('A workflow name is required.');
-      }
-      return fetchOfficialWorkflowBundle(request.requestedWorkflow);
     case 'local': {
       const dir = await resolveLocalWorkflowDir(request.source.root, request.requestedWorkflow);
-      return loadWorkflowBundleFromDirectory(dir, request.source.root);
+      return {
+        bundle: await loadWorkflowBundleFromDirectory(dir, request.source.root),
+      };
     }
-    case 'github':
-      return fetchGitHubWorkflowBundle(request.source, request.requestedWorkflow);
+    case 'git': {
+      const cloned = await cloneGitRepo(request.source);
+      try {
+        const dir = await resolveLocalWorkflowDir(cloned.path, request.requestedWorkflow);
+        const bundle = await loadWorkflowBundleFromDirectory(dir, cloned.sourceLabel);
+        return {
+          bundle,
+          cleanup: cloned.cleanup,
+        };
+      } catch (error) {
+        await cloned.cleanup();
+        throw error;
+      }
+    }
   }
 }

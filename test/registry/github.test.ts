@@ -1,90 +1,35 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchGitHubWorkflowBundle } from '../../src/registry/github.js';
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { afterEach, describe, expect, it } from 'vitest';
+import { cloneGitRepo } from '../../src/registry/github.js';
 
-function response(body: unknown): Response {
-  return new Response(JSON.stringify(body), {
-    status: 200,
-    headers: { 'content-type': 'application/json' },
+describe('cloneGitRepo', () => {
+  const cleanup: Array<() => Promise<void>> = [];
+
+  afterEach(async () => {
+    while (cleanup.length > 0) {
+      await cleanup.pop()?.();
+    }
   });
-}
 
-describe('fetchGitHubWorkflowBundle', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+  it('clones a git source into a temp directory and exposes cleanup', async () => {
+    const sourceRepo = await mkdtemp(join(tmpdir(), 'openci-git-source-'));
+    execFileSync('git', ['init', '--initial-branch=main'], { cwd: sourceRepo, stdio: 'ignore' });
+    execFileSync('git', ['config', 'user.name', 'OpenCI Test'], { cwd: sourceRepo, stdio: 'ignore' });
+    execFileSync('git', ['config', 'user.email', 'test@example.com'], { cwd: sourceRepo, stdio: 'ignore' });
+    await writeFile(join(sourceRepo, 'README.md'), '# source', 'utf8');
+    execFileSync('git', ['add', '.'], { cwd: sourceRepo, stdio: 'ignore' });
+    execFileSync('git', ['commit', '-m', 'init'], { cwd: sourceRepo, stdio: 'ignore' });
 
-  it('loads a named workflow from a multi-workflow repo', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-      const url = String(input);
-
-      if (url.endsWith('/contents/')) {
-        return response([{ name: 'workflows', path: 'workflows', type: 'dir', download_url: null }]);
-      }
-
-      if (url.endsWith('/contents/workflows')) {
-        return response([{ name: 'ai-pr-review', path: 'workflows/ai-pr-review', type: 'dir', download_url: null }]);
-      }
-
-      if (url.endsWith('/contents/workflows/ai-pr-review')) {
-        return response([
-          {
-            name: 'metadata.json',
-            path: 'workflows/ai-pr-review/metadata.json',
-            type: 'file',
-            download_url: 'https://example.test/metadata.json',
-          },
-          {
-            name: 'README.md',
-            path: 'workflows/ai-pr-review/README.md',
-            type: 'file',
-            download_url: 'https://example.test/README.md',
-          },
-          {
-            name: 'workflow.yml',
-            path: 'workflows/ai-pr-review/workflow.yml',
-            type: 'file',
-            download_url: 'https://example.test/workflow.yml',
-          },
-        ]);
-      }
-
-      if (url === 'https://example.test/metadata.json') {
-        return new Response(
-          JSON.stringify({
-            name: 'ai-pr-review',
-            displayName: 'AI Pull Request Review',
-            description: 'Automated review',
-            version: '1.0.0',
-            author: 'acme',
-            tags: ['code-review'],
-            provider: ['claude'],
-            smart: false,
-            requiredSecrets: { claude: ['ANTHROPIC_API_KEY'] },
-            triggers: ['pull_request'],
-            stacks: ['any'],
-            minGitHubActionsVersion: null,
-          }),
-          { status: 200, headers: { 'content-type': 'application/json' } },
-        );
-      }
-
-      if (url === 'https://example.test/README.md') {
-        return new Response('# README', { status: 200 });
-      }
-
-      if (url === 'https://example.test/workflow.yml') {
-        return new Response('name: AI PR Review', { status: 200 });
-      }
-
-      throw new Error(`Unexpected URL: ${url}`);
+    const cloned = await cloneGitRepo({
+      repoUrl: `file://${sourceRepo}`,
+      sourceLabel: 'file-source',
     });
+    cleanup.push(cloned.cleanup);
 
-    const bundle = await fetchGitHubWorkflowBundle(
-      { kind: 'github', owner: 'acme', repo: 'workflows' },
-      'ai-pr-review',
-    );
-
-    expect(bundle.metadata.name).toBe('ai-pr-review');
-    expect(bundle.workflow).toContain('AI PR Review');
+    expect(cloned.path).toContain('openci-source-');
+    expect(cloned.sourceLabel).toBe('file-source');
   });
 });

@@ -7,7 +7,7 @@ OpenCI is a CLI for discovering and installing AI-agent GitHub Actions workflows
 Run it directly with `npx`:
 
 ```bash
-npx openci add ai-pr-review
+npx openci add ./workflows --workflow ai-pr-review
 ```
 
 Common commands:
@@ -16,9 +16,10 @@ Common commands:
 openci list
 openci search review
 openci info ai-pr-review
-openci add ai-pr-review --provider codex
-openci add ai-pr-review --model codex-mini --yes
-openci add ai-pr-review --from ./workflows --yes
+openci add ./workflows --workflow ai-pr-review --provider codex
+openci add ./workflows --workflow ai-pr-review --model codex-mini --yes
+openci add git@github.com:your-org/private-workflows.git --workflow ai-pr-review --yes
+openci add ./workflows --workflow ai-pr-review --yes
 openci status
 openci create my-workflow --smart --yes
 ```
@@ -28,7 +29,8 @@ openci create my-workflow --smart --yes
 - `--provider <name>` selects the AI provider. Supported launch providers are `claude` and `codex`.
 - `--model <name>` overrides the provider default model. For smart workflows, OpenCI infers the provider from the model when `--provider` is omitted.
 - `--trigger <event>` and `--branch <name>` override smart workflow placeholders.
-- `--from <source>` installs from the official registry, a local path, or a GitHub repo like `acme/workflows#ai-pr-review`.
+- `add <source>` accepts a local path, a GitHub shorthand like `owner/repo`, or a git URL.
+- `--workflow <name>` selects a workflow from a multi-workflow source.
 - `--yes` enables non-interactive mode. For `add` and `create`, stdout contains only the created target path.
 - `--dry-run` shows the target path without writing files.
 - `--verbose` prints detection and substitution details to stderr.
@@ -44,7 +46,7 @@ npx openci create my-workflow --smart --yes
 Test it locally without cloning another repo:
 
 ```bash
-npx openci add my-workflow --from . --dry-run --yes
+npx openci add . --workflow my-workflow --dry-run --yes
 ```
 
 ## Development

@@ -21,7 +21,6 @@ export function buildCli(version = '0.1.0'): Command {
     .option('--branch <name>', 'Target branch override')
     .option('--yes', 'Non-interactive mode')
     .option('--dry-run', 'Show what would be installed without writing files')
-    .option('--from <source>', 'Install from a specific GitHub repo or local path')
     .option('--verbose', 'Show detection and substitution details');
 
   registerAddCommand(program);
