@@ -1,4 +1,4 @@
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -25,5 +25,31 @@ describe('manifest store', () => {
     expect(installations).toHaveLength(1);
     expect(installations[0]?.targetPath).toBe('.github/workflows/ai-pr-review.yml');
     expect(raw).toContain('"model": "claude-sonnet-4-6"');
+  });
+
+  it('does not read legacy manifest files anymore', async () => {
+    const repoRoot = await mkdtemp(join(tmpdir(), 'openci-manifest-legacy-'));
+    await writeFile(
+      join(repoRoot, '.openci.json'),
+      JSON.stringify({
+        version: 1,
+        installations: [
+          {
+            name: 'legacy-workflow',
+            source: 'legacy',
+            provider: 'claude',
+            smart: false,
+            workflowVersion: '0.1.0',
+            targetPath: '.github/workflows/legacy.yml',
+            installedAt: '2026-03-09T12:34:56Z',
+          },
+        ],
+      }),
+      'utf8',
+    );
+
+    const installations = await listInstallationMetadata(repoRoot);
+
+    expect(installations).toEqual([]);
   });
 });

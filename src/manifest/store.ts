@@ -2,10 +2,6 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import { ManifestInstallationSchema, type ManifestInstallation } from './schema.js';
 
-export function getLegacyManifestPath(repoRoot: string): string {
-  return join(repoRoot, '.openci.json');
-}
-
 export function getInstallationMetadataDir(repoRoot: string): string {
   return join(repoRoot, '.github', 'workflows', '.openci');
 }
@@ -31,26 +27,7 @@ export async function listInstallationMetadata(repoRoot: string): Promise<Manife
     );
 
     const valid = items.filter((item): item is ManifestInstallation => Boolean(item));
-    if (valid.length > 0) {
-      return valid.sort((left, right) => left.name.localeCompare(right.name));
-    }
-  } catch {
-    // fall through to legacy manifest support
-  }
-
-  return readLegacyManifest(repoRoot);
-}
-
-async function readLegacyManifest(repoRoot: string): Promise<ManifestInstallation[]> {
-  try {
-    const raw = await readFile(getLegacyManifestPath(repoRoot), 'utf8');
-    const parsed = JSON.parse(raw) as { installations?: unknown[] };
-    const items = Array.isArray(parsed.installations) ? parsed.installations : [];
-    return items
-      .map((item) => ManifestInstallationSchema.safeParse(item))
-      .filter((result) => result.success)
-      .map((result) => result.data)
-      .sort((left, right) => left.name.localeCompare(right.name));
+    return valid.sort((left, right) => left.name.localeCompare(right.name));
   } catch {
     return [];
   }
