@@ -1,10 +1,10 @@
 {
-  "name": "ai-pr-review",
-  "displayName": "AI Pull Request Review",
+  "name": "pr-review",
+  "displayName": "Pull Request Review",
   "description": "Automated code review on pull requests using an AI coding agent.",
   "version": "1.0.0",
   "author": "openci",
-  "tags": ["code-review", "pull-request", "ai-agent"],
+  "tags": ["code-review", "pull-request", "ai-agent", "automation"],
   "provider": ["claude", "codex"],
   "smart": true,
   "requiredSecrets": {
@@ -13,5 +13,7 @@
   },
   "triggers": ["pull_request"],
   "stacks": ["any"],
-  "minGitHubActionsVersion": null
+  "minGitHubActionsVersion": null,
+  "repository": "openci/workflows",
+  "publishedAt": "2026-03-09"
 }

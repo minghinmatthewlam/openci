@@ -34,7 +34,7 @@ export default function DocsPage(): React.ReactNode {
             <section id="cli">
               <h2>Getting started</h2>
               <p>Install a workflow from a source:</p>
-              <CopyCommand value="$ npx openci add ./workflows --workflow ai-pr-review" />
+              <CopyCommand value="$ npx openci add ./workflows --workflow pr-review" />
               <p>
                 This generates a workflow file in <code>.github/workflows/</code> and records sidecar metadata for
                 later updates.

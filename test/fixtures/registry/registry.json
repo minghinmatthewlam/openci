@@ -3,8 +3,8 @@
   "updatedAt": "2026-03-09T00:00:00Z",
   "workflows": [
     {
-      "name": "ai-pr-review",
-      "displayName": "AI Pull Request Review",
+      "name": "pr-review",
+      "displayName": "Pull Request Review",
       "description": "Automated code review on pull requests using an AI coding agent.",
       "tags": ["code-review", "pull-request", "ai-agent"],
       "provider": ["claude", "codex"],
@@ -12,8 +12,8 @@
       "stacks": ["any"]
     },
     {
-      "name": "ai-security-scan",
-      "displayName": "AI Security Scan",
+      "name": "security-scan",
+      "displayName": "Security Scan",
       "description": "AI agent scans pull requests for security vulnerabilities.",
       "tags": ["security", "pull-request"],
       "provider": ["claude", "codex"],

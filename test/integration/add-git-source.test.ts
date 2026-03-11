@@ -28,11 +28,11 @@ describe('integration: add git source', () => {
     cpSync(detectionFixture('pnpm-next'), targetRepo, { recursive: true });
 
     const sourceRepo = makeSourceRepo();
-    const result = runCli(['add', `file://${sourceRepo}`, '--workflow', 'ai-pr-review', '--yes'], {
+    const result = runCli(['add', `file://${sourceRepo}`, '--workflow', 'pr-review', '--yes'], {
       cwd: targetRepo,
     });
 
-    const targetPath = join(targetRepo, '.github', 'workflows', 'ai-pr-review.yml');
+    const targetPath = join(targetRepo, '.github', 'workflows', 'pr-review.yml');
 
     expect(result.status).toBe(0);
     expect(normalizePath(result.stdout.trim())).toBe(normalizePath(targetPath));

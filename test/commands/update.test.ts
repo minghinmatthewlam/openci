@@ -23,21 +23,21 @@ describe('update command', () => {
     git(repo, ['add', '.']);
     git(repo, ['commit', '-m', 'init']);
 
-    const installResult = await runCli(['add', sourceRegistryRoot, '--workflow', 'ai-pr-review', '--yes'], { cwd: repo });
+    const installResult = await runCli(['add', sourceRegistryRoot, '--workflow', 'pr-review', '--yes'], { cwd: repo });
     expect(installResult.error).toBeUndefined();
 
     await writeFile(
-      join(sourceRegistryRoot, 'workflows', 'ai-pr-review', 'workflow.yml.tmpl'),
+      join(sourceRegistryRoot, 'workflows', 'pr-review', 'workflow.yml.tmpl'),
       'name: AI PR Review\njobs:\n  review:\n    steps:\n      - run: echo updated-template\n',
       'utf8',
     );
 
-    const updateResult = await runCli(['update', 'ai-pr-review'], { cwd: repo });
-    const workflowPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');
+    const updateResult = await runCli(['update', 'pr-review'], { cwd: repo });
+    const workflowPath = join(repo, '.github', 'workflows', 'pr-review.yml');
     const written = await readFile(workflowPath, 'utf8');
 
     expect(updateResult.error).toBeUndefined();
-    expect(updateResult.stdout).toContain('ai-pr-review\tupdated');
+    expect(updateResult.stdout).toContain('pr-review\tupdated');
     expect(written).toContain('updated-template');
   });
 });

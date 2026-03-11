@@ -7,11 +7,11 @@ describe('normalizeInstallRequest', () => {
       normalizeInstallRequest({
         cwd: '/tmp/project',
         sourceArg: './fixtures',
-        workflow: 'ai-pr-review',
+        workflow: 'pr-review',
       }),
     ).toEqual({
       source: { kind: 'local', root: '/tmp/project/fixtures' },
-      requestedWorkflow: 'ai-pr-review',
+      requestedWorkflow: 'pr-review',
     });
   });
 
@@ -19,7 +19,7 @@ describe('normalizeInstallRequest', () => {
     const result = normalizeInstallRequest({
       cwd: '/tmp/project',
       sourceArg: 'acme/workflows',
-      workflow: 'ai-pr-review',
+      workflow: 'pr-review',
     });
 
     expect(result.source.kind).toBe('git');
@@ -27,14 +27,14 @@ describe('normalizeInstallRequest', () => {
       repoUrl: 'https://github.com/acme/workflows.git',
       sourceLabel: 'acme/workflows',
     });
-    expect(result.requestedWorkflow).toBe('ai-pr-review');
+    expect(result.requestedWorkflow).toBe('pr-review');
   });
 
   it('parses workflow fragments on the source itself', () => {
     expect(
       normalizeInstallRequest({
         cwd: '/tmp/project',
-        sourceArg: 'acme/workflows#ai-pr-review',
+        sourceArg: 'acme/workflows#pr-review',
       }),
     ).toEqual({
       source: {
@@ -42,7 +42,7 @@ describe('normalizeInstallRequest', () => {
         repoUrl: 'https://github.com/acme/workflows.git',
         sourceLabel: 'acme/workflows',
       },
-      requestedWorkflow: 'ai-pr-review',
+      requestedWorkflow: 'pr-review',
     });
   });
 });

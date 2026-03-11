@@ -19,9 +19,9 @@ describe('searchRegistry', () => {
   });
 
   it('ranks exact name matches ahead of other matches', async () => {
-    const results = await searchRegistry('ai-pr-review');
+    const results = await searchRegistry('pr-review');
 
-    expect(results[0]?.name).toBe('ai-pr-review');
+    expect(results[0]?.name).toBe('pr-review');
   });
 
   it('returns an empty list for no matches', async () => {

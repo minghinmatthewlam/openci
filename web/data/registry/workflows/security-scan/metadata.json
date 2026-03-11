@@ -1,17 +1,17 @@
 {
-  "name": "ai-issue-resolver",
-  "displayName": "AI Issue Resolver",
-  "description": "Turn labeled issues into draft pull requests with an autonomous coding agent.",
+  "name": "security-scan",
+  "displayName": "Security Scan",
+  "description": "Scan pull requests for security vulnerabilities, unsafe patterns, and secret leaks.",
   "version": "1.0.0",
   "author": "openci",
-  "tags": ["issues", "automation", "triage"],
+  "tags": ["security", "pull-request", "review"],
   "provider": ["claude", "codex"],
   "smart": true,
   "requiredSecrets": {
     "claude": ["ANTHROPIC_API_KEY"],
     "codex": ["OPENAI_API_KEY"]
   },
-  "triggers": ["issues"],
+  "triggers": ["pull_request"],
   "stacks": ["any"],
   "minGitHubActionsVersion": null,
   "repository": "openci/workflows",

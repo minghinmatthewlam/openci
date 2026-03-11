@@ -37,8 +37,8 @@ describe('add smart workflow', () => {
   });
 
   it('renders and writes a smart workflow', async () => {
-    const result = await runCli(['add', sourceRoot, '--workflow', 'ai-pr-review', '--yes'], { cwd: repo });
-    const workflowPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');
+    const result = await runCli(['add', sourceRoot, '--workflow', 'pr-review', '--yes'], { cwd: repo });
+    const workflowPath = join(repo, '.github', 'workflows', 'pr-review.yml');
     const written = await readFile(workflowPath, 'utf8');
 
     expect(result.error).toBeUndefined();
@@ -50,10 +50,10 @@ describe('add smart workflow', () => {
   });
 
   it('infers the provider from --model when --provider is omitted', async () => {
-    const result = await runCli(['add', sourceRoot, '--workflow', 'ai-pr-review', '--model', 'codex-mini', '--yes'], {
+    const result = await runCli(['add', sourceRoot, '--workflow', 'pr-review', '--model', 'codex-mini', '--yes'], {
       cwd: repo,
     });
-    const workflowPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');
+    const workflowPath = join(repo, '.github', 'workflows', 'pr-review.yml');
     const written = await readFile(workflowPath, 'utf8');
 
     expect(result.error).toBeUndefined();

@@ -3,8 +3,8 @@ import { buildSecretInstructions, parseGithubRemote } from '../../src/secrets/pr
 import type { WorkflowMetadata } from '../../src/registry/schemas.js';
 
 const metadata: WorkflowMetadata = {
-  name: 'ai-pr-review',
-  displayName: 'AI Pull Request Review',
+  name: 'pr-review',
+  displayName: 'Pull Request Review',
   description: 'Automated review',
   version: '1.0.0',
   author: 'openci',

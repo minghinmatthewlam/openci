@@ -6,11 +6,11 @@ import { detectionFixture, localRegistryRoot, makeTempRepo, normalizeTempPath, r
 describe('integration: non-interactive contract', () => {
   it('keeps stdout machine-clean for add --yes --dry-run', () => {
     const repo = makeTempRepo({ fixturePath: detectionFixture('pnpm-next') });
-    const result = runCli(['add', localRegistryRoot(), '--workflow', 'ai-pr-review', '--yes', '--dry-run'], {
+    const result = runCli(['add', localRegistryRoot(), '--workflow', 'pr-review', '--yes', '--dry-run'], {
       cwd: repo,
     });
 
-    const targetPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');
+    const targetPath = join(repo, '.github', 'workflows', 'pr-review.yml');
 
     expect(result.status).toBe(0);
     expect(normalizeTempPath(result.stdout.trim())).toBe(normalizeTempPath(targetPath));

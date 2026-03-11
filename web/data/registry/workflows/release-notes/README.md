@@ -1,4 +1,4 @@
-# AI Release Notes
+# Release Notes
 
 Generates release notes from merged pull requests and issue references.
 
@@ -11,5 +11,5 @@ Generates release notes from merged pull requests and issue references.
 ## Install
 
 ```bash
-npx openci add ai-release-notes
+npx openci add release-notes
 ```

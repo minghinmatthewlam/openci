@@ -5,7 +5,7 @@ OpenCI is an open-source CLI for installing AI-powered GitHub Actions workflows 
 It is source-first:
 
 ```bash
-npx openci add ./workflows --workflow ai-pr-review
+npx openci add ./workflows --workflow pr-review
 ```
 
 The current scope is intentionally simple:
@@ -28,19 +28,19 @@ OpenCI gives you:
 Install from a local or official-style workflows directory:
 
 ```bash
-npx openci add ./workflows --workflow ai-pr-review
+npx openci add ./workflows --workflow pr-review
 ```
 
 Install from a git/GitHub source:
 
 ```bash
-npx openci add minghinmatthewlam/openci --workflow ai-pr-review
+npx openci add minghinmatthewlam/openci --workflow pr-review
 ```
 
 Install from a private repo over SSH:
 
 ```bash
-npx openci add git@github.com:your-org/private-workflows.git --workflow ai-pr-review
+npx openci add git@github.com:your-org/private-workflows.git --workflow pr-review
 ```
 
 Inspect what is installed in the current repo:
@@ -104,7 +104,7 @@ Typical smart substitutions include:
 ### Local source
 
 ```bash
-npx openci add ./workflows --workflow ai-pr-review
+npx openci add ./workflows --workflow pr-review
 ```
 
 This is the easiest workflow for:
@@ -115,14 +115,14 @@ This is the easiest workflow for:
 ### GitHub shorthand
 
 ```bash
-npx openci add owner/repo --workflow ai-pr-review
+npx openci add owner/repo --workflow pr-review
 ```
 
 ### Git URL
 
 ```bash
-npx openci add https://github.com/owner/repo.git --workflow ai-pr-review
-npx openci add git@github.com:owner/repo.git --workflow ai-pr-review
+npx openci add https://github.com/owner/repo.git --workflow pr-review
+npx openci add git@github.com:owner/repo.git --workflow pr-review
 ```
 
 Git sources are cloned to a temporary directory and cleaned up automatically after install/update.
@@ -174,7 +174,7 @@ Refreshes installed workflows from their recorded source metadata:
 
 ```bash
 npx openci update
-npx openci update ai-pr-review
+npx openci update pr-review
 ```
 
 ## Other Useful Commands
@@ -188,7 +188,7 @@ npx openci search review
 Inspect an official workflow:
 
 ```bash
-npx openci info ai-pr-review
+npx openci info pr-review
 ```
 
 Scaffold a new workflow:
@@ -230,7 +230,7 @@ In `--yes` mode:
 Example:
 
 ```bash
-npx openci add ./workflows --workflow ai-pr-review --provider claude --yes
+npx openci add ./workflows --workflow pr-review --provider claude --yes
 ```
 
 ## Official Workflow Directory

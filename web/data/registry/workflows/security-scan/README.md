@@ -1,4 +1,4 @@
-# AI Security Scan
+# Security Scan
 
 Adds a security-focused AI review pass to pull requests.
 
@@ -12,5 +12,5 @@ Adds a security-focused AI review pass to pull requests.
 ## Install
 
 ```bash
-npx openci add ai-security-scan --provider claude
+npx openci add security-scan --provider claude
 ```

@@ -54,7 +54,7 @@ export default async function HomePage({
         <section className="top-panels">
           <div>
             <p className="section-label">Try it now</p>
-            <CopyCommand value={buildInstallCommand('ai-pr-review')} />
+            <CopyCommand value={buildInstallCommand('pr-review')} />
           </div>
 
           <div>

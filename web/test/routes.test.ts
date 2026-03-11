@@ -15,7 +15,7 @@ describe('route components', () => {
 
   it('renders a workflow detail page', async () => {
     const page = await WorkflowDetailPage({
-      params: Promise.resolve({ author: 'openci', name: 'ai-pr-review' }),
+      params: Promise.resolve({ author: 'openci', name: 'pr-review' }),
     });
 
     expect(page).toBeTruthy();

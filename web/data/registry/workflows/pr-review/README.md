@@ -1,4 +1,4 @@
-# AI Pull Request Review
+# Pull Request Review
 
 Adds an AI-powered review workflow to every pull request.
 
@@ -18,5 +18,5 @@ Adds an AI-powered review workflow to every pull request.
 ## Install
 
 ```bash
-npx openci add ai-pr-review --provider claude
+npx openci add pr-review --provider claude
 ```

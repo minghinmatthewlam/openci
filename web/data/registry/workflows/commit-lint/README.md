@@ -1,4 +1,4 @@
-# AI Commit Lint
+# Commit Lint
 
 Checks commit messages and pull request descriptions for clarity, consistency, and useful context.
 
@@ -11,5 +11,5 @@ Checks commit messages and pull request descriptions for clarity, consistency, a
 ## Install
 
 ```bash
-npx openci add ai-commit-lint
+npx openci add commit-lint
 ```

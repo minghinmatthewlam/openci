@@ -1,17 +1,17 @@
 {
-  "name": "ai-security-scan",
-  "displayName": "AI Security Scan",
-  "description": "Scan pull requests for security vulnerabilities, unsafe patterns, and secret leaks.",
+  "name": "release-notes",
+  "displayName": "Release Notes",
+  "description": "Generate release notes from merged pull requests and linked issues.",
   "version": "1.0.0",
   "author": "openci",
-  "tags": ["security", "pull-request", "review"],
+  "tags": ["release", "changelog", "automation"],
   "provider": ["claude", "codex"],
   "smart": true,
   "requiredSecrets": {
     "claude": ["ANTHROPIC_API_KEY"],
     "codex": ["OPENAI_API_KEY"]
   },
-  "triggers": ["pull_request"],
+  "triggers": ["release", "workflow_dispatch"],
   "stacks": ["any"],
   "minGitHubActionsVersion": null,
   "repository": "openci/workflows",

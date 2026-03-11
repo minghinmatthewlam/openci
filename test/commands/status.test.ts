@@ -14,15 +14,15 @@ describe('status command', () => {
   it('shows tracked and untracked workflows', async () => {
     const repo = await mkdtemp(join(tmpdir(), 'openci-status-'));
     await mkdir(join(repo, '.github', 'workflows'), { recursive: true });
-    await writeFile(join(repo, '.github', 'workflows', 'ai-pr-review.yml'), 'name: AI PR Review', 'utf8');
+    await writeFile(join(repo, '.github', 'workflows', 'pr-review.yml'), 'name: AI PR Review', 'utf8');
     await writeFile(join(repo, '.github', 'workflows', 'extra.yml'), 'name: Extra', 'utf8');
     await upsertInstallationMetadata(repo, {
-      name: 'ai-pr-review',
+      name: 'pr-review',
       source: 'official',
       provider: 'claude',
       smart: true,
       workflowVersion: '1.0.0',
-      targetPath: join(repo, '.github', 'workflows', 'ai-pr-review.yml'),
+      targetPath: join(repo, '.github', 'workflows', 'pr-review.yml'),
       installedAt: '2026-03-09T12:34:56Z',
     });
     git(repo, ['init', '--initial-branch=main']);
@@ -33,14 +33,14 @@ describe('status command', () => {
     const result = await runCli(['status'], { cwd: repo });
 
     expect(result.error).toBeUndefined();
-    expect(result.stdout).toContain('ai-pr-review\tclaude\tofficial\t1.0.0\t.github/workflows/ai-pr-review.yml\tinstalled');
+    expect(result.stdout).toContain('pr-review\tclaude\tofficial\t1.0.0\t.github/workflows/pr-review.yml\tinstalled');
     expect(result.stdout).toContain('extra\tunknown\tunknown\tunknown\t.github/workflows/extra.yml\tuntracked-file');
   });
 
   it('falls back to untracked rows when manifest is absent', async () => {
     const repo = await mkdtemp(join(tmpdir(), 'openci-status-untracked-'));
     await mkdir(join(repo, '.github', 'workflows'), { recursive: true });
-    await writeFile(join(repo, '.github', 'workflows', 'ai-pr-review.yml'), 'name: AI PR Review', 'utf8');
+    await writeFile(join(repo, '.github', 'workflows', 'pr-review.yml'), 'name: AI PR Review', 'utf8');
     git(repo, ['init', '--initial-branch=main']);
     git(repo, ['config', 'user.name', 'OpenCI Test']);
     git(repo, ['config', 'user.email', 'test@example.com']);
@@ -48,6 +48,6 @@ describe('status command', () => {
 
     const result = await runCli(['status'], { cwd: repo });
 
-    expect(result.stdout).toContain('ai-pr-review\tunknown\tunknown\tunknown\t.github/workflows/ai-pr-review.yml\tuntracked-file');
+    expect(result.stdout).toContain('pr-review\tunknown\tunknown\tunknown\t.github/workflows/pr-review.yml\tuntracked-file');
   });
 });

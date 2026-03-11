@@ -6,11 +6,11 @@ import { detectionFixture, localRegistryRoot, makeTempRepo, normalizePath, runCl
 describe('integration: add local smart workflow', () => {
   it('installs a smart workflow from a local registry root', () => {
     const repo = makeTempRepo({ fixturePath: detectionFixture('pnpm-next') });
-    const result = runCli(['add', localRegistryRoot(), '--workflow', 'ai-pr-review', '--yes'], {
+    const result = runCli(['add', localRegistryRoot(), '--workflow', 'pr-review', '--yes'], {
       cwd: repo,
     });
 
-    const targetPath = join(repo, '.github', 'workflows', 'ai-pr-review.yml');
+    const targetPath = join(repo, '.github', 'workflows', 'pr-review.yml');
 
     expect(result.status).toBe(0);
     expect(normalizePath(result.stdout.trim())).toBe(normalizePath(targetPath));

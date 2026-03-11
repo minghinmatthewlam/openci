@@ -20,13 +20,13 @@ describe('info command', () => {
   it('prints metadata and README for a workflow', async () => {
     process.env.OPENCI_REGISTRY_URL = registryUrl;
 
-    const result = await runCli(['info', 'ai-pr-review']);
+    const result = await runCli(['info', 'pr-review']);
 
     expect(result.error).toBeUndefined();
-    expect(result.stdout).toContain('AI Pull Request Review');
+    expect(result.stdout).toContain('Pull Request Review');
     expect(result.stdout).toContain('Type: smart');
     expect(result.stdout).toContain('claude: ANTHROPIC_API_KEY');
-    expect(result.stdout).toContain('# AI Pull Request Review');
+    expect(result.stdout).toContain('# Pull Request Review');
   });
 
   it('errors for a missing workflow', async () => {

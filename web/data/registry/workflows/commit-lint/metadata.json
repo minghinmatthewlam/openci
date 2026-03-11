@@ -1,6 +1,6 @@
 {
-  "name": "ai-commit-lint",
-  "displayName": "AI Commit Lint",
+  "name": "commit-lint",
+  "displayName": "Commit Lint",
   "description": "Review commit messages and PR descriptions for clarity and consistency.",
   "version": "1.0.0",
   "author": "openci",
