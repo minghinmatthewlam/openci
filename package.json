@@ -2,7 +2,7 @@
   "name": "openci",
   "version": "0.1.0",
   "description": "Discover and install AI-powered GitHub Actions workflows",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "repository": {
     "type": "git",
