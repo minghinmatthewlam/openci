@@ -91,13 +91,13 @@ export function registerAddCommand(program: Command): void {
           }
         } else {
           if (hasRawFlag(command, '--model')) {
-            logger.warn(`Ignoring --model for basic workflow '${bundle.metadata.name}'.`);
+            logger.warn(`Ignoring --model for copied-as-is workflow '${bundle.metadata.name}'.`);
           }
           if (hasRawFlag(command, '--trigger')) {
-            logger.warn(`Ignoring --trigger for basic workflow '${bundle.metadata.name}'.`);
+            logger.warn(`Ignoring --trigger for copied-as-is workflow '${bundle.metadata.name}'.`);
           }
           if (hasRawFlag(command, '--branch')) {
-            logger.warn(`Ignoring --branch for basic workflow '${bundle.metadata.name}'.`);
+            logger.warn(`Ignoring --branch for copied-as-is workflow '${bundle.metadata.name}'.`);
           }
         }
 

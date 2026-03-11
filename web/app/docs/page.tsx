@@ -57,8 +57,8 @@ export default function DocsPage(): React.ReactNode {
             <section id="faq">
               <h2>FAQ</h2>
               <p>
-                OpenCI supports smart and basic workflows. Smart workflows use <code>openci.config.json</code> for local
-                detection and substitution when generating the installed YAML.
+                OpenCI supports regular workflows and smart workflows. Smart workflows use <code>openci.config.json</code>{' '}
+                for local detection and substitution when generating the installed YAML.
               </p>
             </section>
           </article>

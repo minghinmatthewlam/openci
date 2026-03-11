@@ -33,7 +33,7 @@ describe('add basic workflow', () => {
     vi.restoreAllMocks();
   });
 
-  it('copies a basic workflow exactly and warns about ignored flags', async () => {
+  it('copies a workflow exactly and warns about ignored flags', async () => {
     const result = await runCli(
       [
         'add',
@@ -56,9 +56,9 @@ describe('add basic workflow', () => {
 
     expect(result.error).toBeUndefined();
     expect(await realpath(result.stdout.trim())).toBe(await realpath(workflowPath));
-    expect(result.stderr).toContain("Ignoring --model for basic workflow 'claude-pr-review-nextjs-pnpm'.");
-    expect(result.stderr).toContain("Ignoring --trigger for basic workflow 'claude-pr-review-nextjs-pnpm'.");
-    expect(result.stderr).toContain("Ignoring --branch for basic workflow 'claude-pr-review-nextjs-pnpm'.");
+    expect(result.stderr).toContain("Ignoring --model for copied-as-is workflow 'claude-pr-review-nextjs-pnpm'.");
+    expect(result.stderr).toContain("Ignoring --trigger for copied-as-is workflow 'claude-pr-review-nextjs-pnpm'.");
+    expect(result.stderr).toContain("Ignoring --branch for copied-as-is workflow 'claude-pr-review-nextjs-pnpm'.");
     expect(written).toContain('pnpm install --frozen-lockfile');
     expect(written).toContain('model: claude-sonnet-4-6');
   });

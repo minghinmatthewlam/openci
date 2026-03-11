@@ -11,7 +11,7 @@ export function registerCreateCommand(program: Command): void {
     .command('create')
     .description('Scaffold a new workflow for contributors')
     .argument('<name>')
-    .option('--basic', 'Generate a basic workflow scaffold')
+    .option('--basic', 'Generate a copied-as-is workflow scaffold')
     .option('--smart', 'Generate a smart workflow scaffold')
     .action(async (name: string, options: { basic?: boolean; smart?: boolean }, command: Command) => {
       if (options.basic && options.smart) {

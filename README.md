@@ -5,13 +5,13 @@ OpenCI is an open-source CLI for installing AI-powered GitHub Actions workflows 
 It is source-first:
 
 ```bash
-npx openci add ./workflows --workflow pr-review
+npx openci add minghinmatthewlam/openci --workflow pr-review
 ```
 
 The current scope is intentionally simple:
 - source-first workflow installs
 - local workflow management (`list`, `status`, `update`)
-- smart and basic workflow support
+- workflow and smart workflow support
 - a lightweight OSS web directory in [`web/`](/Users/matthewlam/dev/openci/web) for official workflows only
 
 ## Why OpenCI
@@ -19,17 +19,11 @@ The current scope is intentionally simple:
 GitHub Actions workflows for AI agents are useful, but they are also annoying to wire up repeatedly.
 
 OpenCI gives you:
-- a consistent install flow for official, local, public, and private workflow sources
+- a consistent install flow for official/public, private, and local workflow sources
 - smart workflow rendering for common substitutions like provider, package manager, validation command, and branch
 - local management metadata so installed workflows can be listed, inspected, and updated later
 
 ## Quick Start
-
-Install from a local or official-style workflows directory:
-
-```bash
-npx openci add ./workflows --workflow pr-review
-```
 
 Install from a git/GitHub source:
 
@@ -37,10 +31,16 @@ Install from a git/GitHub source:
 npx openci add minghinmatthewlam/openci --workflow pr-review
 ```
 
-Install from a private repo over SSH:
+Install from a private repo:
 
 ```bash
-npx openci add git@github.com:your-org/private-workflows.git --workflow pr-review
+npx openci add your-org/private-workflows --workflow pr-review
+```
+
+Install from a local workflows directory:
+
+```bash
+npx openci add ./workflows --workflow pr-review
 ```
 
 Inspect what is installed in the current repo:
@@ -75,14 +75,29 @@ If a source contains multiple workflows, use `--workflow <name>` to select one.
 
 ## Workflow Types
 
-### Basic workflows
+OpenCI supports two workflow types:
+- **workflows**: copied as-is
+- **smart workflows**: rendered from templates with local repo detection
 
-Basic workflows are copied as-is.
+If you are new to OpenCI workflow authoring, start with a regular **workflow** first.
+
+### Workflows
+
+Workflows are copied as-is.
 
 They are best when:
 - the stack is fixed
 - the workflow is intentionally opinionated
 - you do not need auto-detection
+
+Typical files:
+
+```text
+workflows/my-workflow/
+├── metadata.json
+├── workflow.yml
+└── README.md
+```
 
 ### Smart workflows
 
@@ -99,7 +114,52 @@ Typical smart substitutions include:
 - target branch
 - prompt/provider-specific details
 
+Typical files:
+
+```text
+workflows/my-workflow/
+├── metadata.json
+├── openci.config.json
+├── workflow.yml.tmpl
+└── README.md
+```
+
+Use smart workflows when you want one workflow definition to adapt to multiple repos or providers. Use a regular workflow when you want the simplest, most explicit setup.
+
 ## Install Sources
+
+### GitHub shorthand
+
+```bash
+npx openci add owner/repo --workflow pr-review
+```
+
+This is the primary source form to optimize for in docs and onboarding. It matches the most common public install flow and keeps the command short.
+
+### Private repos
+
+Private repos are supported through normal git credentials:
+- SSH keys
+- configured git credentials
+- any auth flow your local git already uses
+
+These can both work for private repos, depending on local git auth setup:
+
+```bash
+npx openci add owner/private-workflows --workflow pr-review
+npx openci add git@github.com:owner/private-workflows.git --workflow pr-review
+```
+
+OpenCI does not prompt for credentials itself. If `git clone` cannot access the repo, the install fails with the clone error.
+
+### Git URL
+
+```bash
+npx openci add https://github.com/owner/repo.git --workflow pr-review
+npx openci add git@github.com:owner/repo.git --workflow pr-review
+```
+
+Git sources are cloned to a temporary directory and cleaned up automatically after install/update.
 
 ### Local source
 
@@ -111,30 +171,6 @@ This is the easiest workflow for:
 - local development
 - testing a workflow before publishing it
 - internal/shared directories on your machine
-
-### GitHub shorthand
-
-```bash
-npx openci add owner/repo --workflow pr-review
-```
-
-### Git URL
-
-```bash
-npx openci add https://github.com/owner/repo.git --workflow pr-review
-npx openci add git@github.com:owner/repo.git --workflow pr-review
-```
-
-Git sources are cloned to a temporary directory and cleaned up automatically after install/update.
-
-### Private repos
-
-Private repos are supported through normal git credentials:
-- SSH keys
-- configured git credentials
-- any auth flow your local git already uses
-
-OpenCI does not prompt for credentials itself. If `git clone` cannot access the repo, the install fails with the clone error.
 
 ## Local Management
 
@@ -185,6 +221,8 @@ Search official workflow metadata:
 npx openci search review
 ```
 
+At the current phase, `search` is intentionally lightweight. It searches the official static metadata only and is not yet backed by a broader ingest/search service.
+
 Inspect an official workflow:
 
 ```bash
@@ -196,6 +234,8 @@ Scaffold a new workflow:
 ```bash
 npx openci create my-workflow --smart --yes
 ```
+
+`create` generates the starter files for a new workflow in `workflows/<name>/`. Use `--basic` for the simplest copied-as-is workflow, or `--smart` if you need templating and local detection.
 
 `init` exists as a stub right now and is not implemented yet.
 
@@ -214,7 +254,7 @@ npx openci create my-workflow --smart --yes
 
 ### `create`
 
-- `--basic`: scaffold a basic workflow
+- `--basic`: scaffold a copied-as-is workflow
 - `--smart`: scaffold a smart workflow
 - `--yes`: skip prompts
 
@@ -251,6 +291,26 @@ It intentionally does **not** depend on:
 That keeps the first public web experience fully OSS and easy to run locally.
 
 ## Contributor Workflow
+
+### Start with a regular workflow
+
+If you are learning the format or publishing a single opinionated workflow, start here:
+
+```bash
+npx openci create my-workflow --basic --yes
+```
+
+That gives you the simplest possible structure to edit and test.
+
+### Move to smart workflows when needed
+
+If you need local detection and templating:
+
+```bash
+npx openci create my-workflow --smart --yes
+```
+
+Smart workflows are more powerful, but they also require more files and more testing.
 
 Create a workflow scaffold:
 
