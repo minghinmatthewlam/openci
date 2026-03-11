@@ -37,13 +37,13 @@ export default async function WorkflowDetailPage({
             </div>
 
             <h1 className="detail-title">{bundle.metadata.name}</h1>
-            <CopyCommand value={buildInstallCommand(bundle.metadata.name, bundle.metadata.provider[0] ?? 'claude')} />
+          <CopyCommand value={buildInstallCommand(bundle.metadata.name, bundle.metadata.provider[0] ?? 'claude')} />
 
-            <div className="content-card">
-              <div className="content-label">{bundle.metadata.smart ? 'SMART WORKFLOW' : 'BASIC WORKFLOW'}</div>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
+          <div className="content-card">
+            <div className="content-label">{bundle.metadata.smart ? 'SMART WORKFLOW' : 'WORKFLOW'}</div>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
                   h1: ({ children }) => <h2>{children}</h2>,
                 }}
               >

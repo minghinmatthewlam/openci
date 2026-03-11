@@ -13,7 +13,7 @@ describe('detectValidationCommand', () => {
   });
 
   it('returns lint and test joined when both exist', async () => {
-    const packageJson = await readPackageJson(join(fixturesRoot, 'npm-basic'));
+    const packageJson = await readPackageJson(join(fixturesRoot, 'npm-standard'));
 
     expect(detectValidationCommand(packageJson, 'npm')).toBe('npm run lint && npm test');
   });

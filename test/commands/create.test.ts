@@ -10,8 +10,8 @@ function git(cwd: string, args: string[]): void {
 }
 
 describe('create command', () => {
-  it('creates a basic scaffold by default', async () => {
-    const cwd = await mkdtemp(join(tmpdir(), 'openci-create-basic-'));
+  it('creates a workflow scaffold by default', async () => {
+    const cwd = await mkdtemp(join(tmpdir(), 'openci-create-workflow-'));
 
     const result = await runCli(['create', 'my-workflow', '--yes'], { cwd });
     const metadata = await readFile(join(cwd, 'workflows', 'my-workflow', 'metadata.json'), 'utf8');

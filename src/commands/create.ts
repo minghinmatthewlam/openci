@@ -1,9 +1,8 @@
 import type { Command } from 'commander';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { CliError } from '../core/errors.js';
-import { buildBasicScaffold } from '../scaffold/basic.js';
 import { buildSmartScaffold } from '../scaffold/smart.js';
+import { buildWorkflowScaffold } from '../scaffold/workflow.js';
 import { createLogger } from '../utils/logger.js';
 
 export function registerCreateCommand(program: Command): void {
@@ -11,18 +10,12 @@ export function registerCreateCommand(program: Command): void {
     .command('create')
     .description('Scaffold a new workflow for contributors')
     .argument('<name>')
-    .option('--basic', 'Generate a copied-as-is workflow scaffold')
     .option('--smart', 'Generate a smart workflow scaffold')
-    .action(async (name: string, options: { basic?: boolean; smart?: boolean }, command: Command) => {
-      if (options.basic && options.smart) {
-        throw new CliError('Choose either --basic or --smart, not both.');
-      }
-
+    .action(async (name: string, options: { smart?: boolean }, command: Command) => {
       const globals = command.optsWithGlobals<{ yes?: boolean; verbose?: boolean }>();
       const yes = Boolean(globals.yes);
       const logger = createLogger({ yes, verbose: Boolean(globals.verbose) });
-      const mode = options.smart ? 'smart' : 'basic';
-      const files = mode === 'smart' ? buildSmartScaffold(name) : buildBasicScaffold(name);
+      const files = options.smart ? buildSmartScaffold(name) : buildWorkflowScaffold(name);
       const targetDir = join(process.cwd(), 'workflows', name);
 
       await mkdir(targetDir, { recursive: true });

@@ -12,12 +12,12 @@ function git(cwd: string, args: string[]): void {
   execFileSync('git', args, { cwd, stdio: 'ignore' });
 }
 
-describe('add basic workflow', () => {
+describe('add workflow', () => {
   let repo: string;
   const sourceRoot = '/Users/matthewlam/dev/openci/test/fixtures/registry';
 
   beforeEach(async () => {
-    repo = await mkdtemp(join(tmpdir(), 'openci-add-basic-'));
+    repo = await mkdtemp(join(tmpdir(), 'openci-add-workflow-'));
     process.env.OPENCI_REGISTRY_URL = registryUrl;
     git(repo, ['init', '--initial-branch=main']);
     git(repo, ['config', 'user.name', 'OpenCI Test']);

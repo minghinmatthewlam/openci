@@ -235,7 +235,7 @@ Scaffold a new workflow:
 npx openci create my-workflow --smart --yes
 ```
 
-`create` generates the starter files for a new workflow in `workflows/<name>/`. Use `--basic` for the simplest copied-as-is workflow, or `--smart` if you need templating and local detection.
+`create` generates the starter files for a new workflow in `workflows/<name>/`. By default it creates the simplest copied-as-is workflow. Add `--smart` if you need templating and local detection.
 
 `init` exists as a stub right now and is not implemented yet.
 
@@ -254,7 +254,7 @@ npx openci create my-workflow --smart --yes
 
 ### `create`
 
-- `--basic`: scaffold a copied-as-is workflow
+- default: scaffold a copied-as-is workflow
 - `--smart`: scaffold a smart workflow
 - `--yes`: skip prompts
 
@@ -297,7 +297,7 @@ That keeps the first public web experience fully OSS and easy to run locally.
 If you are learning the format or publishing a single opinionated workflow, start here:
 
 ```bash
-npx openci create my-workflow --basic --yes
+npx openci create my-workflow --yes
 ```
 
 That gives you the simplest possible structure to edit and test.

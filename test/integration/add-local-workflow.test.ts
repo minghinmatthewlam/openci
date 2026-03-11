@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { localRegistryRoot, makeTempRepo, normalizePath, runCli } from './helpers.js';
 
-describe('integration: add local basic workflow', () => {
+describe('integration: add local workflow', () => {
   it('installs a workflow from a local registry root and ignores unsupported flags', () => {
     const repo = makeTempRepo();
     const result = runCli(

@@ -24,7 +24,7 @@ export function registerInfoCommand(program: Command): void {
 
       process.stdout.write(`${metadata.displayName}\n`);
       process.stdout.write(`${metadata.description}\n\n`);
-      process.stdout.write(`Type: ${metadata.smart ? 'smart' : 'basic'}\n`);
+      process.stdout.write(`Type: ${metadata.smart ? 'smart workflow' : 'workflow'}\n`);
       process.stdout.write(`Providers: ${metadata.provider.join(', ')}\n`);
       process.stdout.write(`Triggers: ${metadata.triggers.join(', ')}\n`);
       process.stdout.write(`Tags: ${metadata.tags.join(', ')}\n`);

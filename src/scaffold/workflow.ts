@@ -1,4 +1,4 @@
-export function buildBasicScaffold(name: string): Record<string, string> {
+export function buildWorkflowScaffold(name: string): Record<string, string> {
   return {
     'metadata.json': JSON.stringify(
       {

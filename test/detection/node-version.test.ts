@@ -21,7 +21,7 @@ describe('detectNodeVersion', () => {
   });
 
   it('normalizes engines.node ranges to the minimum major version when possible', async () => {
-    const fixture = join(fixturesRoot, 'npm-basic');
+    const fixture = join(fixturesRoot, 'npm-standard');
     const packageJson = await readPackageJson(fixture);
 
     await expect(detectNodeVersion(fixture, packageJson)).resolves.toBe('20');
