@@ -2,7 +2,24 @@
   "name": "openci",
   "version": "0.1.0",
   "description": "Discover and install AI-powered GitHub Actions workflows",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minghinmatthewlam/openci.git"
+  },
+  "homepage": "https://github.com/minghinmatthewlam/openci#readme",
+  "bugs": {
+    "url": "https://github.com/minghinmatthewlam/openci/issues"
+  },
+  "keywords": [
+    "cli",
+    "github-actions",
+    "workflows",
+    "ai-agents",
+    "automation",
+    "openci"
+  ],
   "bin": {
     "openci": "./dist/index.js"
   },

@@ -17,7 +17,10 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - run: npm --prefix web ci
       - run: npm run typecheck
       - run: npm run test -- --coverage
+      - run: npm --prefix web run test
+      - run: npm --prefix web run build
       - run: npm run build
       - run: npm pack --dry-run
