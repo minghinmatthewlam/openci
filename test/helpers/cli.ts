@@ -1,5 +1,5 @@
-import { vi } from 'vitest';
-import { buildCli } from '../../src/cli.js';
+import { vi } from "vitest";
+import { buildCli } from "../../src/cli.js";
 
 export interface CliRunResult {
   stdout: string;
@@ -14,18 +14,22 @@ export async function runCli(
     env?: NodeJS.ProcessEnv;
   } = {},
 ): Promise<CliRunResult> {
-  let stdout = '';
-  let stderr = '';
+  let stdout = "";
+  let stderr = "";
   let error: unknown;
   const previousCwd = process.cwd();
   const previousEnv = { ...process.env };
 
-  const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(((chunk: string | Uint8Array) => {
+  const stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(((
+    chunk: string | Uint8Array,
+  ) => {
     stdout += String(chunk);
     return true;
   }) as typeof process.stdout.write);
 
-  const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(((chunk: string | Uint8Array) => {
+  const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(((
+    chunk: string | Uint8Array,
+  ) => {
     stderr += String(chunk);
     return true;
   }) as typeof process.stderr.write);
@@ -37,7 +41,7 @@ export async function runCli(
     if (options.env) {
       Object.assign(process.env, options.env);
     }
-    await buildCli('0.1.0').parseAsync(args, { from: 'user' });
+    await buildCli("0.1.0").parseAsync(args, { from: "user" });
   } catch (caught) {
     error = caught;
   } finally {
