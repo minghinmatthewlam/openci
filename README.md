@@ -343,6 +343,8 @@ Contributor guidance is pinned to [`24.14.0`](/Users/matthewlam/dev/openci/.nvmr
 
 ```bash
 npm install
+npm run lint
+npm run format:check
 npm run typecheck
 npm test
 npm run build
@@ -365,6 +367,8 @@ The npm package is published as `openci` and exposes the CLI through the `bin` e
 Before publishing:
 
 ```bash
+npm run lint
+npm run format:check
 npm run typecheck
 npm test
 npm run build
@@ -376,3 +380,4 @@ The repository also includes:
 - release workflow in [release.yml](/Users/matthewlam/dev/openci/.github/workflows/release.yml)
 
 The release workflow uses npm trusted publishing with provenance.
+Workflow files are linted with `actionlint`, and project code is linted/formatted with `oxlint` and `oxfmt`.

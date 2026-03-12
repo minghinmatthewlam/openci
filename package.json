@@ -33,6 +33,9 @@
   },
   "scripts": {
     "build": "tsup",
+    "lint": "oxlint src web test",
+    "format": "oxfmt src web test '!test/fixtures/detection/invalid-package-json/**'",
+    "format:check": "oxfmt --check src web test '!test/fixtures/detection/invalid-package-json/**'",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && vitest run",
     "test:watch": "vitest",
@@ -55,6 +58,8 @@
     "@types/node": "24.10.15",
     "@types/semver": "^7.7.1",
     "@vitest/coverage-v8": "^4.0.18",
+    "oxfmt": "^0.38.0",
+    "oxlint": "^1.53.0",
     "tsup": "8.5.1",
     "typescript": "5.9.3",
     "vitest": "4.0.18"
