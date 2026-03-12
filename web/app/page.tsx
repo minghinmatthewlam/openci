@@ -1,10 +1,10 @@
-import { CopyCommand } from '../components/copy-command';
-import { LeaderboardTable } from '../components/leaderboard-table';
-import { SiteHeader } from '../components/site-header';
-import { listRegistryWorkflows } from '../lib/registry';
-import { buildInstallCommand, featuredAgents } from '../lib/site';
+import { CopyCommand } from "../components/copy-command";
+import { LeaderboardTable } from "../components/leaderboard-table";
+import { SiteHeader } from "../components/site-header";
+import { listRegistryWorkflows } from "../lib/registry";
+import { buildInstallCommand, featuredAgents } from "../lib/site";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function HomePage({
   searchParams,
@@ -12,21 +12,28 @@ export default async function HomePage({
   searchParams: Promise<{ q?: string }>;
 }): Promise<React.ReactNode> {
   const params = await searchParams;
-  const query = params.q?.trim().toLowerCase() ?? '';
+  const query = params.q?.trim().toLowerCase() ?? "";
   const items = (await listRegistryWorkflows())
     .filter((workflow) => {
       if (!query) {
         return true;
       }
 
-      return [workflow.name, workflow.displayName, workflow.description, ...workflow.tags, ...workflow.provider, ...workflow.stacks]
-        .join(' ')
+      return [
+        workflow.name,
+        workflow.displayName,
+        workflow.description,
+        ...workflow.tags,
+        ...workflow.provider,
+        ...workflow.stacks,
+      ]
+        .join(" ")
         .toLowerCase()
         .includes(query);
     })
     .map((workflow) => ({
       workflow,
-      href: `/${workflow.author ?? 'openci'}/${workflow.name}`,
+      href: `/${workflow.author ?? "openci"}/${workflow.name}`,
       providers: workflow.provider,
     }));
 
@@ -45,8 +52,8 @@ export default async function HomePage({
 
           <div className="hero-copy">
             <p>
-              Discover official GitHub Actions workflows for AI agents and install them into your repositories with a
-              single command.
+              Discover official GitHub Actions workflows for AI agents and install them into your
+              repositories with a single command.
             </p>
           </div>
         </section>
@@ -54,7 +61,7 @@ export default async function HomePage({
         <section className="top-panels">
           <div>
             <p className="section-label">Try it now</p>
-            <CopyCommand value={buildInstallCommand('pr-review')} />
+            <CopyCommand value={buildInstallCommand("pr-review")} />
           </div>
 
           <div>
@@ -85,7 +92,10 @@ export default async function HomePage({
             </button>
           </form>
 
-          <LeaderboardTable items={items} emptyState="No official workflows match that query yet." />
+          <LeaderboardTable
+            items={items}
+            emptyState="No official workflows match that query yet."
+          />
         </section>
       </main>
     </>

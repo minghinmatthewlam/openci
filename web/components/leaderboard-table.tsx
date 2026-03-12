@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import type { RegistryEntry } from '../lib/registry';
+import Link from "next/link";
+import type { RegistryEntry } from "../lib/registry";
 
 export interface LeaderboardItem {
   href: string;
@@ -15,7 +15,7 @@ export function LeaderboardTable({
   emptyState?: string;
 }): React.ReactNode {
   if (items.length === 0) {
-    return <p className="empty-state">{emptyState ?? 'No workflows found.'}</p>;
+    return <p className="empty-state">{emptyState ?? "No workflows found."}</p>;
   }
 
   return (
@@ -31,7 +31,7 @@ export function LeaderboardTable({
             <strong>{item.workflow.name}</strong>
             <span className="row-meta">{item.workflow.description}</span>
           </span>
-          <span>{item.providers.join(', ')}</span>
+          <span>{item.providers.join(", ")}</span>
         </Link>
       ))}
     </div>

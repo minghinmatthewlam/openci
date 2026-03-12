@@ -1,6 +1,6 @@
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 export interface RegistryEntry {
   name: string;
@@ -38,7 +38,7 @@ export interface RegistryDocument {
 }
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const defaultRegistryRoot = path.resolve(currentDir, '../data/registry');
+const defaultRegistryRoot = path.resolve(currentDir, "../data/registry");
 
 function getRegistryRoot(): string {
   return process.env.OPENCI_WEB_REGISTRY_PATH
@@ -47,8 +47,8 @@ function getRegistryRoot(): string {
 }
 
 export async function readRegistry(): Promise<RegistryDocument> {
-  const registryPath = path.join(getRegistryRoot(), 'registry.json');
-  const raw = await readFile(registryPath, 'utf8');
+  const registryPath = path.join(getRegistryRoot(), "registry.json");
+  const raw = await readFile(registryPath, "utf8");
   return JSON.parse(raw) as RegistryDocument;
 }
 
@@ -70,28 +70,28 @@ export async function listRegistryWorkflows(): Promise<RegistryEntry[]> {
 }
 
 export async function readWorkflowBundle(name: string): Promise<WorkflowBundle | undefined> {
-  const workflowRoot = path.join(getRegistryRoot(), 'workflows', name);
+  const workflowRoot = path.join(getRegistryRoot(), "workflows", name);
 
   try {
-    const metadataRaw = await readFile(path.join(workflowRoot, 'metadata.json'), 'utf8');
+    const metadataRaw = await readFile(path.join(workflowRoot, "metadata.json"), "utf8");
     const metadata = JSON.parse(metadataRaw) as WorkflowMetadata;
 
     const [readme, config, template, workflow] = await Promise.all([
-      readOptional(path.join(workflowRoot, 'README.md')),
-      readOptional(path.join(workflowRoot, 'openci.config.json')),
-      readOptional(path.join(workflowRoot, 'workflow.yml.tmpl')),
-      readOptional(path.join(workflowRoot, 'workflow.yml')),
+      readOptional(path.join(workflowRoot, "README.md")),
+      readOptional(path.join(workflowRoot, "openci.config.json")),
+      readOptional(path.join(workflowRoot, "workflow.yml.tmpl")),
+      readOptional(path.join(workflowRoot, "workflow.yml")),
     ]);
 
     return {
       metadata,
-      readme: readme ?? '',
+      readme: readme ?? "",
       config: config ?? undefined,
       template: template ?? undefined,
       workflow: workflow ?? undefined,
     };
   } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       return undefined;
     }
 
@@ -99,7 +99,10 @@ export async function readWorkflowBundle(name: string): Promise<WorkflowBundle |
   }
 }
 
-export async function readWorkflowBundleByAuthor(author: string, name: string): Promise<WorkflowBundle | undefined> {
+export async function readWorkflowBundleByAuthor(
+  author: string,
+  name: string,
+): Promise<WorkflowBundle | undefined> {
   const bundle = await readWorkflowBundle(name);
   if (!bundle) {
     return undefined;
@@ -110,9 +113,9 @@ export async function readWorkflowBundleByAuthor(author: string, name: string): 
 
 async function readOptional(filePath: string): Promise<string | undefined> {
   try {
-    return await readFile(filePath, 'utf8');
+    return await readFile(filePath, "utf8");
   } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       return undefined;
     }
 

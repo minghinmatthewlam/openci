@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { CopyCommand } from '../../../components/copy-command';
-import { SiteHeader } from '../../../components/site-header';
-import { readWorkflowBundleByAuthor } from '../../../lib/registry';
-import { buildInstallCommand } from '../../../lib/site';
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { CopyCommand } from "../../../components/copy-command";
+import { SiteHeader } from "../../../components/site-header";
+import { readWorkflowBundleByAuthor } from "../../../lib/registry";
+import { buildInstallCommand } from "../../../lib/site";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function WorkflowDetailPage({
   params,
@@ -37,13 +37,20 @@ export default async function WorkflowDetailPage({
             </div>
 
             <h1 className="detail-title">{bundle.metadata.name}</h1>
-          <CopyCommand value={buildInstallCommand(bundle.metadata.name, bundle.metadata.provider[0] ?? 'claude')} />
+            <CopyCommand
+              value={buildInstallCommand(
+                bundle.metadata.name,
+                bundle.metadata.provider[0] ?? "claude",
+              )}
+            />
 
-          <div className="content-card">
-            <div className="content-label">{bundle.metadata.smart ? 'SMART WORKFLOW' : 'WORKFLOW'}</div>
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
+            <div className="content-card">
+              <div className="content-label">
+                {bundle.metadata.smart ? "SMART WORKFLOW" : "WORKFLOW"}
+              </div>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
                   h1: ({ children }) => <h2>{children}</h2>,
                 }}
               >
@@ -55,7 +62,7 @@ export default async function WorkflowDetailPage({
           <aside className="detail-sidebar">
             <div className="sidebar-block">
               <p className="sidebar-label">Providers</p>
-              <p>{bundle.metadata.provider.join(', ')}</p>
+              <p>{bundle.metadata.provider.join(", ")}</p>
             </div>
             <div className="sidebar-block">
               <p className="sidebar-label">Repository</p>
@@ -63,21 +70,21 @@ export default async function WorkflowDetailPage({
             </div>
             <div className="sidebar-block">
               <p className="sidebar-label">Triggers</p>
-              <p>{bundle.metadata.triggers.join(', ')}</p>
+              <p>{bundle.metadata.triggers.join(", ")}</p>
             </div>
             <div className="sidebar-block">
               <p className="sidebar-label">Required secrets</p>
               <ul>
                 {Object.entries(bundle.metadata.requiredSecrets).map(([provider, secrets]) => (
                   <li key={provider}>
-                    <strong>{provider}</strong>: {secrets.join(', ')}
+                    <strong>{provider}</strong>: {secrets.join(", ")}
                   </li>
                 ))}
               </ul>
             </div>
             <div className="sidebar-block">
               <p className="sidebar-label">First seen</p>
-              <p>{bundle.metadata.publishedAt ?? '2026-03-09'}</p>
+              <p>{bundle.metadata.publishedAt ?? "2026-03-09"}</p>
             </div>
           </aside>
         </div>
@@ -87,5 +94,5 @@ export default async function WorkflowDetailPage({
 }
 
 function stripLeadingTitle(markdown: string): string {
-  return markdown.replace(/^# .+\n+/, '');
+  return markdown.replace(/^# .+\n+/, "");
 }
