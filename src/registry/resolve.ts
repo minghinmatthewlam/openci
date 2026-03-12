@@ -1,8 +1,8 @@
-import { CliError } from '../core/errors.js';
-import { fetchText } from '../utils/http.js';
-import { fetchRegistry, getOfficialWorkflowFileUrl } from './fetch.js';
-import { WorkflowMetadataSchema, type RegistryWorkflow, type WorkflowMetadata } from './schemas.js';
-import { OpenCiConfigSchema, type OpenCiConfig } from '../template/schemas.js';
+import { CliError } from "../core/errors.js";
+import { fetchText } from "../utils/http.js";
+import { fetchRegistry, getOfficialWorkflowFileUrl } from "./fetch.js";
+import { WorkflowMetadataSchema, type RegistryWorkflow, type WorkflowMetadata } from "./schemas.js";
+import { OpenCiConfigSchema, type OpenCiConfig } from "../template/schemas.js";
 
 function scoreWorkflow(workflow: RegistryWorkflow, query: string): number {
   const normalizedQuery = query.toLowerCase();
@@ -30,7 +30,9 @@ function scoreWorkflow(workflow: RegistryWorkflow, query: string): number {
   return score;
 }
 
-export async function findRegistryWorkflowByName(name: string): Promise<RegistryWorkflow | undefined> {
+export async function findRegistryWorkflowByName(
+  name: string,
+): Promise<RegistryWorkflow | undefined> {
   const registry = await fetchRegistry();
   return registry.workflows.find((workflow) => workflow.name === name);
 }
@@ -48,17 +50,20 @@ export async function searchRegistry(query?: string): Promise<RegistryWorkflow[]
       score: scoreWorkflow(workflow, query),
     }))
     .filter((entry) => entry.score > 0)
-    .sort((left, right) => right.score - left.score || left.workflow.name.localeCompare(right.workflow.name))
+    .sort(
+      (left, right) =>
+        right.score - left.score || left.workflow.name.localeCompare(right.workflow.name),
+    )
     .map((entry) => entry.workflow);
 }
 
 export async function fetchOfficialWorkflowMetadata(name: string): Promise<WorkflowMetadata> {
-  const url = getOfficialWorkflowFileUrl(name, 'metadata.json');
+  const url = getOfficialWorkflowFileUrl(name, "metadata.json");
   return fetchJsonLikeMetadata(url);
 }
 
 export async function fetchOfficialWorkflowReadme(name: string): Promise<string> {
-  return fetchText(getOfficialWorkflowFileUrl(name, 'README.md'));
+  return fetchText(getOfficialWorkflowFileUrl(name, "README.md"));
 }
 
 export interface WorkflowBundle {
@@ -77,8 +82,8 @@ export async function fetchOfficialWorkflowBundle(name: string): Promise<Workflo
   if (metadata.smart) {
     const [readme, workflowTemplate, configRaw] = await Promise.all([
       readmePromise,
-      fetchText(getOfficialWorkflowFileUrl(name, 'workflow.yml.tmpl')),
-      fetchText(getOfficialWorkflowFileUrl(name, 'openci.config.json')),
+      fetchText(getOfficialWorkflowFileUrl(name, "workflow.yml.tmpl")),
+      fetchText(getOfficialWorkflowFileUrl(name, "openci.config.json")),
     ]);
 
     return {
@@ -86,20 +91,20 @@ export async function fetchOfficialWorkflowBundle(name: string): Promise<Workflo
       readme,
       workflowTemplate,
       config: parseOpenCiConfig(name, configRaw),
-      sourceLabel: 'official',
+      sourceLabel: "official",
     };
   }
 
   const [readme, workflow] = await Promise.all([
     readmePromise,
-    fetchText(getOfficialWorkflowFileUrl(name, 'workflow.yml')),
+    fetchText(getOfficialWorkflowFileUrl(name, "workflow.yml")),
   ]);
 
   return {
     metadata,
     readme,
     workflow,
-    sourceLabel: 'official',
+    sourceLabel: "official",
   };
 }
 

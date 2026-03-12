@@ -1,10 +1,10 @@
-import { CliError } from '../core/errors.js';
-import type { WorkflowMetadata } from '../registry/schemas.js';
-import type { OpenCiConfig } from '../template/schemas.js';
+import { CliError } from "../core/errors.js";
+import type { WorkflowMetadata } from "../registry/schemas.js";
+import type { OpenCiConfig } from "../template/schemas.js";
 
 const MODEL_PREFIX_TO_PROVIDER = new Map<string, string>([
-  ['claude-', 'claude'],
-  ['codex-', 'codex'],
+  ["claude-", "claude"],
+  ["codex-", "codex"],
 ]);
 
 export function inferProviderFromModel(model: string): string | undefined {
@@ -18,8 +18,8 @@ export function inferProviderFromModel(model: string): string | undefined {
 }
 
 export function applyModelOverride(extraArgs: string | undefined, model: string): string {
-  const lines = (extraArgs ?? '')
-    .split('\n')
+  const lines = (extraArgs ?? "")
+    .split("\n")
     .map((line) => line.trimEnd())
     .filter(Boolean);
 
@@ -37,18 +37,18 @@ export function applyModelOverride(extraArgs: string | undefined, model: string)
     updated.unshift(`model: ${model}`);
   }
 
-  return updated.join('\n');
+  return updated.join("\n");
 }
 
 export function resolveSupportedProvider(
   metadata: WorkflowMetadata,
   provider?: string | undefined,
 ): string {
-  const selectedProvider = provider ?? 'claude';
+  const selectedProvider = provider ?? "claude";
 
   if (!metadata.provider.includes(selectedProvider)) {
     throw new CliError(
-      `Workflow '${metadata.name}' doesn't support provider '${selectedProvider}'. Supported: ${metadata.provider.join(', ')}`,
+      `Workflow '${metadata.name}' doesn't support provider '${selectedProvider}'. Supported: ${metadata.provider.join(", ")}`,
     );
   }
 
@@ -62,7 +62,7 @@ export function resolveProviderPlaceholders(params: {
   model?: string | undefined;
 }): { provider: string; placeholders: Record<string, string> } {
   const inferredProvider = params.model ? inferProviderFromModel(params.model) : undefined;
-  const provider = params.provider ?? inferredProvider ?? 'claude';
+  const provider = params.provider ?? inferredProvider ?? "claude";
 
   if (params.provider && inferredProvider && params.provider !== inferredProvider) {
     throw new CliError(
@@ -72,13 +72,15 @@ export function resolveProviderPlaceholders(params: {
 
   if (!params.metadata.provider.includes(provider)) {
     throw new CliError(
-      `Workflow '${params.metadata.name}' doesn't support provider '${provider}'. Supported: ${params.metadata.provider.join(', ')}`,
+      `Workflow '${params.metadata.name}' doesn't support provider '${provider}'. Supported: ${params.metadata.provider.join(", ")}`,
     );
   }
 
   const providerConfig = params.config.providers[provider];
   if (!providerConfig) {
-    throw new CliError(`Workflow '${params.metadata.name}' has no provider config for '${provider}'.`);
+    throw new CliError(
+      `Workflow '${params.metadata.name}' has no provider config for '${provider}'.`,
+    );
   }
 
   const placeholders = { ...providerConfig };

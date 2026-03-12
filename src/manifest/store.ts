@@ -1,9 +1,9 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join, relative } from 'node:path';
-import { ManifestInstallationSchema, type ManifestInstallation } from './schema.js';
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join, relative } from "node:path";
+import { ManifestInstallationSchema, type ManifestInstallation } from "./schema.js";
 
 export function getInstallationMetadataDir(repoRoot: string): string {
-  return join(repoRoot, '.github', 'workflows', '.openci');
+  return join(repoRoot, ".github", "workflows", ".openci");
 }
 
 export function getInstallationMetadataPath(repoRoot: string, workflowName: string): string {
@@ -13,13 +13,13 @@ export function getInstallationMetadataPath(repoRoot: string, workflowName: stri
 export async function listInstallationMetadata(repoRoot: string): Promise<ManifestInstallation[]> {
   const sidecarDir = getInstallationMetadataDir(repoRoot);
   try {
-    const { readdir } = await import('node:fs/promises');
+    const { readdir } = await import("node:fs/promises");
     const entries = await readdir(sidecarDir);
     const items = await Promise.all(
       entries
-        .filter((entry) => entry.endsWith('.json'))
+        .filter((entry) => entry.endsWith(".json"))
         .map(async (entry) => {
-          const raw = await readFile(join(sidecarDir, entry), 'utf8');
+          const raw = await readFile(join(sidecarDir, entry), "utf8");
           const parsed = JSON.parse(raw);
           const result = ManifestInstallationSchema.safeParse(parsed);
           return result.success ? result.data : undefined;
@@ -37,13 +37,15 @@ export async function readInstallationMetadata(
   repoRoot: string,
   workflowName: string,
 ): Promise<ManifestInstallation | undefined> {
-  const installation = (await listInstallationMetadata(repoRoot)).find((item) => item.name === workflowName);
+  const installation = (await listInstallationMetadata(repoRoot)).find(
+    (item) => item.name === workflowName,
+  );
   return installation;
 }
 
 export async function upsertInstallationMetadata(
   repoRoot: string,
-  installation: Omit<ManifestInstallation, 'targetPath'> & { targetPath: string },
+  installation: Omit<ManifestInstallation, "targetPath"> & { targetPath: string },
 ): Promise<void> {
   const relativeTargetPath = relative(repoRoot, installation.targetPath);
   const nextInstallation: ManifestInstallation = {
@@ -53,5 +55,5 @@ export async function upsertInstallationMetadata(
 
   const metadataPath = getInstallationMetadataPath(repoRoot, installation.name);
   await mkdir(dirname(metadataPath), { recursive: true });
-  await writeFile(metadataPath, JSON.stringify(nextInstallation, null, 2), 'utf8');
+  await writeFile(metadataPath, JSON.stringify(nextInstallation, null, 2), "utf8");
 }

@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const DetectionKeySchema = z.enum([
-  'packageManager',
-  'nodeVersion',
-  'defaultBranch',
-  'validationCommand',
-  'framework',
+  "packageManager",
+  "nodeVersion",
+  "defaultBranch",
+  "validationCommand",
+  "framework",
 ]);
 
 export const SubstitutionRuleSchema = z

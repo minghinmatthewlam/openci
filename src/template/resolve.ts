@@ -1,16 +1,16 @@
-import type { DetectionResult } from '../detection/index.js';
-import type { WorkflowMetadata } from '../registry/schemas.js';
-import { CliError } from '../core/errors.js';
-import { resolveProviderPlaceholders } from '../provider/resolve.js';
-import type { DetectionKey, OpenCiConfig } from './schemas.js';
+import type { DetectionResult } from "../detection/index.js";
+import type { WorkflowMetadata } from "../registry/schemas.js";
+import { CliError } from "../core/errors.js";
+import { resolveProviderPlaceholders } from "../provider/resolve.js";
+import type { DetectionKey, OpenCiConfig } from "./schemas.js";
 
 const IMPLICIT_DETECT_BY_PLACEHOLDER: Record<string, DetectionKey> = {
-  INSTALL_CMD: 'packageManager',
-  VALIDATION_CMD: 'validationCommand',
-  TARGET_BRANCH: 'defaultBranch',
-  NODE_VERSION: 'nodeVersion',
-  FRAMEWORK: 'framework',
-  PACKAGE_MANAGER: 'packageManager',
+  INSTALL_CMD: "packageManager",
+  VALIDATION_CMD: "validationCommand",
+  TARGET_BRANCH: "defaultBranch",
+  NODE_VERSION: "nodeVersion",
+  FRAMEWORK: "framework",
+  PACKAGE_MANAGER: "packageManager",
 };
 
 export interface AddFlags {
@@ -52,18 +52,20 @@ export function resolveTemplateContext(params: {
     const detectKey = rule._detect ?? IMPLICIT_DETECT_BY_PLACEHOLDER[placeholder];
     const detectedValue = detectKey ? params.detected[detectKey] : undefined;
 
-    if (typeof detectedValue === 'string') {
+    if (typeof detectedValue === "string") {
       const mappedValue = rule[detectedValue];
-      context[placeholder] = typeof mappedValue === 'string' ? mappedValue : detectedValue;
+      context[placeholder] = typeof mappedValue === "string" ? mappedValue : detectedValue;
       continue;
     }
 
-    if (typeof rule._default === 'string') {
+    if (typeof rule._default === "string") {
       context[placeholder] = rule._default;
       continue;
     }
 
-    throw new CliError(`Unable to resolve {{${placeholder}}} for workflow '${params.metadata.name}'.`);
+    throw new CliError(
+      `Unable to resolve {{${placeholder}}} for workflow '${params.metadata.name}'.`,
+    );
   }
 
   context.PROVIDER = provider;

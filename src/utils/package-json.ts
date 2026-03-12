@@ -1,5 +1,5 @@
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 export interface PackageJsonLike {
   name?: string;
@@ -15,10 +15,10 @@ export interface PackageJsonLike {
 
 export async function readPackageJson(root: string): Promise<PackageJsonLike | undefined> {
   try {
-    const raw = await readFile(join(root, 'package.json'), 'utf8');
+    const raw = await readFile(join(root, "package.json"), "utf8");
     return JSON.parse(raw) as PackageJsonLike;
   } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       return undefined;
     }
 

@@ -1,4 +1,4 @@
-import type { WorkflowMetadata } from '../registry/schemas.js';
+import type { WorkflowMetadata } from "../registry/schemas.js";
 
 export interface GithubRemote {
   owner: string;
@@ -18,7 +18,9 @@ export function parseGithubRemote(remoteUrl: string | undefined): GithubRemote |
     };
   }
 
-  const httpsMatch = remoteUrl.match(/^https:\/\/github\.com\/(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?$/);
+  const httpsMatch = remoteUrl.match(
+    /^https:\/\/github\.com\/(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?$/,
+  );
   if (httpsMatch?.groups?.owner && httpsMatch.groups.repo) {
     return {
       owner: httpsMatch.groups.owner,
@@ -51,11 +53,13 @@ export function buildSecretInstructions(
     }
 
     if (repo) {
-      lines.push(`Visit: https://github.com/${repo.owner}/${repo.repo}/settings/secrets/actions/new`);
+      lines.push(
+        `Visit: https://github.com/${repo.owner}/${repo.repo}/settings/secrets/actions/new`,
+      );
       return lines;
     }
 
-    lines.push('Install and authenticate gh CLI for easier secret setup.');
+    lines.push("Install and authenticate gh CLI for easier secret setup.");
     return lines;
   });
 }

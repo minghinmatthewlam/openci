@@ -1,9 +1,9 @@
-import { detectDefaultBranch } from './branch.js';
-import { detectFramework } from './framework.js';
-import { detectNodeVersion } from './node-version.js';
-import { detectPackageManager, type PackageManager } from './package-manager.js';
-import { detectValidationCommand } from './validation.js';
-import { readPackageJson } from '../utils/package-json.js';
+import { detectDefaultBranch } from "./branch.js";
+import { detectFramework } from "./framework.js";
+import { detectNodeVersion } from "./node-version.js";
+import { detectPackageManager, type PackageManager } from "./package-manager.js";
+import { detectValidationCommand } from "./validation.js";
+import { readPackageJson } from "../utils/package-json.js";
 
 export interface DetectionResult {
   packageManager?: PackageManager;
@@ -27,7 +27,10 @@ function warningMessage(key: string, error: unknown): string {
   return `Failed to detect ${key}: ${detail}`;
 }
 
-export async function detectRepo(root: string, enabled: DetectionOptions): Promise<DetectionResult> {
+export async function detectRepo(
+  root: string,
+  enabled: DetectionOptions,
+): Promise<DetectionResult> {
   const result: DetectionResult = {
     warnings: [],
   };
@@ -36,7 +39,7 @@ export async function detectRepo(root: string, enabled: DetectionOptions): Promi
   try {
     packageJson = await readPackageJson(root);
   } catch (error) {
-    result.warnings.push(warningMessage('package.json', error));
+    result.warnings.push(warningMessage("package.json", error));
   }
 
   if (enabled.packageManager || enabled.validationCommand) {
@@ -46,7 +49,7 @@ export async function detectRepo(root: string, enabled: DetectionOptions): Promi
         result.packageManager = packageManager;
       }
     } catch (error) {
-      result.warnings.push(warningMessage('package manager', error));
+      result.warnings.push(warningMessage("package manager", error));
     }
   }
 
@@ -57,7 +60,7 @@ export async function detectRepo(root: string, enabled: DetectionOptions): Promi
         result.nodeVersion = nodeVersion;
       }
     } catch (error) {
-      result.warnings.push(warningMessage('Node version', error));
+      result.warnings.push(warningMessage("Node version", error));
     }
   }
 
@@ -68,7 +71,7 @@ export async function detectRepo(root: string, enabled: DetectionOptions): Promi
         result.defaultBranch = defaultBranch;
       }
     } catch (error) {
-      result.warnings.push(warningMessage('default branch', error));
+      result.warnings.push(warningMessage("default branch", error));
     }
   }
 
@@ -79,7 +82,7 @@ export async function detectRepo(root: string, enabled: DetectionOptions): Promi
         result.framework = framework;
       }
     } catch (error) {
-      result.warnings.push(warningMessage('framework', error));
+      result.warnings.push(warningMessage("framework", error));
     }
   }
 
@@ -90,7 +93,7 @@ export async function detectRepo(root: string, enabled: DetectionOptions): Promi
         result.validationCommand = validationCommand;
       }
     } catch (error) {
-      result.warnings.push(warningMessage('validation command', error));
+      result.warnings.push(warningMessage("validation command", error));
     }
   }
 

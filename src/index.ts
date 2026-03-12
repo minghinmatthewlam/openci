@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { buildCli } from './cli.js';
-import { CliError } from './core/errors.js';
+import { buildCli } from "./cli.js";
+import { CliError } from "./core/errors.js";
 
 async function main(): Promise<void> {
   try {
@@ -12,7 +12,7 @@ async function main(): Promise<void> {
       return;
     }
 
-    if (error instanceof Error && 'code' in error && error.code === 'commander.helpDisplayed') {
+    if (error instanceof Error && "code" in error && error.code === "commander.helpDisplayed") {
       process.exitCode = 0;
       return;
     }

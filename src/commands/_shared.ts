@@ -1,5 +1,5 @@
-import type { Command } from 'commander';
-import { CliError } from '../core/errors.js';
+import type { Command } from "commander";
+import { CliError } from "../core/errors.js";
 
 export function registerPlaceholderCommand(
   program: Command,

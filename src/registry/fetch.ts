@@ -1,12 +1,12 @@
-import { join } from 'node:path';
-import { CliError } from '../core/errors.js';
-import { readJsonIfFresh, writeJson, getCacheRoot } from '../utils/cache.js';
-import { fetchJson } from '../utils/http.js';
-import { OFFICIAL_REGISTRY, REGISTRY_TTL_MS, officialRawUrl } from './constants.js';
-import { RegistrySchema, type Registry } from './schemas.js';
+import { join } from "node:path";
+import { CliError } from "../core/errors.js";
+import { readJsonIfFresh, writeJson, getCacheRoot } from "../utils/cache.js";
+import { fetchJson } from "../utils/http.js";
+import { OFFICIAL_REGISTRY, REGISTRY_TTL_MS, officialRawUrl } from "./constants.js";
+import { RegistrySchema, type Registry } from "./schemas.js";
 
 export function getRegistryCachePath(): string {
-  return join(getCacheRoot(), 'registry.json');
+  return join(getCacheRoot(), "registry.json");
 }
 
 export async function fetchRegistry(options?: { fresh?: boolean }): Promise<Registry> {
@@ -23,7 +23,7 @@ export async function fetchRegistry(options?: { fresh?: boolean }): Promise<Regi
   }
 
   try {
-    const registry = await fetchJson(officialRawUrl('registry.json'), RegistrySchema);
+    const registry = await fetchJson(officialRawUrl("registry.json"), RegistrySchema);
     await writeJson(cachePath, registry);
     return registry;
   } catch (error) {
@@ -31,7 +31,7 @@ export async function fetchRegistry(options?: { fresh?: boolean }): Promise<Regi
       throw error;
     }
 
-    throw new CliError('Could not reach registry. Check your connection.');
+    throw new CliError("Could not reach registry. Check your connection.");
   }
 }
 

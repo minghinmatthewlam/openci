@@ -1,4 +1,4 @@
-import { CliError } from '../core/errors.js';
+import { CliError } from "../core/errors.js";
 
 const WHOLE_LINE_PLACEHOLDER_RE = /^(?<indent>[ \t]*){{\s*(?<name>[A-Z0-9_]+)\s*}}[ \t]*$/gm;
 const INLINE_PLACEHOLDER_RE = /{{\s*([A-Z0-9_]+)\s*}}/g;
@@ -10,7 +10,7 @@ export function substituteTemplate(template: string, values: Record<string, stri
     WHOLE_LINE_PLACEHOLDER_RE,
     (match, _indent, _name, _offset, _input, groups?: { indent?: string; name?: string }) => {
       const name = groups?.name;
-      const indent = groups?.indent ?? '';
+      const indent = groups?.indent ?? "";
 
       if (!name || !(name in values)) {
         if (name) {
@@ -27,9 +27,9 @@ export function substituteTemplate(template: string, values: Record<string, stri
       }
 
       return value
-        .split('\n')
+        .split("\n")
         .map((line) => `${indent}${line}`)
-        .join('\n');
+        .join("\n");
     },
   );
 
@@ -44,7 +44,7 @@ export function substituteTemplate(template: string, values: Record<string, stri
   });
 
   if (missing.size > 0) {
-    throw new CliError(`Unresolved placeholders: ${Array.from(missing).sort().join(', ')}`);
+    throw new CliError(`Unresolved placeholders: ${Array.from(missing).sort().join(", ")}`);
   }
 
   return rendered;

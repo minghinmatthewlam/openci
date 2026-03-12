@@ -1,15 +1,15 @@
-import { access } from 'node:fs/promises';
-import { join } from 'node:path';
+import { access } from "node:fs/promises";
+import { join } from "node:path";
 
-export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
+export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
 
 const LOCKFILE_ORDER: Array<[string, PackageManager]> = [
-  ['pnpm-lock.yaml', 'pnpm'],
-  ['yarn.lock', 'yarn'],
-  ['bun.lockb', 'bun'],
-  ['bun.lock', 'bun'],
-  ['package-lock.json', 'npm'],
-  ['npm-shrinkwrap.json', 'npm'],
+  ["pnpm-lock.yaml", "pnpm"],
+  ["yarn.lock", "yarn"],
+  ["bun.lockb", "bun"],
+  ["bun.lock", "bun"],
+  ["package-lock.json", "npm"],
+  ["npm-shrinkwrap.json", "npm"],
 ];
 
 async function exists(path: string): Promise<boolean> {
@@ -28,5 +28,5 @@ export async function detectPackageManager(root: string): Promise<PackageManager
     }
   }
 
-  return 'npm';
+  return "npm";
 }

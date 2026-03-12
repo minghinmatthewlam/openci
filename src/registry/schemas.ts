@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const RegistryWorkflowSchema = z.object({
   name: z.string().regex(/^[a-z0-9-]+$/),

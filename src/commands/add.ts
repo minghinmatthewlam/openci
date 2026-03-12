@@ -1,19 +1,19 @@
-import type { Command } from 'commander';
-import { access, mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
-import { detectRepo } from '../detection/index.js';
-import { upsertInstallationMetadata } from '../manifest/store.js';
-import { resolveSupportedProvider } from '../provider/resolve.js';
-import { resolveWorkflowBundle } from '../registry/source.js';
-import { isGhAuthenticated, isGhAvailable } from '../secrets/check.js';
-import { buildSecretInstructions } from '../secrets/prompt.js';
-import { resolveTemplateContext } from '../template/resolve.js';
-import { substituteTemplate } from '../template/substitute.js';
-import { getGitRemoteUrl, getGitRepoRoot } from '../utils/git.js';
-import { createLogger } from '../utils/logger.js';
+import type { Command } from "commander";
+import { access, mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { detectRepo } from "../detection/index.js";
+import { upsertInstallationMetadata } from "../manifest/store.js";
+import { resolveSupportedProvider } from "../provider/resolve.js";
+import { resolveWorkflowBundle } from "../registry/source.js";
+import { isGhAuthenticated, isGhAvailable } from "../secrets/check.js";
+import { buildSecretInstructions } from "../secrets/prompt.js";
+import { resolveTemplateContext } from "../template/resolve.js";
+import { substituteTemplate } from "../template/substitute.js";
+import { getGitRemoteUrl, getGitRepoRoot } from "../utils/git.js";
+import { createLogger } from "../utils/logger.js";
 
 function hasRawFlag(command: Command, flag: string): boolean {
-  const rawArgs = (command.parent as Command & { rawArgs?: string[] } | undefined)?.rawArgs;
+  const rawArgs = (command.parent as (Command & { rawArgs?: string[] }) | undefined)?.rawArgs;
   return rawArgs?.includes(flag) ?? false;
 }
 
@@ -28,10 +28,10 @@ async function fileExists(path: string): Promise<boolean> {
 
 export function registerAddCommand(program: Command): void {
   program
-    .command('add')
-    .description('Install a workflow into your repo')
-    .argument('<source>')
-    .option('--workflow <name>', 'Workflow to install from the source')
+    .command("add")
+    .description("Install a workflow into your repo")
+    .argument("<source>")
+    .option("--workflow <name>", "Workflow to install from the source")
     .action(async (sourceArg: string, options: { workflow?: string }, command: Command) => {
       const globals = command.optsWithGlobals<{
         provider?: string;
@@ -43,7 +43,7 @@ export function registerAddCommand(program: Command): void {
         verbose?: boolean;
       }>();
 
-      const explicitProvider = hasRawFlag(command, '--provider') ? globals.provider : undefined;
+      const explicitProvider = hasRawFlag(command, "--provider") ? globals.provider : undefined;
       const yes = Boolean(globals.yes);
       const dryRun = Boolean(globals.dryRun);
       const verbose = Boolean(globals.verbose);
@@ -59,7 +59,7 @@ export function registerAddCommand(program: Command): void {
 
       try {
         const { bundle } = resolvedSource;
-        const targetPath = join(repoRoot, '.github', 'workflows', `${bundle.metadata.name}.yml`);
+        const targetPath = join(repoRoot, ".github", "workflows", `${bundle.metadata.name}.yml`);
 
         let selectedProvider = resolveSupportedProvider(bundle.metadata, explicitProvider);
         let output = bundle.workflow;
@@ -90,13 +90,13 @@ export function registerAddCommand(program: Command): void {
             logger.debug(`Resolved context: ${JSON.stringify(resolved.context, null, 2)}`);
           }
         } else {
-          if (hasRawFlag(command, '--model')) {
+          if (hasRawFlag(command, "--model")) {
             logger.warn(`Ignoring --model for copied-as-is workflow '${bundle.metadata.name}'.`);
           }
-          if (hasRawFlag(command, '--trigger')) {
+          if (hasRawFlag(command, "--trigger")) {
             logger.warn(`Ignoring --trigger for copied-as-is workflow '${bundle.metadata.name}'.`);
           }
-          if (hasRawFlag(command, '--branch')) {
+          if (hasRawFlag(command, "--branch")) {
             logger.warn(`Ignoring --branch for copied-as-is workflow '${bundle.metadata.name}'.`);
           }
         }
@@ -121,7 +121,7 @@ export function registerAddCommand(program: Command): void {
           }
         } else {
           await mkdir(dirname(targetPath), { recursive: true });
-          await writeFile(targetPath, output, 'utf8');
+          await writeFile(targetPath, output, "utf8");
           await upsertInstallationMetadata(repoRoot, {
             name: bundle.metadata.name,
             source: bundle.sourceLabel,
@@ -143,7 +143,12 @@ export function registerAddCommand(program: Command): void {
         }
 
         const ghReady = isGhAvailable() && isGhAuthenticated();
-        for (const instruction of buildSecretInstructions(bundle.metadata, selectedProvider, remoteUrl, ghReady)) {
+        for (const instruction of buildSecretInstructions(
+          bundle.metadata,
+          selectedProvider,
+          remoteUrl,
+          ghReady,
+        )) {
           logger.warn(instruction);
         }
       } finally {

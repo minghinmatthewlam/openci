@@ -1,8 +1,8 @@
-import { spawnSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import type { ZodType } from 'zod';
-import { CliError } from '../core/errors.js';
+import { spawnSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import type { ZodType } from "zod";
+import { CliError } from "../core/errors.js";
 
 let ghTokenCache: string | null | undefined;
 
@@ -11,12 +11,12 @@ function readGhToken(): string | undefined {
     return ghTokenCache ?? undefined;
   }
 
-  const result = spawnSync('gh', ['auth', 'token'], {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore'],
+  const result = spawnSync("gh", ["auth", "token"], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
   });
 
-  const token = result.status === 0 ? result.stdout.trim() : '';
+  const token = result.status === 0 ? result.stdout.trim() : "";
   ghTokenCache = token || null;
   return ghTokenCache ?? undefined;
 }
@@ -26,7 +26,7 @@ function getGithubToken(): string | undefined {
 }
 
 function isGithubRequest(url: URL): boolean {
-  return url.hostname === 'api.github.com' || url.hostname === 'raw.githubusercontent.com';
+  return url.hostname === "api.github.com" || url.hostname === "raw.githubusercontent.com";
 }
 
 function getAuthHeaders(url: URL): Record<string, string> {
@@ -47,11 +47,11 @@ function getAuthHeaders(url: URL): Record<string, string> {
 async function fetchRaw(url: string, accept?: string): Promise<string> {
   const parsedUrl = new URL(url);
 
-  if (parsedUrl.protocol === 'file:') {
+  if (parsedUrl.protocol === "file:") {
     try {
-      return await readFile(fileURLToPath(parsedUrl), 'utf8');
+      return await readFile(fileURLToPath(parsedUrl), "utf8");
     } catch {
-      throw new CliError('Could not reach registry. Check your connection.');
+      throw new CliError("Could not reach registry. Check your connection.");
     }
   }
 
@@ -60,25 +60,25 @@ async function fetchRaw(url: string, accept?: string): Promise<string> {
   try {
     response = await fetch(url, {
       headers: {
-        'user-agent': 'openci-cli',
+        "user-agent": "openci-cli",
         ...(accept ? { Accept: accept } : {}),
         ...getAuthHeaders(parsedUrl),
       },
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new CliError('Could not reach registry. Check your connection.');
+    throw new CliError("Could not reach registry. Check your connection.");
   }
 
   if (!response.ok) {
-    throw new CliError('Could not reach registry. Check your connection.');
+    throw new CliError("Could not reach registry. Check your connection.");
   }
 
   return response.text();
 }
 
 export async function fetchJson<T>(url: string, schema: ZodType<T>): Promise<T> {
-  const raw = await fetchRaw(url, 'application/json');
+  const raw = await fetchRaw(url, "application/json");
 
   let parsed: unknown;
   try {
