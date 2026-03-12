@@ -1,6 +1,6 @@
 export const OFFICIAL_REGISTRY = {
-  owner: "openci",
-  repo: "workflows",
+  owner: "minghinmatthewlam",
+  repo: "openci",
   branch: "main",
 } as const;
 

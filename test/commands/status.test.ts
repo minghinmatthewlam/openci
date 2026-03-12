@@ -24,6 +24,8 @@ describe("status command", () => {
       name: "pr-review",
       source: "official",
       provider: "claude",
+      runtime: "action",
+      runner: "github-ubuntu",
       smart: true,
       workflowVersion: "1.0.0",
       targetPath: join(repo, ".github", "workflows", "pr-review.yml"),
@@ -38,10 +40,10 @@ describe("status command", () => {
 
     expect(result.error).toBeUndefined();
     expect(result.stdout).toContain(
-      "pr-review\tclaude\tofficial\t1.0.0\t.github/workflows/pr-review.yml\tinstalled",
+      "pr-review\tclaude\taction\tgithub-ubuntu\tofficial\t1.0.0\t.github/workflows/pr-review.yml\tinstalled",
     );
     expect(result.stdout).toContain(
-      "extra\tunknown\tunknown\tunknown\t.github/workflows/extra.yml\tuntracked-file",
+      "extra\tunknown\tunknown\tunknown\tunknown\tunknown\t.github/workflows/extra.yml\tuntracked-file",
     );
   });
 
@@ -61,7 +63,7 @@ describe("status command", () => {
     const result = await runCli(["status"], { cwd: repo });
 
     expect(result.stdout).toContain(
-      "pr-review\tunknown\tunknown\tunknown\t.github/workflows/pr-review.yml\tuntracked-file",
+      "pr-review\tunknown\tunknown\tunknown\tunknown\tunknown\t.github/workflows/pr-review.yml\tuntracked-file",
     );
   });
 });

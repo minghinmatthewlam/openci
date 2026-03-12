@@ -12,5 +12,5 @@ Adds a security-focused AI review pass to pull requests.
 ## Install
 
 ```bash
-npx openci add security-scan --provider claude
+npx openci add minghinmatthewlam/openci --workflow security-scan --provider glm --runtime script --runner self-hosted-a8
 ```

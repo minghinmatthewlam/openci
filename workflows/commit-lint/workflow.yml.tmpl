@@ -1,0 +1,12 @@
+name: Commit Lint
+
+on:
+  {{TRIGGER_EVENT}}:
+    branches: [{{TARGET_BRANCH}}]
+
+jobs:
+  review:
+    runs-on: {{RUNS_ON}}
+    steps:
+      - uses: actions/checkout@v4
+      {{PROVIDER_STEP}}

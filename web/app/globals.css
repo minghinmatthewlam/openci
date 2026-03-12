@@ -1,6 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 :root {
   color-scheme: dark;
-  --background: #040404;
+  --background: #0a0a0a;
   --foreground: #f3f3f3;
   --muted: #8f8f8f;
   --dim: #6a6a6a;
@@ -18,7 +36,7 @@ body {
   min-height: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans), sans-serif;
 }
 
 a {
@@ -33,14 +51,18 @@ input {
 
 code,
 pre {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: var(--font-mono), monospace;
 }
+
+/* ── Layout ── */
 
 .page-shell {
   max-width: 1152px;
   margin: 0 auto;
   padding: 0 32px 72px;
 }
+
+/* ── Header ── */
 
 .site-header {
   position: sticky;
@@ -58,6 +80,7 @@ pre {
   height: 56px;
   max-width: 1152px;
   margin: 0 auto;
+  padding: 0 32px;
   font-size: 14px;
 }
 
@@ -67,70 +90,22 @@ pre {
   gap: 8px;
 }
 
-.brand-mark {
-  width: 14px;
-  height: 14px;
-  background: linear-gradient(135deg, #f3f3f3 0%, #7c7c7c 100%);
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-}
-
-.brand-slash,
 .top-nav a {
   color: var(--dim);
 }
 
 .top-nav {
   display: flex;
+  align-items: center;
   gap: 18px;
 }
 
-.hero-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-  gap: 38px;
-  margin-bottom: 44px;
-  align-items: start;
+.top-nav a:hover {
+  color: var(--foreground);
+  transition: color 0.15s;
 }
 
-.hero-wordmark {
-  margin: 0;
-  color: #ececec;
-  font-size: clamp(72px, 13vw, 150px);
-  line-height: 0.9;
-  font-weight: 700;
-  letter-spacing: -0.1em;
-  text-shadow:
-    6px 0 0 rgba(255, 255, 255, 0.16),
-    12px 0 0 rgba(255, 255, 255, 0.08);
-  white-space: nowrap;
-}
-
-.eyebrow,
-.section-label,
-.content-label,
-.sidebar-label {
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.hero-copy p {
-  margin: 0;
-  color: #a5a5a5;
-  font-size: 28px;
-  line-height: 1.25;
-  letter-spacing: -0.03em;
-}
-
-.top-panels {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 36px;
-  margin-bottom: 48px;
-}
+/* ── Command box (shared: homepage, docs, detail) ── */
 
 .command-box {
   width: 100%;
@@ -142,11 +117,10 @@ pre {
   background: var(--panel);
   color: #d7d7d7;
   padding: 14px 18px;
-  margin-top: 14px;
   border-radius: 6px;
   cursor: pointer;
   text-align: left;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 14px;
 }
 
@@ -168,27 +142,27 @@ pre {
   letter-spacing: 0.08em;
 }
 
-.agent-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 14px;
+/* ── Section labels (shared) ── */
+
+.section-label,
+.content-label,
+.sidebar-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.agent-pill {
-  border: 1px solid var(--border);
-  color: #d4d4d4;
-  padding: 10px 12px;
-  border-radius: 999px;
-  font-size: 13px;
-}
+/* ── Leaderboard / workflow list ── */
 
 .leaderboard-section {
   margin-top: 16px;
 }
 
 .leaderboard-section > .section-label {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0;
@@ -241,7 +215,7 @@ pre {
 
 .leaderboard-header {
   color: var(--dim);
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -277,6 +251,8 @@ pre {
 .empty-state {
   color: var(--muted);
 }
+
+/* ── Docs page ── */
 
 .docs-layout {
   display: grid;
@@ -344,6 +320,8 @@ pre {
   overflow-wrap: anywhere;
 }
 
+/* ── Detail page ── */
+
 .detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 260px;
@@ -406,16 +384,12 @@ pre {
   overflow-wrap: anywhere;
 }
 
+/* ── Responsive ── */
+
 @media (max-width: 960px) {
-  .hero-grid,
-  .top-panels,
   .docs-layout,
   .detail-layout {
     grid-template-columns: 1fr;
-  }
-
-  .hero-grid {
-    gap: 18px;
   }
 
   .detail-sidebar {
@@ -432,23 +406,15 @@ pre {
   }
 
   .header-inner {
-    padding: 0;
+    padding: 0 16px;
   }
 
   .site-header {
     margin-bottom: 28px;
   }
 
-  .hero-copy p {
-    font-size: 22px;
-  }
-
   .docs-intro {
     font-size: 16px;
-  }
-
-  .hero-wordmark {
-    font-size: 56px;
   }
 
   .docs-content h1,

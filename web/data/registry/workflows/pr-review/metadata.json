@@ -6,6 +6,10 @@
   "author": "openci",
   "tags": ["code-review", "pull-request", "ai-agent", "automation"],
   "provider": ["claude", "codex"],
+  "runtimes": ["action", "script"],
+  "runners": ["github-ubuntu", "self-hosted-a8"],
+  "defaultRuntime": "action",
+  "defaultRunner": "github-ubuntu",
   "smart": true,
   "requiredSecrets": {
     "claude": ["ANTHROPIC_API_KEY"],
@@ -14,6 +18,6 @@
   "triggers": ["pull_request"],
   "stacks": ["any"],
   "minGitHubActionsVersion": null,
-  "repository": "openci/workflows",
+  "repository": "minghinmatthewlam/openci",
   "publishedAt": "2026-03-09"
 }

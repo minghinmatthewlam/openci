@@ -16,7 +16,9 @@ export function registerListCommand(program: Command): void {
       }
 
       for (const workflow of workflows) {
-        process.stdout.write(`${workflow.name}\t${workflow.provider}\t${workflow.source}\n`);
+        process.stdout.write(
+          `${workflow.name}\t${workflow.provider ?? "none"}\t${workflow.runtime ?? "none"}\t${workflow.runner ?? "none"}\t${workflow.source}\n`,
+        );
       }
 
       process.stdout.write(`\n${workflows.length} workflows installed.\n`);

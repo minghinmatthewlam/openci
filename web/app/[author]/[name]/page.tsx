@@ -37,12 +37,7 @@ export default async function WorkflowDetailPage({
             </div>
 
             <h1 className="detail-title">{bundle.metadata.name}</h1>
-            <CopyCommand
-              value={buildInstallCommand(
-                bundle.metadata.name,
-                bundle.metadata.provider[0] ?? "claude",
-              )}
-            />
+            <CopyCommand value={buildInstallCommand(bundle.metadata)} />
 
             <div className="content-card">
               <div className="content-label">
@@ -62,7 +57,21 @@ export default async function WorkflowDetailPage({
           <aside className="detail-sidebar">
             <div className="sidebar-block">
               <p className="sidebar-label">Providers</p>
-              <p>{bundle.metadata.provider.join(", ")}</p>
+              <p>
+                {bundle.metadata.provider.length > 0 ? bundle.metadata.provider.join(", ") : "none"}
+              </p>
+            </div>
+            <div className="sidebar-block">
+              <p className="sidebar-label">Runtimes</p>
+              <p>
+                {bundle.metadata.runtimes.length > 0 ? bundle.metadata.runtimes.join(", ") : "none"}
+              </p>
+            </div>
+            <div className="sidebar-block">
+              <p className="sidebar-label">Runners</p>
+              <p>
+                {bundle.metadata.runners.length > 0 ? bundle.metadata.runners.join(", ") : "none"}
+              </p>
             </div>
             <div className="sidebar-block">
               <p className="sidebar-label">Repository</p>
@@ -74,13 +83,17 @@ export default async function WorkflowDetailPage({
             </div>
             <div className="sidebar-block">
               <p className="sidebar-label">Required secrets</p>
-              <ul>
-                {Object.entries(bundle.metadata.requiredSecrets).map(([provider, secrets]) => (
-                  <li key={provider}>
-                    <strong>{provider}</strong>: {secrets.join(", ")}
-                  </li>
-                ))}
-              </ul>
+              {Object.keys(bundle.metadata.requiredSecrets).length === 0 ? (
+                <p>none</p>
+              ) : (
+                <ul>
+                  {Object.entries(bundle.metadata.requiredSecrets).map(([provider, secrets]) => (
+                    <li key={provider}>
+                      <strong>{provider}</strong>: {secrets.join(", ")}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className="sidebar-block">
               <p className="sidebar-label">First seen</p>

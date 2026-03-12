@@ -5,15 +5,18 @@
   "version": "1.0.0",
   "author": "openci",
   "tags": ["security", "pull-request", "review"],
-  "provider": ["claude", "codex"],
+  "provider": ["glm"],
+  "runtimes": ["script"],
+  "runners": ["self-hosted-a8"],
+  "defaultRuntime": "script",
+  "defaultRunner": "self-hosted-a8",
   "smart": true,
   "requiredSecrets": {
-    "claude": ["ANTHROPIC_API_KEY"],
-    "codex": ["OPENAI_API_KEY"]
+    "glm": ["GLM_API_KEY"]
   },
   "triggers": ["pull_request"],
   "stacks": ["any"],
   "minGitHubActionsVersion": null,
-  "repository": "openci/workflows",
+  "repository": "minghinmatthewlam/openci",
   "publishedAt": "2026-03-09"
 }

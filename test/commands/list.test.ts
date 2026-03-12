@@ -7,7 +7,7 @@ import { runCli } from "../helpers/cli.js";
 import { upsertInstallationMetadata } from "../../src/manifest/store.js";
 
 describe("list command", () => {
-  it("prints locally installed workflows with provider and source", async () => {
+  it("prints locally installed workflows with provider, runtime, runner, and source", async () => {
     const repo = await mkdtemp(join(tmpdir(), "openci-list-"));
     execFileSync("git", ["init", "--initial-branch=main"], { cwd: repo, stdio: "ignore" });
     execFileSync("git", ["config", "user.name", "OpenCI Test"], { cwd: repo, stdio: "ignore" });
@@ -21,6 +21,8 @@ describe("list command", () => {
       name: "pr-review",
       source: "minghinmatthewlam/openci",
       provider: "claude",
+      runtime: "action",
+      runner: "github-ubuntu",
       smart: true,
       workflowVersion: "1.0.0",
       targetPath: join(repo, ".github", "workflows", "pr-review.yml"),
@@ -30,7 +32,9 @@ describe("list command", () => {
     const result = await runCli(["list"], { cwd: repo });
 
     expect(result.error).toBeUndefined();
-    expect(result.stdout).toContain("pr-review\tclaude\tminghinmatthewlam/openci");
+    expect(result.stdout).toContain(
+      "pr-review\tclaude\taction\tgithub-ubuntu\tminghinmatthewlam/openci",
+    );
     expect(result.stdout).toContain("1 workflows installed.");
   });
 });

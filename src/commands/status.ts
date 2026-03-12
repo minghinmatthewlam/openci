@@ -22,12 +22,14 @@ export function registerStatusCommand(program: Command): void {
         workflowFiles = [];
       }
 
-      process.stdout.write("name\tprovider\tsource\tversion\tfile\tstatus\n");
+      process.stdout.write("name\tprovider\truntime\trunner\tsource\tversion\tfile\tstatus\n");
 
       if (installations.length === 0) {
         for (const file of workflowFiles) {
           const name = file.replace(/^\.github\/workflows\//, "").replace(/\.ya?ml$/, "");
-          process.stdout.write(`${name}\tunknown\tunknown\tunknown\t${file}\tuntracked-file\n`);
+          process.stdout.write(
+            `${name}\tunknown\tunknown\tunknown\tunknown\tunknown\t${file}\tuntracked-file\n`,
+          );
         }
         return;
       }
@@ -38,14 +40,16 @@ export function registerStatusCommand(program: Command): void {
           ? "installed"
           : "missing-file";
         process.stdout.write(
-          `${installation.name}\t${installation.provider}\t${installation.source}\t${installation.workflowVersion}\t${installation.targetPath}\t${status}\n`,
+          `${installation.name}\t${installation.provider ?? "none"}\t${installation.runtime ?? "none"}\t${installation.runner ?? "none"}\t${installation.source}\t${installation.workflowVersion}\t${installation.targetPath}\t${status}\n`,
         );
       }
 
       for (const file of workflowFiles) {
         if (!trackedFiles.has(file)) {
           const name = file.replace(/^\.github\/workflows\//, "").replace(/\.ya?ml$/, "");
-          process.stdout.write(`${name}\tunknown\tunknown\tunknown\t${file}\tuntracked-file\n`);
+          process.stdout.write(
+            `${name}\tunknown\tunknown\tunknown\tunknown\tunknown\t${file}\tuntracked-file\n`,
+          );
         }
       }
     });

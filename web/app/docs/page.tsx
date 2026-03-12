@@ -37,12 +37,22 @@ export default function DocsPage(): React.ReactNode {
 
             <section id="cli">
               <h2>Getting started</h2>
-              <p>Install a workflow from a source:</p>
-              <CopyCommand value="$ npx openci add ./workflows --workflow pr-review" />
+              <p>Install an official workflow from the public source:</p>
+              <CopyCommand value="npx openci add minghinmatthewlam/openci --workflow pr-review --provider claude" />
               <p>
                 This generates a workflow file in <code>.github/workflows/</code> and records
                 sidecar metadata for later updates.
               </p>
+            </section>
+
+            <section>
+              <h2>Providers, runtimes, and runners</h2>
+              <p>
+                OpenCI separates the AI provider from the runtime and runner. A workflow can target
+                Claude, Codex, GLM, or no provider at all, then choose an action runtime or a script
+                runtime, and finally render onto a GitHub-hosted or self-hosted runner.
+              </p>
+              <CopyCommand value="npx openci add minghinmatthewlam/openci --workflow security-scan --provider glm --runtime script --runner self-hosted-a8" />
             </section>
 
             <section>

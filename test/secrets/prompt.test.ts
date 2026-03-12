@@ -10,6 +10,10 @@ const metadata: WorkflowMetadata = {
   author: "openci",
   tags: ["code-review"],
   provider: ["claude"],
+  runtimes: ["action"],
+  runners: ["github-ubuntu"],
+  defaultRuntime: "action",
+  defaultRunner: "github-ubuntu",
   smart: true,
   requiredSecrets: {
     claude: ["ANTHROPIC_API_KEY"],

@@ -8,11 +8,16 @@ export function buildSmartScaffold(name: string): Record<string, string> {
         version: "1.0.0",
         author: "TODO",
         tags: ["TODO"],
-        provider: ["claude", "codex"],
+        provider: ["claude", "codex", "glm"],
+        runtimes: ["action", "script"],
+        runners: ["github-ubuntu", "self-hosted-a8"],
+        defaultRuntime: "action",
+        defaultRunner: "github-ubuntu",
         smart: true,
         requiredSecrets: {
           claude: ["ANTHROPIC_API_KEY"],
           codex: ["OPENAI_API_KEY"],
+          glm: ["GLM_API_KEY"],
         },
         triggers: ["pull_request"],
         stacks: ["any"],
@@ -22,6 +27,11 @@ export function buildSmartScaffold(name: string): Record<string, string> {
     ),
     "openci.config.json": JSON.stringify(
       {
+        defaults: {
+          provider: "claude",
+          runtime: "action",
+          runner: "github-ubuntu",
+        },
         detect: {
           packageManager: true,
           nodeVersion: true,
@@ -29,18 +39,29 @@ export function buildSmartScaffold(name: string): Record<string, string> {
           validationCommand: true,
           framework: true,
         },
-        providers: {
+        providerModes: {
           claude: {
-            AGENT_ACTION: "anthropics/claude-code-action@v1",
-            AGENT_AUTH_KEY: "anthropic_api_key",
-            AGENT_SECRET_NAME: "ANTHROPIC_API_KEY",
-            AGENT_EXTRA_ARGS: "model: claude-sonnet-4-6",
+            runtime: "action",
           },
           codex: {
-            AGENT_ACTION: "openai/codex-action@v1",
-            AGENT_AUTH_KEY: "openai-api-key",
-            AGENT_SECRET_NAME: "OPENAI_API_KEY",
-            AGENT_EXTRA_ARGS: "model: codex-mini",
+            runtime: "action",
+          },
+          glm: {
+            runtime: "script",
+            script: {
+              env: {
+                GLM_API_KEY: "${{ secrets.GLM_API_KEY }}",
+              },
+              run: "node scripts/run-provider.js glm",
+            },
+          },
+        },
+        runners: {
+          "github-ubuntu": {
+            runsOn: "ubuntu-latest",
+          },
+          "self-hosted-a8": {
+            runsOn: ["self-hosted", "linux", "x64", "a8"],
           },
         },
         substitutions: {
@@ -87,28 +108,24 @@ export function buildSmartScaffold(name: string): Record<string, string> {
       "",
       "jobs:",
       "  task:",
-      "    runs-on: ubuntu-latest",
+      "    runs-on: {{RUNS_ON}}",
       "    steps:",
       "      - uses: actions/checkout@v4",
       "      - name: Install",
       "        run: {{INSTALL_CMD}}",
       "      - name: Validate",
       "        run: {{VALIDATION_CMD}}",
-      "      - uses: {{AGENT_ACTION}}",
-      "        with:",
-      "          {{AGENT_AUTH_KEY}}: ${{ secrets.{{AGENT_SECRET_NAME}} }}",
-      "          {{AGENT_EXTRA_ARGS}}",
-      "          prompt: TODO",
+      "      {{PROVIDER_STEP}}",
     ].join("\n"),
     "README.md": [
       `# ${name}`,
       "",
-      "TODO: describe what this workflow does.",
+      "TODO: describe what this smart workflow does.",
       "",
       "## Install",
       "",
       "```bash",
-      `npx openci add ${name}`,
+      `npx openci add owner/repo --workflow ${name} --provider claude`,
       "```",
     ].join("\n"),
   };

@@ -11,5 +11,5 @@ Checks commit messages and pull request descriptions for clarity, consistency, a
 ## Install
 
 ```bash
-npx openci add commit-lint
+npx openci add minghinmatthewlam/openci --workflow commit-lint --provider claude
 ```

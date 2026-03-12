@@ -18,5 +18,5 @@ Adds an AI-powered review workflow to every pull request.
 ## Install
 
 ```bash
-npx openci add pr-review --provider claude
+npx openci add minghinmatthewlam/openci --workflow pr-review --provider claude
 ```

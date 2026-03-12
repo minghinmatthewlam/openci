@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { CliError } from "../core/errors.js";
 import { detectRepo } from "../detection/index.js";
 import { listInstallationMetadata, upsertInstallationMetadata } from "../manifest/store.js";
 import { resolveSupportedProvider } from "../provider/resolve.js";
@@ -29,21 +30,28 @@ export function registerUpdateCommand(program: Command): void {
           : installations;
 
       if (selected.length === 0) {
-        process.stdout.write("0 matching workflows installed.\n");
-        return;
+        throw new CliError(`No installed workflows matched: ${workflowNames.join(", ")}`);
       }
 
+      const failures: Array<{ name: string; message: string }> = [];
+
       for (const installation of selected) {
-        const resolved = await resolveWorkflowBundle({
-          cwd: repoRoot,
-          sourceArg: installation.source,
-          workflow: installation.name,
-        });
+        let resolved: Awaited<ReturnType<typeof resolveWorkflowBundle>> | undefined;
 
         try {
+          resolved = await resolveWorkflowBundle({
+            cwd: repoRoot,
+            sourceArg: installation.source,
+            workflow: installation.name,
+          });
+
           const { bundle } = resolved;
           const targetPath = join(repoRoot, installation.targetPath);
           let selectedProvider = resolveSupportedProvider(bundle.metadata, installation.provider);
+          let selectedRuntime =
+            installation.runtime ?? bundle.metadata.defaultRuntime ?? bundle.metadata.runtimes[0];
+          let selectedRunner =
+            installation.runner ?? bundle.metadata.defaultRunner ?? bundle.metadata.runners[0];
           let output = bundle.workflow;
 
           if (bundle.metadata.smart) {
@@ -60,6 +68,8 @@ export function registerUpdateCommand(program: Command): void {
               detected,
               flags: {
                 provider: installation.provider,
+                runtime: installation.runtime,
+                runner: installation.runner,
                 model: installation.model,
                 trigger: installation.trigger,
                 branch: installation.branch,
@@ -67,6 +77,8 @@ export function registerUpdateCommand(program: Command): void {
             });
 
             selectedProvider = resolvedTemplate.provider;
+            selectedRuntime = resolvedTemplate.runtime;
+            selectedRunner = resolvedTemplate.runner;
             output = substituteTemplate(bundle.workflowTemplate, resolvedTemplate.context);
           }
 
@@ -79,15 +91,27 @@ export function registerUpdateCommand(program: Command): void {
           await upsertInstallationMetadata(repoRoot, {
             ...installation,
             provider: selectedProvider,
+            runtime: selectedRuntime,
+            runner: selectedRunner,
             workflowVersion: bundle.metadata.version,
             targetPath,
             installedAt: new Date().toISOString(),
           });
 
           process.stdout.write(`${bundle.metadata.name}\tupdated\n`);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          failures.push({ name: installation.name, message });
+          process.stderr.write(`${installation.name}\tfailed\t${message}\n`);
         } finally {
-          await resolved.cleanup?.();
+          await resolved?.cleanup?.();
         }
+      }
+
+      if (failures.length > 0) {
+        throw new CliError(
+          `Failed to update ${failures.length} workflow(s): ${failures.map((failure) => failure.name).join(", ")}`,
+        );
       }
     });
 }

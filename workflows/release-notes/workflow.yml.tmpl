@@ -1,0 +1,13 @@
+name: Release Notes
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  notes:
+    runs-on: {{RUNS_ON}}
+    steps:
+      - uses: actions/checkout@v4
+      {{PROVIDER_STEP}}

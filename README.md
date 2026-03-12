@@ -20,7 +20,7 @@ GitHub Actions workflows for AI agents are useful, but they are also annoying to
 
 OpenCI gives you:
 - a consistent install flow for official/public, private, and local workflow sources
-- smart workflow rendering for common substitutions like provider, package manager, validation command, and branch
+- smart workflow rendering for common substitutions like provider, runtime, runner, package manager, validation command, and branch
 - local management metadata so installed workflows can be listed, inspected, and updated later
 
 ## Quick Start
@@ -89,6 +89,7 @@ They are best when:
 - the stack is fixed
 - the workflow is intentionally opinionated
 - you do not need auto-detection
+- the workflow may not need any AI provider at all, such as routing or review-gating flows
 
 Typical files:
 
@@ -108,7 +109,7 @@ Smart workflows use:
 OpenCI detects local repo characteristics and renders the final YAML before writing it to `.github/workflows/`.
 
 Typical smart substitutions include:
-- provider action and secret
+- provider, runtime, and runner
 - package manager install command
 - validation command
 - target branch
@@ -180,7 +181,7 @@ OpenCI stores per-workflow sidecar metadata next to installed workflows:
 .github/workflows/.openci/<workflow>.json
 ```
 
-That metadata records the workflow source, provider, version, and install time so local management commands can work reliably.
+That metadata records the workflow source, provider, runtime, runner, version, and install time so local management commands can work reliably.
 
 ### `list`
 
@@ -235,7 +236,7 @@ Scaffold a new workflow:
 npx openci create my-workflow --smart --yes
 ```
 
-`create` generates the starter files for a new workflow in `workflows/<name>/`. By default it creates the simplest copied-as-is workflow. Add `--smart` if you need templating and local detection.
+`create` generates the starter files for a new workflow in `workflows/<name>/`. By default it creates the simplest copied-as-is workflow. Add `--smart` if you need templating, runtime/provider configuration, and local detection.
 
 `init` exists as a stub right now and is not implemented yet.
 
@@ -244,7 +245,9 @@ npx openci create my-workflow --smart --yes
 ### `add`
 
 - `--workflow <name>`: select a workflow from a multi-workflow source
-- `--provider <name>`: choose provider (`claude`, `codex`)
+- `--provider <name>`: choose a supported provider such as `claude`, `codex`, `glm`, or `custom`
+- `--runtime <name>`: override the provider runtime (`action`, `script`)
+- `--runner <name>`: override the workflow runner
 - `--model <name>`: override the default model
 - `--trigger <event>`: override smart workflow trigger placeholder
 - `--branch <name>`: override smart workflow branch placeholder
@@ -270,7 +273,13 @@ In `--yes` mode:
 Example:
 
 ```bash
-npx openci add ./workflows --workflow pr-review --provider claude --yes
+npx openci add minghinmatthewlam/openci --workflow pr-review --provider claude --yes
+```
+
+Script-runtime and self-hosted workflows can override runtime and runner directly:
+
+```bash
+npx openci add minghinmatthewlam/openci --workflow security-scan --provider glm --runtime script --runner self-hosted-a8 --yes
 ```
 
 ## Official Workflow Directory
@@ -343,6 +352,7 @@ Contributor guidance is pinned to [`24.14.0`](/Users/matthewlam/dev/openci/.nvmr
 
 ```bash
 npm install
+npm run lint:actions
 npm run lint
 npm run format:check
 npm run typecheck
@@ -367,6 +377,7 @@ The npm package is published as `openci` and exposes the CLI through the `bin` e
 Before publishing:
 
 ```bash
+npm run lint:actions
 npm run lint
 npm run format:check
 npm run typecheck

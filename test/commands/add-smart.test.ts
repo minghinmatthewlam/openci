@@ -48,7 +48,8 @@ describe("add smart workflow", () => {
     expect(result.stderr).toContain("Required secret: ANTHROPIC_API_KEY");
     expect(written).toContain("pnpm install --frozen-lockfile");
     expect(written).toContain("model: claude-sonnet-4-6");
-    expect(written).toContain("Review a Next.js project using pnpm.");
+    expect(written).toContain("runs-on: ubuntu-latest");
+    expect(written).toContain("anthropics/claude-code-action@v1");
   });
 
   it("infers the provider from --model when --provider is omitted", async () => {
@@ -64,5 +65,38 @@ describe("add smart workflow", () => {
     expect(result.error).toBeUndefined();
     expect(written).toContain("openai/codex-action@v1");
     expect(written).toContain("model: codex-mini");
+  });
+
+  it("renders a script runtime workflow on a self-hosted runner", async () => {
+    const result = await runCli(
+      [
+        "add",
+        sourceRoot,
+        "--workflow",
+        "security-scan",
+        "--provider",
+        "glm",
+        "--runtime",
+        "script",
+        "--runner",
+        "self-hosted-a8",
+        "--yes",
+      ],
+      { cwd: repo },
+    );
+    const workflowPath = join(repo, ".github", "workflows", "security-scan.yml");
+    const sidecarPath = join(repo, ".github", "workflows", ".openci", "security-scan.json");
+    const written = await readFile(workflowPath, "utf8");
+    const sidecar = JSON.parse(await readFile(sidecarPath, "utf8")) as {
+      runtime?: string;
+      runner?: string;
+    };
+
+    expect(result.error).toBeUndefined();
+    expect(written).toContain("runs-on: [self-hosted, linux, x64, a8]");
+    expect(written).toContain("node scripts/run-provider.js glm");
+    expect(written).toContain("GLM_API_KEY");
+    expect(sidecar.runtime).toBe("script");
+    expect(sidecar.runner).toBe("self-hosted-a8");
   });
 });

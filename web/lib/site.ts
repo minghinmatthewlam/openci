@@ -1,36 +1,29 @@
 import type { RegistryEntry } from "./registry";
 
-export const featuredAgents = [
-  "Claude",
-  "Codex",
-  "Cursor",
-  "GitHub Copilot",
-  "OpenCode",
-  "Windsurf",
-];
-
 export const docsSections = [
   { label: "Overview", href: "/docs" },
   { label: "CLI", href: "/docs#cli" },
   { label: "FAQ", href: "/docs#faq" },
 ];
 
-export function formatInstallCount(value: number): string {
-  if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+const OFFICIAL_SOURCE = "minghinmatthewlam/openci";
+
+export function buildInstallCommand(workflow: RegistryEntry): string {
+  const source = workflow.repository ?? OFFICIAL_SOURCE;
+  const parts = ["npx", "openci", "add", source, "--workflow", workflow.name];
+
+  if (workflow.provider.length > 0) {
+    parts.push("--provider", workflow.provider[0]);
+  }
+  if (workflow.defaultRuntime && workflow.defaultRuntime !== "action") {
+    parts.push("--runtime", workflow.defaultRuntime);
+  }
+  if (
+    workflow.defaultRunner &&
+    !["github-ubuntu", "ubuntu-latest"].includes(workflow.defaultRunner)
+  ) {
+    parts.push("--runner", workflow.defaultRunner);
   }
 
-  if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
-  }
-
-  return String(value);
-}
-
-export function buildWorkflowHref(workflow: RegistryEntry): string {
-  return `/${workflow.author ?? "openci"}/${workflow.name}`;
-}
-
-export function buildInstallCommand(workflowName: string, provider = "claude"): string {
-  return `$ npx openci add ${workflowName} --provider ${provider}`;
+  return parts.join(" ");
 }

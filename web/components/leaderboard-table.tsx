@@ -29,9 +29,14 @@ export function LeaderboardTable({
         <Link key={item.workflow.name} href={item.href} className="leaderboard-row">
           <span className="row-copy">
             <strong>{item.workflow.name}</strong>
-            <span className="row-meta">{item.workflow.description}</span>
+            <span className="row-meta">
+              {item.workflow.description}
+              {(item.workflow.runtimes.length > 0 || item.workflow.runners.length > 0) && (
+                <> · {[...item.workflow.runtimes, ...item.workflow.runners].join(" · ")}</>
+              )}
+            </span>
           </span>
-          <span>{item.providers.join(", ")}</span>
+          <span>{item.providers.length > 0 ? item.providers.join(", ") : "none"}</span>
         </Link>
       ))}
     </div>

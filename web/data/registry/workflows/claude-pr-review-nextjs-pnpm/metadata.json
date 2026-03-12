@@ -6,6 +6,10 @@
   "author": "community-contributor",
   "tags": ["code-review", "pull-request", "nextjs", "pnpm"],
   "provider": ["claude"],
+  "runtimes": ["action"],
+  "runners": ["github-ubuntu"],
+  "defaultRuntime": "action",
+  "defaultRunner": "github-ubuntu",
   "smart": false,
   "requiredSecrets": {
     "claude": ["ANTHROPIC_API_KEY"]

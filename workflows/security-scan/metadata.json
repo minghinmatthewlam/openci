@@ -1,0 +1,20 @@
+{
+  "name": "security-scan",
+  "displayName": "Security Scan",
+  "description": "AI agent scans pull requests for security vulnerabilities.",
+  "version": "1.0.0",
+  "author": "openci",
+  "tags": ["security", "pull-request"],
+  "provider": ["glm"],
+  "runtimes": ["script"],
+  "runners": ["self-hosted-a8"],
+  "defaultRuntime": "script",
+  "defaultRunner": "self-hosted-a8",
+  "smart": true,
+  "requiredSecrets": {
+    "glm": ["GLM_API_KEY"]
+  },
+  "triggers": ["pull_request"],
+  "stacks": ["any"],
+  "minGitHubActionsVersion": null
+}

@@ -40,6 +40,10 @@ describe("add workflow", () => {
         sourceRoot,
         "--workflow",
         "claude-pr-review-nextjs-pnpm",
+        "--runtime",
+        "script",
+        "--runner",
+        "self-hosted-a8",
         "--model",
         "claude-opus-4-6",
         "--trigger",
@@ -57,6 +61,12 @@ describe("add workflow", () => {
     expect(result.error).toBeUndefined();
     expect(await realpath(result.stdout.trim())).toBe(await realpath(workflowPath));
     expect(result.stderr).toContain(
+      "Ignoring --runtime for copied-as-is workflow 'claude-pr-review-nextjs-pnpm'.",
+    );
+    expect(result.stderr).toContain(
+      "Ignoring --runner for copied-as-is workflow 'claude-pr-review-nextjs-pnpm'.",
+    );
+    expect(result.stderr).toContain(
       "Ignoring --model for copied-as-is workflow 'claude-pr-review-nextjs-pnpm'.",
     );
     expect(result.stderr).toContain(
@@ -67,5 +77,27 @@ describe("add workflow", () => {
     );
     expect(written).toContain("pnpm install --frozen-lockfile");
     expect(written).toContain("model: claude-sonnet-4-6");
+  });
+
+  it("supports providerless workflows", async () => {
+    const result = await runCli(["add", sourceRoot, "--workflow", "review-gate", "--yes"], {
+      cwd: repo,
+    });
+    const workflowPath = join(repo, ".github", "workflows", "review-gate.yml");
+    const sidecarPath = join(repo, ".github", "workflows", ".openci", "review-gate.json");
+    const written = await readFile(workflowPath, "utf8");
+    const sidecar = JSON.parse(await readFile(sidecarPath, "utf8")) as {
+      provider?: string;
+      runtime?: string;
+      runner?: string;
+    };
+
+    expect(result.error).toBeUndefined();
+    expect(await realpath(result.stdout.trim())).toBe(await realpath(workflowPath));
+    expect(result.stderr).not.toContain("Required secret:");
+    expect(written).toContain("label or gate PR here");
+    expect(sidecar.provider).toBeUndefined();
+    expect(sidecar.runtime).toBeUndefined();
+    expect(sidecar.runner).toBe("github-ubuntu");
   });
 });

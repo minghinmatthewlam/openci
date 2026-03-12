@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RuntimeSchema } from "../registry/schemas.js";
 
 export const DetectionKeySchema = z.enum([
   "packageManager",
@@ -25,7 +26,44 @@ export const OpenCiConfigSchema = z.object({
       framework: z.boolean().optional(),
     })
     .default({}),
-  providers: z.record(z.string(), z.record(z.string(), z.string())),
+  defaults: z
+    .object({
+      provider: z.string().optional(),
+      runner: z.string().optional(),
+      runtime: RuntimeSchema.optional(),
+    })
+    .default({}),
+  providerModes: z
+    .record(
+      z.string(),
+      z.object({
+        runtime: RuntimeSchema.optional(),
+        runner: z.string().optional(),
+        action: z
+          .object({
+            action: z.string(),
+            authKey: z.string().optional(),
+            secretName: z.string().optional(),
+            extraArgs: z.string().optional(),
+          })
+          .optional(),
+        script: z
+          .object({
+            env: z.record(z.string(), z.string()).optional(),
+            run: z.string(),
+          })
+          .optional(),
+      }),
+    )
+    .default({}),
+  runners: z
+    .record(
+      z.string(),
+      z.object({
+        runsOn: z.union([z.string(), z.array(z.string())]),
+      }),
+    )
+    .default({}),
   substitutions: z.record(z.string(), SubstitutionRuleSchema),
 });
 

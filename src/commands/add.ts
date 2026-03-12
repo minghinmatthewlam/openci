@@ -35,6 +35,8 @@ export function registerAddCommand(program: Command): void {
     .action(async (sourceArg: string, options: { workflow?: string }, command: Command) => {
       const globals = command.optsWithGlobals<{
         provider?: string;
+        runtime?: "action" | "script";
+        runner?: string;
         model?: string;
         trigger?: string;
         branch?: string;
@@ -62,6 +64,10 @@ export function registerAddCommand(program: Command): void {
         const targetPath = join(repoRoot, ".github", "workflows", `${bundle.metadata.name}.yml`);
 
         let selectedProvider = resolveSupportedProvider(bundle.metadata, explicitProvider);
+        let selectedRuntime: "action" | "script" | undefined =
+          bundle.metadata.defaultRuntime ?? bundle.metadata.runtimes[0];
+        let selectedRunner: string | undefined =
+          bundle.metadata.defaultRunner ?? bundle.metadata.runners[0];
         let output = bundle.workflow;
 
         if (bundle.metadata.smart) {
@@ -76,6 +82,8 @@ export function registerAddCommand(program: Command): void {
             detected,
             flags: {
               provider: explicitProvider,
+              runtime: globals.runtime,
+              runner: globals.runner,
               model: globals.model,
               trigger: globals.trigger,
               branch: globals.branch,
@@ -83,6 +91,8 @@ export function registerAddCommand(program: Command): void {
           });
 
           selectedProvider = resolved.provider;
+          selectedRuntime = resolved.runtime;
+          selectedRunner = resolved.runner;
           output = substituteTemplate(bundle.workflowTemplate, resolved.context);
 
           if (verbose) {
@@ -90,6 +100,12 @@ export function registerAddCommand(program: Command): void {
             logger.debug(`Resolved context: ${JSON.stringify(resolved.context, null, 2)}`);
           }
         } else {
+          if (hasRawFlag(command, "--runtime")) {
+            logger.warn(`Ignoring --runtime for copied-as-is workflow '${bundle.metadata.name}'.`);
+          }
+          if (hasRawFlag(command, "--runner")) {
+            logger.warn(`Ignoring --runner for copied-as-is workflow '${bundle.metadata.name}'.`);
+          }
           if (hasRawFlag(command, "--model")) {
             logger.warn(`Ignoring --model for copied-as-is workflow '${bundle.metadata.name}'.`);
           }
@@ -126,6 +142,8 @@ export function registerAddCommand(program: Command): void {
             name: bundle.metadata.name,
             source: bundle.sourceLabel,
             provider: selectedProvider,
+            runtime: selectedRuntime,
+            runner: selectedRunner,
             model: globals.model,
             trigger: globals.trigger,
             branch: globals.branch,
@@ -142,14 +160,16 @@ export function registerAddCommand(program: Command): void {
           }
         }
 
-        const ghReady = isGhAvailable() && isGhAuthenticated();
-        for (const instruction of buildSecretInstructions(
-          bundle.metadata,
-          selectedProvider,
-          remoteUrl,
-          ghReady,
-        )) {
-          logger.warn(instruction);
+        if (selectedProvider) {
+          const ghReady = isGhAvailable() && isGhAuthenticated();
+          for (const instruction of buildSecretInstructions(
+            bundle.metadata,
+            selectedProvider,
+            remoteUrl,
+            ghReady,
+          )) {
+            logger.warn(instruction);
+          }
         }
       } finally {
         await resolvedSource.cleanup?.();

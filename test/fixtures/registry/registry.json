@@ -8,6 +8,10 @@
       "description": "Automated code review on pull requests using an AI coding agent.",
       "tags": ["code-review", "pull-request", "ai-agent"],
       "provider": ["claude", "codex"],
+      "runtimes": ["action", "script"],
+      "runners": ["github-ubuntu", "self-hosted-a8"],
+      "defaultRuntime": "action",
+      "defaultRunner": "github-ubuntu",
       "smart": true,
       "stacks": ["any"]
     },
@@ -16,8 +20,24 @@
       "displayName": "Security Scan",
       "description": "AI agent scans pull requests for security vulnerabilities.",
       "tags": ["security", "pull-request"],
-      "provider": ["claude", "codex"],
+      "provider": ["glm"],
+      "runtimes": ["script"],
+      "runners": ["self-hosted-a8"],
+      "defaultRuntime": "script",
+      "defaultRunner": "self-hosted-a8",
       "smart": true,
+      "stacks": ["any"]
+    },
+    {
+      "name": "review-gate",
+      "displayName": "Review Gate",
+      "description": "A providerless workflow that labels or gates pull requests before review.",
+      "tags": ["pull-request", "routing"],
+      "provider": [],
+      "runtimes": [],
+      "runners": ["github-ubuntu"],
+      "defaultRunner": "github-ubuntu",
+      "smart": false,
       "stacks": ["any"]
     },
     {
@@ -26,6 +46,10 @@
       "description": "Static workflow for Claude-powered PR review on Next.js projects using pnpm.",
       "tags": ["code-review", "pull-request", "nextjs", "pnpm"],
       "provider": ["claude"],
+      "runtimes": ["action"],
+      "runners": ["github-ubuntu"],
+      "defaultRuntime": "action",
+      "defaultRunner": "github-ubuntu",
       "smart": false,
       "stacks": ["nextjs"]
     }

@@ -24,7 +24,9 @@ describe("info command", () => {
 
     expect(result.error).toBeUndefined();
     expect(result.stdout).toContain("Pull Request Review");
-    expect(result.stdout).toContain("Type: smart");
+    expect(result.stdout).toContain("Type: smart workflow");
+    expect(result.stdout).toContain("Runtimes: action, script");
+    expect(result.stdout).toContain("Runners: github-ubuntu, self-hosted-a8");
     expect(result.stdout).toContain("claude: ANTHROPIC_API_KEY");
     expect(result.stdout).toContain("# Pull Request Review");
   });

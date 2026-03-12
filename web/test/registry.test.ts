@@ -27,6 +27,7 @@ describe("registry loader", () => {
       "issue-resolver",
       "pr-review",
       "release-notes",
+      "review-gate",
       "security-scan",
     ]);
   });
@@ -36,7 +37,9 @@ describe("registry loader", () => {
 
     expect(bundle?.metadata.displayName).toBe("Pull Request Review");
     expect(bundle?.readme).toContain("Pull Request Review");
-    expect(bundle?.metadata.repository).toBe("openci/workflows");
+    expect(bundle?.metadata.repository).toBe("minghinmatthewlam/openci");
+    expect(bundle?.metadata.runtimes).toEqual(["action", "script"]);
+    expect(bundle?.metadata.runners).toEqual(["github-ubuntu", "self-hosted-a8"]);
   });
 
   it("requires author and name to match for detail lookups", async () => {

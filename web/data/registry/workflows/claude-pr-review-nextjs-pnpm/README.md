@@ -11,5 +11,5 @@ Static workflow tuned for Next.js repositories using pnpm and Claude.
 ## Install
 
 ```bash
-npx openci add claude-pr-review-nextjs-pnpm
+npx openci add minghinmatthewlam/openci --workflow claude-pr-review-nextjs-pnpm --provider claude
 ```

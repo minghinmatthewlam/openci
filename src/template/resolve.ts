@@ -15,6 +15,8 @@ const IMPLICIT_DETECT_BY_PLACEHOLDER: Record<string, DetectionKey> = {
 
 export interface AddFlags {
   provider?: string | undefined;
+  runtime?: "action" | "script" | undefined;
+  runner?: string | undefined;
   model?: string | undefined;
   trigger?: string | undefined;
   branch?: string | undefined;
@@ -25,11 +27,23 @@ export function resolveTemplateContext(params: {
   config: OpenCiConfig;
   detected: DetectionResult;
   flags: AddFlags;
-}): { provider: string; context: Record<string, string> } {
-  const { provider, placeholders: providerPlaceholders } = resolveProviderPlaceholders({
+}): {
+  provider?: string | undefined;
+  runtime?: "action" | "script" | undefined;
+  runner?: string | undefined;
+  context: Record<string, string>;
+} {
+  const {
+    provider,
+    runtime,
+    runner,
+    placeholders: providerPlaceholders,
+  } = resolveProviderPlaceholders({
     metadata: params.metadata,
     config: params.config,
     provider: params.flags.provider,
+    runtime: params.flags.runtime,
+    runner: params.flags.runner,
     model: params.flags.model,
   });
 
@@ -68,7 +82,14 @@ export function resolveTemplateContext(params: {
     );
   }
 
-  context.PROVIDER = provider;
+  if (provider) {
+    context.PROVIDER = provider;
+  }
 
-  return { provider, context };
+  return {
+    context,
+    ...(provider ? { provider } : {}),
+    ...(runtime ? { runtime } : {}),
+    ...(runner ? { runner } : {}),
+  };
 }
