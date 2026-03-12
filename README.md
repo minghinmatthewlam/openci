@@ -149,10 +149,6 @@ npx openci create my-workflow --yes
 npx openci create my-workflow --smart --yes
 ```
 
-### `init`
-
-Planned for a future release.
-
 ## Workflow Types
 
 OpenCI supports two workflow types:

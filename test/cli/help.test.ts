@@ -19,7 +19,7 @@ function collectHelp(args: string[]): { stdout: string; stderr: string } {
   }) as typeof process.stderr.write);
 
   try {
-    buildCli("0.1.0").exitOverride().parse(args, { from: "node" });
+    buildCli().exitOverride().parse(args, { from: "node" });
   } catch {
     // Commander throws after writing help when exitOverride is enabled.
   } finally {
@@ -45,12 +45,11 @@ describe("CLI help", () => {
     expect(output).toContain("list");
     expect(output).toContain("info");
     expect(output).toContain("status");
-    expect(output).toContain("init");
     expect(output).toContain("create");
     expect(output).not.toContain("--provider");
   });
 
-  it.each(["add", "search", "list", "info", "status", "init", "create"])(
+  it.each(["add", "search", "list", "info", "status", "create"])(
     "renders help for %s",
     (commandName) => {
       const output = collectHelpText(["node", "openci", commandName, "--help"]);

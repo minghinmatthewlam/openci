@@ -27,3 +27,9 @@ jobs:
       - run: npm --prefix web run build
       - run: npm run build
       - run: npm pack --dry-run
+      - name: Smoke-test packed CLI
+        run: |
+          npm pack
+          npm install -g openci-*.tgz
+          openci --version
+          openci --help
