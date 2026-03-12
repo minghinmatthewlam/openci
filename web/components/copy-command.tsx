@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function CopyCommand({ value }: { value: string }): React.ReactNode {
   const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
+
+  useEffect(() => {
+    setStatus("idle");
+  }, [value]);
 
   function fallbackCopy(text: string): boolean {
     const textarea = document.createElement("textarea");

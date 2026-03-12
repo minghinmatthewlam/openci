@@ -31,7 +31,7 @@ export function SiteHeader(): React.ReactNode {
   return (
     <header className="site-header">
       <div className="header-inner">
-        <Link href="/" className="brand-row">
+        <Link href="/" className="brand-row" draggable={false}>
           <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
             <span className="text-black">
               <TerminalIcon />

@@ -2,8 +2,8 @@ import type { RegistryEntry } from "./registry";
 
 export const docsSections = [
   { label: "Overview", href: "/docs" },
-  { label: "CLI", href: "/docs#cli" },
-  { label: "FAQ", href: "/docs#faq" },
+  { label: "CLI", href: "/docs/cli" },
+  { label: "FAQ", href: "/docs/faq" },
 ];
 
 const OFFICIAL_SOURCE = "minghinmatthewlam/openci";

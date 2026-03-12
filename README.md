@@ -12,7 +12,7 @@ The current scope is intentionally simple:
 - source-first workflow installs
 - local workflow management (`list`, `status`, `update`)
 - workflow and smart workflow support
-- a lightweight OSS web directory in [`web/`](/Users/matthewlam/dev/openci/web) for official workflows only
+- a lightweight OSS web directory in [`web/`](web/) for official workflows only
 
 ## Why OpenCI
 
@@ -207,11 +207,12 @@ This is the command to use when you want to know:
 
 ### `update`
 
-Refreshes installed workflows from their recorded source metadata:
+Refreshes installed workflows from their recorded source metadata. Pass one or more workflow names to update specific workflows, or run with no arguments to update all:
 
 ```bash
 npx openci update
 npx openci update pr-review
+npx openci update pr-review security-scan
 ```
 
 ## Other Useful Commands
@@ -238,7 +239,7 @@ npx openci create my-workflow --smart --yes
 
 `create` generates the starter files for a new workflow in `workflows/<name>/`. By default it creates the simplest copied-as-is workflow. Add `--smart` if you need templating, runtime/provider configuration, and local detection.
 
-`init` exists as a stub right now and is not implemented yet.
+`init` is a recognized command but prints "Planned for a future release" and takes no action.
 
 ## Flags
 
@@ -284,7 +285,7 @@ npx openci add minghinmatthewlam/openci --workflow security-scan --provider glm 
 
 ## Official Workflow Directory
 
-The lightweight OSS directory app lives in [`web/`](/Users/matthewlam/dev/openci/web).
+The lightweight OSS directory app lives in [`web/`](web/).
 
 It currently provides:
 - official workflow homepage
@@ -346,7 +347,7 @@ Requirements:
 - Node.js `>=20`
 - npm
 
-Contributor guidance is pinned to [`24.14.0`](/Users/matthewlam/dev/openci/.nvmrc) in `.nvmrc`.
+Contributor guidance is pinned to [`24.14.0`](.nvmrc) in `.nvmrc`.
 
 ### CLI
 
@@ -372,7 +373,7 @@ npm --prefix web run dev
 
 ## Publishing
 
-The npm package is published as `openci` and exposes the CLI through the `bin` entry in [`package.json`](/Users/matthewlam/dev/openci/package.json).
+The npm package is published as `openci` and exposes the CLI through the `bin` entry in [`package.json`](package.json).
 
 Before publishing:
 
@@ -387,8 +388,8 @@ npm pack --dry-run
 ```
 
 The repository also includes:
-- CI workflow in [ci.yml](/Users/matthewlam/dev/openci/.github/workflows/ci.yml)
-- release workflow in [release.yml](/Users/matthewlam/dev/openci/.github/workflows/release.yml)
+- CI workflow in [ci.yml](.github/workflows/ci.yml)
+- release workflow in [release.yml](.github/workflows/release.yml)
 
 The release workflow uses npm trusted publishing with provenance.
 Workflow files are linted with `actionlint`, and project code is linted/formatted with `oxlint` and `oxfmt`.
