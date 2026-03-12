@@ -1,17 +1,16 @@
 <div align="center">
 
-```
+<pre>
  ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗
 ██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔════╝██║
 ██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║     ██║
 ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║     ██║
 ╚██████╔╝██║     ███████╗██║ ╚████║╚██████╗██║
  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝
-```
+</pre>
 
 **AI-powered GitHub Actions workflows. One CLI.**
 
-[![npm version](https://img.shields.io/npm/v/openci.svg)](https://www.npmjs.com/package/openci)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-green.svg)](https://nodejs.org/)
 
