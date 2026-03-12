@@ -20,13 +20,7 @@ const FILTERS = [
   { label: "By Provider", value: "provider" },
 ] as const;
 
-function FilterTabs({
-  current,
-  query,
-}: {
-  current: string;
-  query: string;
-}): React.ReactNode {
+function FilterTabs({ current, query }: { current: string; query: string }): React.ReactNode {
   return (
     <div className="filter-tabs">
       {FILTERS.map(({ label, value }) => {

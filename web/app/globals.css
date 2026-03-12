@@ -295,7 +295,9 @@ pre {
   font-size: 13px;
   color: var(--dim);
   text-decoration: none;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 
 .filter-tab:hover {

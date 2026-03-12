@@ -48,8 +48,8 @@ export default function DocsPage(): React.ReactNode {
             <section>
               <h2>How discovery works</h2>
               <p>
-                The site lists official workflows from the public repository. It is a simple
-                OSS directory, without hosted search or telemetry-backed rankings.
+                The site lists official workflows from the public repository. It is a simple OSS
+                directory, without hosted search or telemetry-backed rankings.
               </p>
             </section>
 

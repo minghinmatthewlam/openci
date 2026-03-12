@@ -105,8 +105,7 @@ export default function CliPage(): React.ReactNode {
                   <strong>GitHub shorthand:</strong> <code>owner/repo</code>
                 </li>
                 <li>
-                  <strong>Git URL:</strong>{" "}
-                  <code>git@github.com:owner/repo.git</code>,{" "}
+                  <strong>Git URL:</strong> <code>git@github.com:owner/repo.git</code>,{" "}
                   <code>https://github.com/owner/repo.git</code>
                 </li>
                 <li>
@@ -119,9 +118,9 @@ export default function CliPage(): React.ReactNode {
             <section>
               <h2>Non-interactive mode</h2>
               <p>
-                In <code>--yes</code> mode, the CLI never prompts. Successful{" "}
-                <code>add</code> prints only the created workflow path to stdout. Warnings and
-                secret setup hints go to stderr.
+                In <code>--yes</code> mode, the CLI never prompts. Successful <code>add</code>{" "}
+                prints only the created workflow path to stdout. Warnings and secret setup hints go
+                to stderr.
               </p>
               <CopyCommand value="npx openci add minghinmatthewlam/openci --workflow pr-review --provider claude --yes" />
             </section>

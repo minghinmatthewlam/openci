@@ -12,9 +12,7 @@ export default function FaqPage(): React.ReactNode {
 
           <article className="docs-content">
             <h1>FAQ</h1>
-            <p className="docs-intro">
-              Common questions about OpenCI workflows and the CLI.
-            </p>
+            <p className="docs-intro">Common questions about OpenCI workflows and the CLI.</p>
 
             <section>
               <h2>What are smart workflows?</h2>
@@ -51,8 +49,8 @@ export default function FaqPage(): React.ReactNode {
               <p>
                 Per-workflow sidecar metadata is stored in{" "}
                 <code>.github/workflows/.openci/&lt;workflow&gt;.json</code>. This records the
-                source, provider, runtime, runner, version, and install time so{" "}
-                <code>list</code>, <code>status</code>, and <code>update</code> work reliably.
+                source, provider, runtime, runner, version, and install time so <code>list</code>,{" "}
+                <code>status</code>, and <code>update</code> work reliably.
               </p>
             </section>
 
