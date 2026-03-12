@@ -59,8 +59,8 @@ export async function readRegistry(): Promise<RegistryDocument> {
 export async function listRegistryWorkflows(): Promise<RegistryEntry[]> {
   const registry = await readRegistry();
   return Promise.all(
-    [...registry.workflows]
-      .sort((left, right) => left.name.localeCompare(right.name))
+    registry.workflows
+      .toSorted((left, right) => left.name.localeCompare(right.name))
       .map(async (workflow) => {
         const bundle = await readWorkflowBundle(workflow.name);
         return {

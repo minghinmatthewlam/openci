@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 
 export function CopyCommand({ value }: { value: string }): React.ReactNode {
   const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
+  const prevValueRef = useRef(value);
 
-  useEffect(() => {
+  if (prevValueRef.current !== value) {
+    prevValueRef.current = value;
     setStatus("idle");
-  }, [value]);
+  }
 
   function fallbackCopy(text: string): boolean {
     const textarea = document.createElement("textarea");

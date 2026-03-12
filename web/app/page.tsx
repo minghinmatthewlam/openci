@@ -75,7 +75,7 @@ export default async function HomePage({
   if (filter === "smart") {
     filtered = filtered.filter((w) => w.smart);
   } else if (filter === "provider") {
-    filtered = [...filtered].sort((a, b) => {
+    filtered = filtered.toSorted((a, b) => {
       const pa = a.provider[0] ?? "";
       const pb = b.provider[0] ?? "";
       return pa.localeCompare(pb);
