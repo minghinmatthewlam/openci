@@ -45,7 +45,8 @@
     "web:start": "npm --prefix web run start",
     "web:test": "npm --prefix web run test",
     "pack:check": "npm pack --dry-run",
-    "prepublishOnly": "npm run typecheck && npm run test && npm run build && npm run pack:check"
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build && npm run pack:check",
+    "prepare": "husky"
   },
   "dependencies": {
     "commander": "14.0.3",
@@ -54,12 +55,17 @@
     "yocto-spinner": "1.1.0",
     "zod": "^4.3.6"
   },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,css}": "oxfmt"
+  },
   "devDependencies": {
     "@tsconfig/node24": "24.0.4",
     "@types/node": "24.10.15",
     "@types/semver": "^7.7.1",
     "@vitest/coverage-v8": "^4.0.18",
     "actionlint": "^2.0.6",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.3",
     "oxfmt": "^0.38.0",
     "oxlint": "^1.53.0",
     "tsup": "8.5.1",
