@@ -4,8 +4,9 @@ import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { afterEach, describe, expect, it } from "vitest";
 import { detectDefaultBranch } from "../../src/detection/branch.js";
+import { detectionFixturePath } from "../helpers/paths.js";
 
-const fixtureRoot = "/Users/matthewlam/dev/openci/test/fixtures/detection/npm-standard";
+const fixtureRoot = detectionFixturePath("npm-standard");
 const tempDirs: string[] = [];
 
 function git(cwd: string, args: string[]): void {

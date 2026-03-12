@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { searchRegistry } from "../../src/registry/resolve.js";
+import { registryFixturesUrl } from "../helpers/paths.js";
 
 describe("searchRegistry", () => {
   let cacheRoot: string;
@@ -10,7 +11,7 @@ describe("searchRegistry", () => {
   beforeEach(async () => {
     cacheRoot = await mkdtemp(join(tmpdir(), "openci-search-"));
     process.env.XDG_CACHE_HOME = cacheRoot;
-    process.env.OPENCI_REGISTRY_URL = "file:///Users/matthewlam/dev/openci/test/fixtures/registry";
+    process.env.OPENCI_REGISTRY_URL = registryFixturesUrl;
   });
 
   afterEach(() => {

@@ -3,19 +3,37 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync, spawnSync, type SpawnSyncReturns } from "node:child_process";
+import {
+  registryFixturesRoot,
+  registryFixturesUrl,
+  workspaceRoot,
+  detectionFixturePath,
+} from "../helpers/paths.js";
 
-const workspaceRoot = "/Users/matthewlam/dev/openci";
 const cliPath = join(workspaceRoot, "dist", "index.js");
+
+function runNpm(args: string[]): void {
+  const npmExecPath = process.env.npm_execpath;
+  if (npmExecPath) {
+    execFileSync(process.execPath, [npmExecPath, ...args], {
+      cwd: workspaceRoot,
+      stdio: "ignore",
+    });
+    return;
+  }
+
+  execFileSync("npm", args, {
+    cwd: workspaceRoot,
+    stdio: "ignore",
+  });
+}
 
 export function ensureBuiltCli(): void {
   if (existsSync(cliPath)) {
     return;
   }
 
-  execFileSync("npm", ["run", "build"], {
-    cwd: workspaceRoot,
-    stdio: "ignore",
-  });
+  runNpm(["run", "build"]);
 }
 
 export function makeTempRepo(options?: { fixturePath?: string }): string {
@@ -58,16 +76,16 @@ export function runCli(
 
 export function registryEnv(): NodeJS.ProcessEnv {
   return {
-    OPENCI_REGISTRY_URL: "file:///Users/matthewlam/dev/openci/test/fixtures/registry",
+    OPENCI_REGISTRY_URL: registryFixturesUrl,
   };
 }
 
 export function localRegistryRoot(): string {
-  return "/Users/matthewlam/dev/openci/test/fixtures/registry";
+  return registryFixturesRoot;
 }
 
 export function detectionFixture(name: string): string {
-  return `/Users/matthewlam/dev/openci/test/fixtures/detection/${name}`;
+  return detectionFixturePath(name);
 }
 
 export function normalizePath(pathname: string): string {

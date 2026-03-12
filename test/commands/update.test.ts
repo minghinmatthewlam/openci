@@ -5,6 +5,7 @@ import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { CliError } from "../../src/core/errors.js";
 import { runCli } from "../helpers/cli.js";
+import { detectionFixturePath, registryFixturesRoot } from "../helpers/paths.js";
 
 function git(cwd: string, args: string[]): void {
   execFileSync("git", args, { cwd, stdio: "ignore" });
@@ -13,13 +14,13 @@ function git(cwd: string, args: string[]): void {
 describe("update command", () => {
   it("updates an installed workflow from its stored source metadata", async () => {
     const sourceRoot = await mkdtemp(join(tmpdir(), "openci-update-source-"));
-    await cp("/Users/matthewlam/dev/openci/test/fixtures/registry", sourceRoot, {
+    await cp(registryFixturesRoot, sourceRoot, {
       recursive: true,
     });
     const sourceRegistryRoot = sourceRoot;
 
     const repo = await mkdtemp(join(tmpdir(), "openci-update-target-"));
-    await cp("/Users/matthewlam/dev/openci/test/fixtures/detection/pnpm-next", repo, {
+    await cp(detectionFixturePath("pnpm-next"), repo, {
       recursive: true,
     });
     git(repo, ["init", "--initial-branch=main"]);
@@ -51,12 +52,12 @@ describe("update command", () => {
 
   it("updates a script-runtime workflow and preserves runtime metadata", async () => {
     const sourceRoot = await mkdtemp(join(tmpdir(), "openci-update-script-source-"));
-    await cp("/Users/matthewlam/dev/openci/test/fixtures/registry", sourceRoot, {
+    await cp(registryFixturesRoot, sourceRoot, {
       recursive: true,
     });
 
     const repo = await mkdtemp(join(tmpdir(), "openci-update-script-target-"));
-    await cp("/Users/matthewlam/dev/openci/test/fixtures/detection/pnpm-next", repo, {
+    await cp(detectionFixturePath("pnpm-next"), repo, {
       recursive: true,
     });
     git(repo, ["init", "--initial-branch=main"]);
@@ -108,7 +109,7 @@ describe("update command", () => {
 
   it("errors when a requested workflow name is not installed", async () => {
     const sourceRoot = await mkdtemp(join(tmpdir(), "openci-update-missing-name-source-"));
-    await cp("/Users/matthewlam/dev/openci/test/fixtures/registry", sourceRoot, {
+    await cp(registryFixturesRoot, sourceRoot, {
       recursive: true,
     });
 
@@ -133,12 +134,12 @@ describe("update command", () => {
 
   it("reports partial update failures after updating successful workflows", async () => {
     const sourceRoot = await mkdtemp(join(tmpdir(), "openci-update-partial-source-"));
-    await cp("/Users/matthewlam/dev/openci/test/fixtures/registry", sourceRoot, {
+    await cp(registryFixturesRoot, sourceRoot, {
       recursive: true,
     });
 
     const repo = await mkdtemp(join(tmpdir(), "openci-update-partial-target-"));
-    await cp("/Users/matthewlam/dev/openci/test/fixtures/detection/pnpm-next", repo, {
+    await cp(detectionFixturePath("pnpm-next"), repo, {
       recursive: true,
     });
     git(repo, ["init", "--initial-branch=main"]);

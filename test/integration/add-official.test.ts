@@ -24,8 +24,6 @@ describe("integration: add official workflow", () => {
     expect(result.stderr).toContain("Required secret: ANTHROPIC_API_KEY");
     expect(existsSync(targetPath)).toBe(true);
     expect(readFileSync(targetPath, "utf8")).toContain("pnpm install --frozen-lockfile");
-    expect(readFileSync(sidecarPath, "utf8")).toContain(
-      '"source": "/Users/matthewlam/dev/openci/test/fixtures/registry"',
-    );
+    expect(readFileSync(sidecarPath, "utf8")).toContain(`"source": "${localRegistryRoot()}"`);
   });
 });

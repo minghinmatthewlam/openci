@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { join } from "node:path";
 import { detectRepo } from "../../src/detection/index.js";
-
-const fixturesRoot = "/Users/matthewlam/dev/openci/test/fixtures/detection";
+import { detectionFixturesRoot } from "../helpers/paths.js";
 
 describe("detectRepo", () => {
   it("aggregates enabled detectors into a single result", async () => {
-    const result = await detectRepo(join(fixturesRoot, "pnpm-next"), {
+    const result = await detectRepo(join(detectionFixturesRoot, "pnpm-next"), {
       packageManager: true,
       nodeVersion: true,
       defaultBranch: true,
@@ -21,7 +20,7 @@ describe("detectRepo", () => {
   });
 
   it("returns warnings instead of throwing when package.json parsing fails", async () => {
-    const result = await detectRepo(join(fixturesRoot, "invalid-package-json"), {
+    const result = await detectRepo(join(detectionFixturesRoot, "invalid-package-json"), {
       packageManager: true,
       nodeVersion: true,
       framework: true,

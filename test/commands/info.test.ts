@@ -4,8 +4,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { CliError } from "../../src/core/errors.js";
 import { runCli } from "../helpers/cli.js";
-
-const registryUrl = "file:///Users/matthewlam/dev/openci/test/fixtures/registry";
+import { registryFixturesUrl } from "../helpers/paths.js";
 
 describe("info command", () => {
   beforeEach(async () => {
@@ -18,7 +17,7 @@ describe("info command", () => {
   });
 
   it("prints metadata and README for a workflow", async () => {
-    process.env.OPENCI_REGISTRY_URL = registryUrl;
+    process.env.OPENCI_REGISTRY_URL = registryFixturesUrl;
 
     const result = await runCli(["info", "pr-review"]);
 
@@ -32,7 +31,7 @@ describe("info command", () => {
   });
 
   it("errors for a missing workflow", async () => {
-    process.env.OPENCI_REGISTRY_URL = registryUrl;
+    process.env.OPENCI_REGISTRY_URL = registryFixturesUrl;
 
     const result = await runCli(["info", "missing-workflow"]);
 

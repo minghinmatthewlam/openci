@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../helpers/cli.js";
+import { detectionFixturePath, workspaceRoot } from "../helpers/paths.js";
 
 function git(cwd: string, args: string[]): void {
   execFileSync("git", args, { cwd, stdio: "ignore" });
@@ -12,7 +13,7 @@ function git(cwd: string, args: string[]): void {
 describe("add repo source", () => {
   it("installs from the repo root workflow source layout", async () => {
     const repo = await mkdtemp(join(tmpdir(), "openci-add-repo-source-"));
-    const fixtureRoot = "/Users/matthewlam/dev/openci/test/fixtures/detection/pnpm-next";
+    const fixtureRoot = detectionFixturePath("pnpm-next");
     execFileSync("cp", ["-R", `${fixtureRoot}/.`, repo]);
     git(repo, ["init", "--initial-branch=main"]);
     git(repo, ["config", "user.name", "OpenCI Test"]);
@@ -20,10 +21,9 @@ describe("add repo source", () => {
     git(repo, ["add", "."]);
     git(repo, ["commit", "-m", "init"]);
 
-    const result = await runCli(
-      ["add", "/Users/matthewlam/dev/openci", "--workflow", "pr-review", "--yes"],
-      { cwd: repo },
-    );
+    const result = await runCli(["add", workspaceRoot, "--workflow", "pr-review", "--yes"], {
+      cwd: repo,
+    });
     const workflowPath = join(repo, ".github", "workflows", "pr-review.yml");
     const written = await readFile(workflowPath, "utf8");
 

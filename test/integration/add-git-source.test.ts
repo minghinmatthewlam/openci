@@ -5,10 +5,11 @@ import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { detectionFixture, normalizePath, runCli } from "./helpers.js";
+import { registryFixturesRoot } from "../helpers/paths.js";
 
 function makeSourceRepo(): string {
   const repo = mkdtempSync(join(tmpdir(), "openci-source-registry-"));
-  cpSync("/Users/matthewlam/dev/openci/test/fixtures/registry/.", repo, { recursive: true });
+  cpSync(`${registryFixturesRoot}/.`, repo, { recursive: true });
   execFileSync("git", ["init", "--initial-branch=main"], { cwd: repo, stdio: "ignore" });
   execFileSync("git", ["config", "user.name", "OpenCI Test"], { cwd: repo, stdio: "ignore" });
   execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: repo, stdio: "ignore" });

@@ -5,9 +5,13 @@ import { execFileSync } from "node:child_process";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runCli } from "../helpers/cli.js";
 import * as secretsCheck from "../../src/secrets/check.js";
+import {
+  detectionFixturePath,
+  registryFixturesRoot,
+  registryFixturesUrl,
+} from "../helpers/paths.js";
 
-const registryUrl = "file:///Users/matthewlam/dev/openci/test/fixtures/registry";
-const fixtureRoot = "/Users/matthewlam/dev/openci/test/fixtures/detection/pnpm-next";
+const fixtureRoot = detectionFixturePath("pnpm-next");
 
 function git(cwd: string, args: string[]): void {
   execFileSync("git", args, { cwd, stdio: "ignore" });
@@ -15,11 +19,11 @@ function git(cwd: string, args: string[]): void {
 
 describe("add smart workflow", () => {
   let repo: string;
-  const sourceRoot = "/Users/matthewlam/dev/openci/test/fixtures/registry";
+  const sourceRoot = registryFixturesRoot;
 
   beforeEach(async () => {
     repo = await mkdtemp(join(tmpdir(), "openci-add-smart-"));
-    process.env.OPENCI_REGISTRY_URL = registryUrl;
+    process.env.OPENCI_REGISTRY_URL = registryFixturesUrl;
     await cp(fixtureRoot, repo, { recursive: true });
     git(repo, ["init", "--initial-branch=main"]);
     git(repo, ["config", "user.name", "OpenCI Test"]);
