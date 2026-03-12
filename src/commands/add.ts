@@ -31,148 +31,182 @@ export function registerAddCommand(program: Command): void {
     .command("add")
     .description("Install a workflow into your repo")
     .argument("<source>")
+    .option("--provider <name>", "Provider override")
+    .option("--runtime <name>", "Runtime override: action, script")
+    .option("--runner <name>", "Runner override")
+    .option("--model <name>", "Model override")
+    .option("--trigger <event>", "Workflow trigger override")
+    .option("--branch <name>", "Target branch override")
+    .option("--yes", "Non-interactive mode")
+    .option("--dry-run", "Show what would be installed without writing files")
+    .option("--verbose", "Show detection and substitution details")
     .option("--workflow <name>", "Workflow to install from the source")
-    .action(async (sourceArg: string, options: { workflow?: string }, command: Command) => {
-      const globals = command.optsWithGlobals<{
-        provider?: string;
-        runtime?: "action" | "script";
-        runner?: string;
-        model?: string;
-        trigger?: string;
-        branch?: string;
-        yes?: boolean;
-        dryRun?: boolean;
-        verbose?: boolean;
-      }>();
+    .action(
+      async (
+        sourceArg: string,
+        options: {
+          workflow?: string;
+          provider?: string;
+          runtime?: "action" | "script";
+          runner?: string;
+          model?: string;
+          trigger?: string;
+          branch?: string;
+          yes?: boolean;
+          dryRun?: boolean;
+          verbose?: boolean;
+        },
+        command: Command,
+      ) => {
+        const commandOptions = command.opts<{
+          provider?: string;
+          runtime?: "action" | "script";
+          runner?: string;
+          model?: string;
+          trigger?: string;
+          branch?: string;
+          yes?: boolean;
+          dryRun?: boolean;
+          verbose?: boolean;
+        }>();
 
-      const explicitProvider = hasRawFlag(command, "--provider") ? globals.provider : undefined;
-      const yes = Boolean(globals.yes);
-      const dryRun = Boolean(globals.dryRun);
-      const verbose = Boolean(globals.verbose);
-      const logger = createLogger({ yes, verbose });
-      const cwd = process.cwd();
-      const repoRoot = getGitRepoRoot(cwd);
-      const remoteUrl = getGitRemoteUrl(repoRoot);
-      const resolvedSource = await resolveWorkflowBundle({
-        cwd,
-        sourceArg,
-        workflow: options.workflow,
-      });
+        const explicitProvider = hasRawFlag(command, "--provider")
+          ? commandOptions.provider
+          : undefined;
+        const yes = Boolean(commandOptions.yes);
+        const dryRun = Boolean(commandOptions.dryRun);
+        const verbose = Boolean(commandOptions.verbose);
+        const logger = createLogger({ yes, verbose });
+        const cwd = process.cwd();
+        const repoRoot = getGitRepoRoot(cwd);
+        const remoteUrl = getGitRemoteUrl(repoRoot);
+        const resolvedSource = await resolveWorkflowBundle({
+          cwd,
+          sourceArg,
+          workflow: options.workflow,
+        });
 
-      try {
-        const { bundle } = resolvedSource;
-        const targetPath = join(repoRoot, ".github", "workflows", `${bundle.metadata.name}.yml`);
+        try {
+          const { bundle } = resolvedSource;
+          const targetPath = join(repoRoot, ".github", "workflows", `${bundle.metadata.name}.yml`);
 
-        let selectedProvider = resolveSupportedProvider(bundle.metadata, explicitProvider);
-        let selectedRuntime: "action" | "script" | undefined =
-          bundle.metadata.defaultRuntime ?? bundle.metadata.runtimes[0];
-        let selectedRunner: string | undefined =
-          bundle.metadata.defaultRunner ?? bundle.metadata.runners[0];
-        let output = bundle.workflow;
+          let selectedProvider = resolveSupportedProvider(bundle.metadata, explicitProvider);
+          let selectedRuntime: "action" | "script" | undefined =
+            bundle.metadata.defaultRuntime ?? bundle.metadata.runtimes[0];
+          let selectedRunner: string | undefined =
+            bundle.metadata.defaultRunner ?? bundle.metadata.runners[0];
+          let output = bundle.workflow;
 
-        if (bundle.metadata.smart) {
-          if (!bundle.workflowTemplate || !bundle.config) {
-            throw new Error(`Workflow '${bundle.metadata.name}' is missing smart workflow files.`);
-          }
-
-          const detected = await detectRepo(repoRoot, bundle.config.detect);
-          const resolved = resolveTemplateContext({
-            metadata: bundle.metadata,
-            config: bundle.config,
-            detected,
-            flags: {
-              provider: explicitProvider,
-              runtime: globals.runtime,
-              runner: globals.runner,
-              model: globals.model,
-              trigger: globals.trigger,
-              branch: globals.branch,
-            },
-          });
-
-          selectedProvider = resolved.provider;
-          selectedRuntime = resolved.runtime;
-          selectedRunner = resolved.runner;
-          output = substituteTemplate(bundle.workflowTemplate, resolved.context);
-
-          if (verbose) {
-            logger.debug(`Detected values: ${JSON.stringify(detected, null, 2)}`);
-            logger.debug(`Resolved context: ${JSON.stringify(resolved.context, null, 2)}`);
-          }
-        } else {
-          if (hasRawFlag(command, "--runtime")) {
-            logger.warn(`Ignoring --runtime for copied-as-is workflow '${bundle.metadata.name}'.`);
-          }
-          if (hasRawFlag(command, "--runner")) {
-            logger.warn(`Ignoring --runner for copied-as-is workflow '${bundle.metadata.name}'.`);
-          }
-          if (hasRawFlag(command, "--model")) {
-            logger.warn(`Ignoring --model for copied-as-is workflow '${bundle.metadata.name}'.`);
-          }
-          if (hasRawFlag(command, "--trigger")) {
-            logger.warn(`Ignoring --trigger for copied-as-is workflow '${bundle.metadata.name}'.`);
-          }
-          if (hasRawFlag(command, "--branch")) {
-            logger.warn(`Ignoring --branch for copied-as-is workflow '${bundle.metadata.name}'.`);
-          }
-        }
-
-        if (!output) {
-          throw new Error(`Workflow '${bundle.metadata.name}' could not be resolved.`);
-        }
-
-        const targetExists = await fileExists(targetPath);
-        if (targetExists) {
-          logger.warn(`Overwriting existing workflow at ${targetPath}.`);
-        }
-
-        if (dryRun) {
-          if (yes) {
-            if (verbose) {
-              logger.debug(`Dry run preview for ${targetPath}:\n${output}`);
+          if (bundle.metadata.smart) {
+            if (!bundle.workflowTemplate || !bundle.config) {
+              throw new Error(
+                `Workflow '${bundle.metadata.name}' is missing smart workflow files.`,
+              );
             }
-            logger.machineResult(targetPath);
-          } else {
-            process.stdout.write(`Would create ${targetPath}\n\n${output}\n`);
-          }
-        } else {
-          await mkdir(dirname(targetPath), { recursive: true });
-          await writeFile(targetPath, output, "utf8");
-          await upsertInstallationMetadata(repoRoot, {
-            name: bundle.metadata.name,
-            source: bundle.sourceLabel,
-            provider: selectedProvider,
-            runtime: selectedRuntime,
-            runner: selectedRunner,
-            model: globals.model,
-            trigger: globals.trigger,
-            branch: globals.branch,
-            smart: bundle.metadata.smart,
-            workflowVersion: bundle.metadata.version,
-            targetPath,
-            installedAt: new Date().toISOString(),
-          });
 
-          if (yes) {
-            logger.machineResult(targetPath);
-          } else {
-            process.stdout.write(`Created ${targetPath}\n`);
-          }
-        }
+            const detected = await detectRepo(repoRoot, bundle.config.detect);
+            const resolved = resolveTemplateContext({
+              metadata: bundle.metadata,
+              config: bundle.config,
+              detected,
+              flags: {
+                provider: explicitProvider,
+                runtime: commandOptions.runtime,
+                runner: commandOptions.runner,
+                model: commandOptions.model,
+                trigger: commandOptions.trigger,
+                branch: commandOptions.branch,
+              },
+            });
 
-        if (selectedProvider) {
-          const ghReady = isGhAvailable() && isGhAuthenticated();
-          for (const instruction of buildSecretInstructions(
-            bundle.metadata,
-            selectedProvider,
-            remoteUrl,
-            ghReady,
-          )) {
-            logger.warn(instruction);
+            selectedProvider = resolved.provider;
+            selectedRuntime = resolved.runtime;
+            selectedRunner = resolved.runner;
+            output = substituteTemplate(bundle.workflowTemplate, resolved.context);
+
+            if (verbose) {
+              logger.debug(`Detected values: ${JSON.stringify(detected, null, 2)}`);
+              logger.debug(`Resolved context: ${JSON.stringify(resolved.context, null, 2)}`);
+            }
+          } else {
+            if (hasRawFlag(command, "--runtime")) {
+              logger.warn(
+                `Ignoring --runtime for copied-as-is workflow '${bundle.metadata.name}'.`,
+              );
+            }
+            if (hasRawFlag(command, "--runner")) {
+              logger.warn(`Ignoring --runner for copied-as-is workflow '${bundle.metadata.name}'.`);
+            }
+            if (hasRawFlag(command, "--model")) {
+              logger.warn(`Ignoring --model for copied-as-is workflow '${bundle.metadata.name}'.`);
+            }
+            if (hasRawFlag(command, "--trigger")) {
+              logger.warn(
+                `Ignoring --trigger for copied-as-is workflow '${bundle.metadata.name}'.`,
+              );
+            }
+            if (hasRawFlag(command, "--branch")) {
+              logger.warn(`Ignoring --branch for copied-as-is workflow '${bundle.metadata.name}'.`);
+            }
           }
+
+          if (!output) {
+            throw new Error(`Workflow '${bundle.metadata.name}' could not be resolved.`);
+          }
+
+          const targetExists = await fileExists(targetPath);
+          if (targetExists) {
+            logger.warn(`Overwriting existing workflow at ${targetPath}.`);
+          }
+
+          if (dryRun) {
+            if (yes) {
+              if (verbose) {
+                logger.debug(`Dry run preview for ${targetPath}:\n${output}`);
+              }
+              logger.machineResult(targetPath);
+            } else {
+              process.stdout.write(`Would create ${targetPath}\n\n${output}\n`);
+            }
+          } else {
+            await mkdir(dirname(targetPath), { recursive: true });
+            await writeFile(targetPath, output, "utf8");
+            await upsertInstallationMetadata(repoRoot, {
+              name: bundle.metadata.name,
+              source: bundle.sourceLabel,
+              provider: selectedProvider,
+              runtime: selectedRuntime,
+              runner: selectedRunner,
+              model: commandOptions.model,
+              trigger: commandOptions.trigger,
+              branch: commandOptions.branch,
+              smart: bundle.metadata.smart,
+              workflowVersion: bundle.metadata.version,
+              targetPath,
+              installedAt: new Date().toISOString(),
+            });
+
+            if (yes) {
+              logger.machineResult(targetPath);
+            } else {
+              process.stdout.write(`Created ${targetPath}\n`);
+            }
+          }
+
+          if (selectedProvider) {
+            const ghReady = isGhAvailable() && isGhAuthenticated();
+            for (const instruction of buildSecretInstructions(
+              bundle.metadata,
+              selectedProvider,
+              remoteUrl,
+              ghReady,
+            )) {
+              logger.warn(instruction);
+            }
+          }
+        } finally {
+          await resolvedSource.cleanup?.();
         }
-      } finally {
-        await resolvedSource.cleanup?.();
-      }
-    });
+      },
+    );
 }

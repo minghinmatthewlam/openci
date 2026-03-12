@@ -15,16 +15,7 @@ export function buildCli(version = "0.1.0"): Command {
     .name("openci")
     .description("Discover and install AI-powered GitHub Actions workflows")
     .version(version)
-    .showHelpAfterError()
-    .option("--provider <name>", "Provider override")
-    .option("--runtime <name>", "Runtime override: action, script")
-    .option("--runner <name>", "Runner override")
-    .option("--model <name>", "Model override")
-    .option("--trigger <event>", "Workflow trigger override")
-    .option("--branch <name>", "Target branch override")
-    .option("--yes", "Non-interactive mode")
-    .option("--dry-run", "Show what would be installed without writing files")
-    .option("--verbose", "Show detection and substitution details");
+    .showHelpAfterError();
 
   registerAddCommand(program);
   registerSearchCommand(program);
