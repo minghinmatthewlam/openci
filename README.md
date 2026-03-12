@@ -1,97 +1,161 @@
-# OpenCI
+<div align="center">
+
+# `>_` OpenCI
+
+**AI-powered GitHub Actions workflows. One CLI.**
+
+[![npm version](https://img.shields.io/npm/v/openci.svg)](https://www.npmjs.com/package/openci)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-green.svg)](https://nodejs.org/)
+
+[Quick Start](#quick-start) · [Commands](#commands) · [Workflow Types](#workflow-types) · [Create Workflows](#creating-workflows) · [FAQ](#faq)
+
+</div>
+
+---
 
 OpenCI is an open-source CLI for installing AI-powered GitHub Actions workflows from official, local, and git-based sources.
 
-It is source-first:
-
 ```bash
 npx openci add minghinmatthewlam/openci --workflow pr-review
 ```
-
-The current scope is intentionally simple:
-- source-first workflow installs
-- local workflow management (`list`, `status`, `update`)
-- workflow and smart workflow support
-- a lightweight OSS web directory in [`web/`](web/) for official workflows only
 
 ## Why OpenCI
 
-GitHub Actions workflows for AI agents are useful, but they are also annoying to wire up repeatedly.
+GitHub Actions workflows for AI agents are useful, but annoying to wire up repeatedly.
 
 OpenCI gives you:
-- a consistent install flow for official/public, private, and local workflow sources
-- smart workflow rendering for common substitutions like provider, runtime, runner, package manager, validation command, and branch
-- local management metadata so installed workflows can be listed, inspected, and updated later
+- a consistent install flow for official, private, and local workflow sources
+- smart workflow rendering for provider, runtime, runner, package manager, and branch
+- local management metadata so installed workflows can be listed, inspected, and updated
 
 ## Quick Start
 
-Install from a git/GitHub source:
+Install an official workflow:
 
 ```bash
 npx openci add minghinmatthewlam/openci --workflow pr-review
 ```
 
-Install from a private repo:
+From a private repo:
 
 ```bash
 npx openci add your-org/private-workflows --workflow pr-review
 ```
 
-Install from a local workflows directory:
+From a local directory:
 
 ```bash
 npx openci add ./workflows --workflow pr-review
 ```
 
-Inspect what is installed in the current repo:
+Check what's installed:
 
 ```bash
 npx openci list
 npx openci status
 ```
 
-Refresh installed workflows from their recorded source metadata:
+Update installed workflows:
 
 ```bash
 npx openci update
 ```
 
-## Command Model
+## Commands
 
-OpenCI is source-first.
+### `add`
 
-That means the thing after `add` is the source:
+Install a workflow into your repo. The argument after `add` is the source:
 
 ```bash
 openci add <source> --workflow <name>
 ```
 
-Supported source forms:
-- local path: `./workflows`, `../shared-workflows`, `/abs/path`
-- GitHub shorthand: `owner/repo`
-- git URL: `git@github.com:owner/repo.git`, `https://github.com/owner/repo.git`, `file:///path/to/repo`
+Supported sources:
+- **GitHub shorthand:** `owner/repo`
+- **Git URL:** `git@github.com:owner/repo.git`, `https://github.com/owner/repo.git`
+- **Local path:** `./workflows`, `../shared-workflows`, `/abs/path`
 
-If a source contains multiple workflows, use `--workflow <name>` to select one.
+Flags:
+
+| Flag | Description |
+|------|-------------|
+| `--workflow <name>` | Select a workflow from a multi-workflow source |
+| `--provider <name>` | Provider: `claude`, `codex`, `glm`, `custom` |
+| `--runtime <name>` | Runtime: `action`, `script` |
+| `--runner <name>` | Override the workflow runner |
+| `--model <name>` | Override the default model |
+| `--trigger <event>` | Override smart workflow trigger |
+| `--branch <name>` | Override smart workflow branch |
+| `--yes` | Non-interactive mode |
+| `--dry-run` | Print target path without writing files |
+| `--verbose` | Show detection and render details |
+
+### `search`
+
+Search official workflow metadata:
+
+```bash
+npx openci search review
+```
+
+### `list`
+
+Show locally installed workflows:
+
+```bash
+npx openci list
+```
+
+### `status`
+
+Show workflow health and filesystem state — what's installed, source/provider/version, missing files, untracked workflows:
+
+```bash
+npx openci status
+```
+
+### `update`
+
+Refresh installed workflows from their recorded source metadata. Pass names to update specific workflows, or omit to update all:
+
+```bash
+npx openci update
+npx openci update pr-review
+npx openci update pr-review security-scan
+```
+
+### `info`
+
+Inspect an official workflow:
+
+```bash
+npx openci info pr-review
+```
+
+### `create`
+
+Scaffold a new workflow. Add `--smart` for templated workflows with detection:
+
+```bash
+npx openci create my-workflow --yes
+npx openci create my-workflow --smart --yes
+```
+
+### `init`
+
+Planned for a future release.
 
 ## Workflow Types
 
 OpenCI supports two workflow types:
-- **workflows**: copied as-is
-- **smart workflows**: rendered from templates with local repo detection
-
-If you are new to OpenCI workflow authoring, start with a regular **workflow** first.
+- **Workflows** — copied as-is
+- **Smart workflows** — rendered from templates with local repo detection
 
 ### Workflows
 
-Workflows are copied as-is.
-
-They are best when:
-- the stack is fixed
-- the workflow is intentionally opinionated
-- you do not need auto-detection
-- the workflow may not need any AI provider at all, such as routing or review-gating flows
-
-Typical files:
+Best when the stack is fixed, the workflow is opinionated, or no AI provider is needed:
 
 ```text
 workflows/my-workflow/
@@ -102,20 +166,7 @@ workflows/my-workflow/
 
 ### Smart workflows
 
-Smart workflows use:
-- `workflow.yml.tmpl`
-- `openci.config.json`
-
-OpenCI detects local repo characteristics and renders the final YAML before writing it to `.github/workflows/`.
-
-Typical smart substitutions include:
-- provider, runtime, and runner
-- package manager install command
-- validation command
-- target branch
-- prompt/provider-specific details
-
-Typical files:
+Use `workflow.yml.tmpl` + `openci.config.json` for auto-detection and substitution:
 
 ```text
 workflows/my-workflow/
@@ -125,33 +176,26 @@ workflows/my-workflow/
 └── README.md
 ```
 
-Use smart workflows when you want one workflow definition to adapt to multiple repos or providers. Use a regular workflow when you want the simplest, most explicit setup.
+Typical substitutions: provider, runtime, runner, package manager install command, validation command, target branch.
+
+Use smart workflows when one definition should adapt to multiple repos or providers.
 
 ## Install Sources
 
-### GitHub shorthand
+### GitHub shorthand (recommended)
 
 ```bash
 npx openci add owner/repo --workflow pr-review
 ```
 
-This is the primary source form to optimize for in docs and onboarding. It matches the most common public install flow and keeps the command short.
-
 ### Private repos
 
-Private repos are supported through normal git credentials:
-- SSH keys
-- configured git credentials
-- any auth flow your local git already uses
-
-These can both work for private repos, depending on local git auth setup:
+Supported through normal git credentials (SSH keys, configured credentials). OpenCI does not prompt for credentials — if `git clone` fails, the install fails with the clone error.
 
 ```bash
 npx openci add owner/private-workflows --workflow pr-review
 npx openci add git@github.com:owner/private-workflows.git --workflow pr-review
 ```
-
-OpenCI does not prompt for credentials itself. If `git clone` cannot access the repo, the install fails with the clone error.
 
 ### Git URL
 
@@ -160,7 +204,7 @@ npx openci add https://github.com/owner/repo.git --workflow pr-review
 npx openci add git@github.com:owner/repo.git --workflow pr-review
 ```
 
-Git sources are cloned to a temporary directory and cleaned up automatically after install/update.
+Git sources are cloned to a temp directory and cleaned up after install.
 
 ### Local source
 
@@ -168,186 +212,68 @@ Git sources are cloned to a temporary directory and cleaned up automatically aft
 npx openci add ./workflows --workflow pr-review
 ```
 
-This is the easiest workflow for:
-- local development
-- testing a workflow before publishing it
-- internal/shared directories on your machine
-
-## Local Management
-
-OpenCI stores per-workflow sidecar metadata next to installed workflows:
-
-```text
-.github/workflows/.openci/<workflow>.json
-```
-
-That metadata records the workflow source, provider, runtime, runner, version, and install time so local management commands can work reliably.
-
-### `list`
-
-Shows locally installed workflows in the current repo:
-
-```bash
-npx openci list
-```
-
-### `status`
-
-Shows local workflow health and filesystem state:
-
-```bash
-npx openci status
-```
-
-This is the command to use when you want to know:
-- what is installed
-- which source/provider/version each workflow came from
-- whether a workflow file is missing
-- whether there are untracked workflow files in `.github/workflows/`
-
-### `update`
-
-Refreshes installed workflows from their recorded source metadata. Pass one or more workflow names to update specific workflows, or run with no arguments to update all:
-
-```bash
-npx openci update
-npx openci update pr-review
-npx openci update pr-review security-scan
-```
-
-## Other Useful Commands
-
-Search official workflow metadata:
-
-```bash
-npx openci search review
-```
-
-At the current phase, `search` is intentionally lightweight. It searches the official static metadata only and is not yet backed by a broader ingest/search service.
-
-Inspect an official workflow:
-
-```bash
-npx openci info pr-review
-```
-
-Scaffold a new workflow:
-
-```bash
-npx openci create my-workflow --smart --yes
-```
-
-`create` generates the starter files for a new workflow in `workflows/<name>/`. By default it creates the simplest copied-as-is workflow. Add `--smart` if you need templating, runtime/provider configuration, and local detection.
-
-`init` is a recognized command but prints "Planned for a future release" and takes no action.
-
-## Flags
-
-### `add`
-
-- `--workflow <name>`: select a workflow from a multi-workflow source
-- `--provider <name>`: choose a supported provider such as `claude`, `codex`, `glm`, or `custom`
-- `--runtime <name>`: override the provider runtime (`action`, `script`)
-- `--runner <name>`: override the workflow runner
-- `--model <name>`: override the default model
-- `--trigger <event>`: override smart workflow trigger placeholder
-- `--branch <name>`: override smart workflow branch placeholder
-- `--yes`: non-interactive mode
-- `--dry-run`: print target path without writing files
-- `--verbose`: show detection/render details
-
-### `create`
-
-- default: scaffold a copied-as-is workflow
-- `--smart`: scaffold a smart workflow
-- `--yes`: skip prompts
+Local sources are useful for development, testing before publishing, and internal shared directories.
 
 ## Non-Interactive / Agent Usage
 
-OpenCI is designed to work well in non-interactive environments.
-
-In `--yes` mode:
-- it never prompts
-- successful `add` prints only the created workflow path to stdout
-- warnings and secret setup hints go to stderr
-
-Example:
+In `--yes` mode, the CLI never prompts. Successful `add` prints only the created path to stdout; warnings go to stderr.
 
 ```bash
 npx openci add minghinmatthewlam/openci --workflow pr-review --provider claude --yes
 ```
 
-Script-runtime and self-hosted workflows can override runtime and runner directly:
+Override runtime and runner for script-based or self-hosted workflows:
 
 ```bash
 npx openci add minghinmatthewlam/openci --workflow security-scan --provider glm --runtime script --runner self-hosted-a8 --yes
 ```
 
-## Official Workflow Directory
+## Local Management
 
-The lightweight OSS directory app lives in [`web/`](web/).
+OpenCI stores per-workflow sidecar metadata at:
 
-It currently provides:
-- official workflow homepage
-- workflow detail pages
-- docs
-- simple static filtering over official workflows
+```text
+.github/workflows/.openci/<workflow>.json
+```
 
-It intentionally does **not** depend on:
-- telemetry-backed rankings
-- audits
-- hosted search APIs
+This records source, provider, runtime, runner, version, and install time so `list`, `status`, and `update` work reliably.
 
-That keeps the first public web experience fully OSS and easy to run locally.
-
-## Contributor Workflow
+## Creating Workflows
 
 ### Start with a regular workflow
 
-If you are learning the format or publishing a single opinionated workflow, start here:
+If you're new to workflow authoring, start with a copied-as-is workflow:
 
 ```bash
 npx openci create my-workflow --yes
 ```
 
-That gives you the simplest possible structure to edit and test.
-
 ### Move to smart workflows when needed
 
-If you need local detection and templating:
-
 ```bash
 npx openci create my-workflow --smart --yes
 ```
 
-Smart workflows are more powerful, but they also require more files and more testing.
+### Contributor loop
 
-Create a workflow scaffold:
+1. Scaffold a workflow
+2. Edit the generated files
+3. Dry-run install locally: `npx openci add . --workflow my-workflow --dry-run --yes`
+4. Run the test suite
+5. Publish or submit changes
 
-```bash
-npx openci create my-workflow --smart --yes
-```
+## Official Workflow Directory
 
-Test it locally from the workflow source root:
+The web directory lives in [`web/`](web/) and provides:
+- official workflow homepage with filtering
+- workflow detail pages
+- CLI and FAQ docs
 
-```bash
-npx openci add . --workflow my-workflow --dry-run --yes
-```
-
-Recommended contributor loop:
-1. scaffold a workflow
-2. edit the generated files
-3. dry-run install it locally
-4. run the test suite
-5. then publish or submit changes
+It is fully OSS with no telemetry, hosted search, or external dependencies.
 
 ## Development
 
-Requirements:
-- Node.js `>=20`
-- npm
-
-Contributor guidance is pinned to [`24.14.0`](.nvmrc) in `.nvmrc`.
+Requirements: Node.js `>=20`, npm. Version pinned to [`24.14.0`](.nvmrc) in `.nvmrc`.
 
 ### CLI
 
@@ -373,23 +299,38 @@ npm --prefix web run dev
 
 ## Publishing
 
-The npm package is published as `openci` and exposes the CLI through the `bin` entry in [`package.json`](package.json).
+Published as [`openci`](https://www.npmjs.com/package/openci) on npm via the `bin` entry in [`package.json`](package.json).
 
 Before publishing:
 
 ```bash
-npm run lint:actions
-npm run lint
-npm run format:check
-npm run typecheck
-npm test
-npm run build
-npm pack --dry-run
+npm run lint:actions && npm run lint && npm run format:check && npm run typecheck && npm test && npm run build && npm pack --dry-run
 ```
 
-The repository also includes:
-- CI workflow in [ci.yml](.github/workflows/ci.yml)
-- release workflow in [release.yml](.github/workflows/release.yml)
+CI and release workflows:
+- [ci.yml](.github/workflows/ci.yml)
+- [release.yml](.github/workflows/release.yml) — uses npm trusted publishing with provenance
 
-The release workflow uses npm trusted publishing with provenance.
-Workflow files are linted with `actionlint`, and project code is linted/formatted with `oxlint` and `oxfmt`.
+Code is linted with `actionlint` (workflows) and `oxlint`/`oxfmt` (project).
+
+## FAQ
+
+**What providers are supported?**
+Claude, Codex, GLM, and custom. Each workflow declares supported providers in its metadata.
+
+**Can I use private repos?**
+Yes. Any repo your local `git clone` can access works — SSH keys, HTTPS credentials, etc.
+
+**Where is metadata stored?**
+In `.github/workflows/.openci/<workflow>.json`, alongside the installed workflow files.
+
+**What's the difference between action and script runtimes?**
+Action runtime uses a GitHub Action (e.g., `uses: anthropics/claude-code-action`). Script runtime runs the agent via shell commands — useful for self-hosted runners or custom setups.
+
+## Contributing
+
+Open an issue on [GitHub](https://github.com/minghinmatthewlam/openci/issues) for bugs and feature requests.
+
+## License
+
+[Apache 2.0](LICENSE)
