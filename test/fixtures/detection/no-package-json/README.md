@@ -1,1 +1,0 @@
-# Fixture without package.json
