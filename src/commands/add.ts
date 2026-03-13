@@ -1,16 +1,14 @@
 import type { Command } from "commander";
-import { access, mkdir, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { detectRepo } from "../detection/index.js";
+import { access } from "node:fs/promises";
+import { join } from "node:path";
 import { upsertInstallationMetadata } from "../manifest/store.js";
-import { resolveSupportedProvider } from "../provider/resolve.js";
 import { resolveWorkflowBundle } from "../registry/source.js";
 import { isGhAuthenticated, isGhAvailable } from "../secrets/check.js";
 import { buildSecretInstructions } from "../secrets/prompt.js";
-import { resolveTemplateContext } from "../template/resolve.js";
-import { substituteTemplate } from "../template/substitute.js";
+import { atomicWrite } from "../utils/atomic-write.js";
 import { getGitRemoteUrl, getGitRepoRoot } from "../utils/git.js";
 import { createLogger } from "../utils/logger.js";
+import { renderWorkflow } from "./render-workflow.js";
 
 function hasRawFlag(command: Command, flag: string): boolean {
   const rawArgs = (command.parent as (Command & { rawArgs?: string[] }) | undefined)?.rawArgs;
@@ -90,68 +88,29 @@ export function registerAddCommand(program: Command): void {
           const { bundle } = resolvedSource;
           const targetPath = join(repoRoot, ".github", "workflows", `${bundle.metadata.name}.yml`);
 
-          let selectedProvider = resolveSupportedProvider(bundle.metadata, explicitProvider);
-          let selectedRuntime: "action" | "script" | undefined =
-            bundle.metadata.defaultRuntime ?? bundle.metadata.runtimes[0];
-          let selectedRunner: string | undefined =
-            bundle.metadata.defaultRunner ?? bundle.metadata.runners[0];
-          let output = bundle.workflow;
-
-          if (bundle.metadata.smart) {
-            if (!bundle.workflowTemplate || !bundle.config) {
-              throw new Error(
-                `Workflow '${bundle.metadata.name}' is missing smart workflow files.`,
-              );
-            }
-
-            const detected = await detectRepo(repoRoot, bundle.config.detect);
-            const resolved = resolveTemplateContext({
-              metadata: bundle.metadata,
-              config: bundle.config,
-              detected,
-              flags: {
-                provider: explicitProvider,
-                runtime: commandOptions.runtime,
-                runner: commandOptions.runner,
-                model: commandOptions.model,
-                trigger: commandOptions.trigger,
-                branch: commandOptions.branch,
-              },
-            });
-
-            selectedProvider = resolved.provider;
-            selectedRuntime = resolved.runtime;
-            selectedRunner = resolved.runner;
-            output = substituteTemplate(bundle.workflowTemplate, resolved.context);
-
-            if (verbose) {
-              logger.debug(`Detected values: ${JSON.stringify(detected, null, 2)}`);
-              logger.debug(`Resolved context: ${JSON.stringify(resolved.context, null, 2)}`);
-            }
-          } else {
-            if (hasRawFlag(command, "--runtime")) {
-              logger.warn(
-                `Ignoring --runtime for copied-as-is workflow '${bundle.metadata.name}'.`,
-              );
-            }
-            if (hasRawFlag(command, "--runner")) {
-              logger.warn(`Ignoring --runner for copied-as-is workflow '${bundle.metadata.name}'.`);
-            }
-            if (hasRawFlag(command, "--model")) {
-              logger.warn(`Ignoring --model for copied-as-is workflow '${bundle.metadata.name}'.`);
-            }
-            if (hasRawFlag(command, "--trigger")) {
-              logger.warn(
-                `Ignoring --trigger for copied-as-is workflow '${bundle.metadata.name}'.`,
-              );
-            }
-            if (hasRawFlag(command, "--branch")) {
-              logger.warn(`Ignoring --branch for copied-as-is workflow '${bundle.metadata.name}'.`);
+          // Warn about ignored flags on non-smart workflows
+          if (!bundle.metadata.smart) {
+            for (const flag of ["--runtime", "--runner", "--model", "--trigger", "--branch"]) {
+              if (hasRawFlag(command, flag)) {
+                logger.warn(
+                  `Ignoring ${flag} for copied-as-is workflow '${bundle.metadata.name}'.`,
+                );
+              }
             }
           }
 
-          if (!output) {
-            throw new Error(`Workflow '${bundle.metadata.name}' could not be resolved.`);
+          const result = await renderWorkflow(bundle, repoRoot, {
+            provider: explicitProvider,
+            runtime: commandOptions.runtime,
+            runner: commandOptions.runner,
+            model: commandOptions.model,
+            trigger: commandOptions.trigger,
+            branch: commandOptions.branch,
+          });
+
+          if (verbose && result.detected) {
+            logger.debug(`Detected values: ${JSON.stringify(result.detected, null, 2)}`);
+            logger.debug(`Resolved context: ${JSON.stringify(result.context, null, 2)}`);
           }
 
           const targetExists = await fileExists(targetPath);
@@ -162,21 +121,20 @@ export function registerAddCommand(program: Command): void {
           if (dryRun) {
             if (yes) {
               if (verbose) {
-                logger.debug(`Dry run preview for ${targetPath}:\n${output}`);
+                logger.debug(`Dry run preview for ${targetPath}:\n${result.output}`);
               }
               logger.machineResult(targetPath);
             } else {
-              process.stdout.write(`Would create ${targetPath}\n\n${output}\n`);
+              process.stdout.write(`Would create ${targetPath}\n\n${result.output}\n`);
             }
           } else {
-            await mkdir(dirname(targetPath), { recursive: true });
-            await writeFile(targetPath, output, "utf8");
+            await atomicWrite(targetPath, result.output);
             await upsertInstallationMetadata(repoRoot, {
               name: bundle.metadata.name,
               source: bundle.sourceLabel,
-              provider: selectedProvider,
-              runtime: selectedRuntime,
-              runner: selectedRunner,
+              provider: result.provider,
+              runtime: result.runtime,
+              runner: result.runner,
               model: commandOptions.model,
               trigger: commandOptions.trigger,
               branch: commandOptions.branch,
@@ -193,11 +151,11 @@ export function registerAddCommand(program: Command): void {
             }
           }
 
-          if (selectedProvider) {
+          if (result.provider) {
             const ghReady = isGhAvailable() && isGhAuthenticated();
             for (const instruction of buildSecretInstructions(
               bundle.metadata,
-              selectedProvider,
+              result.provider,
               remoteUrl,
               ghReady,
             )) {

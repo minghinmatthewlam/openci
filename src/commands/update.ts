@@ -1,14 +1,11 @@
 import type { Command } from "commander";
-import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { CliError } from "../core/errors.js";
-import { detectRepo } from "../detection/index.js";
 import { listInstallationMetadata, upsertInstallationMetadata } from "../manifest/store.js";
-import { resolveSupportedProvider } from "../provider/resolve.js";
 import { resolveWorkflowBundle } from "../registry/source.js";
-import { resolveTemplateContext } from "../template/resolve.js";
-import { substituteTemplate } from "../template/substitute.js";
+import { atomicWrite } from "../utils/atomic-write.js";
 import { getGitRepoRoot } from "../utils/git.js";
+import { renderWorkflow } from "./render-workflow.js";
 
 export function registerUpdateCommand(program: Command): void {
   program
@@ -47,52 +44,22 @@ export function registerUpdateCommand(program: Command): void {
 
           const { bundle } = resolved;
           const targetPath = join(repoRoot, installation.targetPath);
-          let selectedProvider = resolveSupportedProvider(bundle.metadata, installation.provider);
-          let selectedRuntime =
-            installation.runtime ?? bundle.metadata.defaultRuntime ?? bundle.metadata.runtimes[0];
-          let selectedRunner =
-            installation.runner ?? bundle.metadata.defaultRunner ?? bundle.metadata.runners[0];
-          let output = bundle.workflow;
 
-          if (bundle.metadata.smart) {
-            if (!bundle.workflowTemplate || !bundle.config) {
-              throw new Error(
-                `Workflow '${bundle.metadata.name}' is missing smart workflow files.`,
-              );
-            }
+          const result = await renderWorkflow(bundle, repoRoot, {
+            provider: installation.provider,
+            runtime: installation.runtime,
+            runner: installation.runner,
+            model: installation.model,
+            trigger: installation.trigger,
+            branch: installation.branch,
+          });
 
-            const detected = await detectRepo(repoRoot, bundle.config.detect);
-            const resolvedTemplate = resolveTemplateContext({
-              metadata: bundle.metadata,
-              config: bundle.config,
-              detected,
-              flags: {
-                provider: installation.provider,
-                runtime: installation.runtime,
-                runner: installation.runner,
-                model: installation.model,
-                trigger: installation.trigger,
-                branch: installation.branch,
-              },
-            });
-
-            selectedProvider = resolvedTemplate.provider;
-            selectedRuntime = resolvedTemplate.runtime;
-            selectedRunner = resolvedTemplate.runner;
-            output = substituteTemplate(bundle.workflowTemplate, resolvedTemplate.context);
-          }
-
-          if (!output) {
-            throw new Error(`Workflow '${bundle.metadata.name}' could not be resolved.`);
-          }
-
-          await mkdir(dirname(targetPath), { recursive: true });
-          await writeFile(targetPath, output, "utf8");
+          await atomicWrite(targetPath, result.output);
           await upsertInstallationMetadata(repoRoot, {
             ...installation,
-            provider: selectedProvider,
-            runtime: selectedRuntime,
-            runner: selectedRunner,
+            provider: result.provider,
+            runtime: result.runtime,
+            runner: result.runner,
             workflowVersion: bundle.metadata.version,
             targetPath,
             installedAt: new Date().toISOString(),
