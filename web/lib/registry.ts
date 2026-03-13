@@ -1,116 +1,74 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
-export interface RegistryEntry {
-  name: string;
+export interface CatalogEntry {
+  id: string;
   displayName: string;
   description: string;
+  source: string;
+  workflow: string;
+  provider: string;
+  category: string;
   tags: string[];
-  provider: string[];
-  runtimes: Array<"action" | "script">;
-  runners: string[];
-  defaultRuntime?: "action" | "script";
-  defaultRunner?: string;
-  smart: boolean;
-  stacks: string[];
-  author?: string;
-  repository?: string;
-  publishedAt?: string;
-}
-
-export interface WorkflowMetadata extends RegistryEntry {
-  version: string;
-  author: string;
-  requiredSecrets: Record<string, string[]>;
+  sourceUrl: string;
   triggers: string[];
-  minGitHubActionsVersion?: string | null;
+  secrets: string[];
+  highlights: string[];
+  addedAt: string;
 }
 
-export interface WorkflowBundle {
-  metadata: WorkflowMetadata;
-  readme: string;
-  config?: string;
-  template?: string;
-  workflow?: string;
+export interface Category {
+  id: string;
+  displayName: string;
 }
 
-export interface RegistryDocument {
+export interface Catalog {
   version: number;
   updatedAt: string;
-  workflows: RegistryEntry[];
+  categories: Category[];
+  workflows: CatalogEntry[];
 }
 
-const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const defaultRegistryRoot = path.resolve(currentDir, "../data/registry");
+const CATALOG_PATH = process.env.OPENCI_CATALOG_PATH
+  ? join(process.cwd(), process.env.OPENCI_CATALOG_PATH)
+  : join(process.cwd(), "..", "catalog.json");
 
-function getRegistryRoot(): string {
-  return process.env.OPENCI_WEB_REGISTRY_PATH
-    ? path.resolve(process.cwd(), process.env.OPENCI_WEB_REGISTRY_PATH)
-    : defaultRegistryRoot;
+let catalogCache: Catalog | undefined;
+
+export function readCatalog(): Catalog {
+  if (catalogCache) return catalogCache;
+  const raw = readFileSync(CATALOG_PATH, "utf8");
+  catalogCache = JSON.parse(raw) as Catalog;
+  return catalogCache;
 }
 
-export async function readRegistry(): Promise<RegistryDocument> {
-  const registryPath = path.join(getRegistryRoot(), "registry.json");
-  const raw = await readFile(registryPath, "utf8");
-  return JSON.parse(raw) as RegistryDocument;
-}
+export function listCatalogWorkflows(query?: string, filter?: string): CatalogEntry[] {
+  const catalog = readCatalog();
+  let workflows = catalog.workflows;
 
-export async function listRegistryWorkflows(): Promise<RegistryEntry[]> {
-  const registry = await readRegistry();
-  return registry.workflows.toSorted((left, right) => left.name.localeCompare(right.name));
-}
-
-export async function readWorkflowBundle(name: string): Promise<WorkflowBundle | undefined> {
-  const workflowRoot = path.join(getRegistryRoot(), "workflows", name);
-
-  try {
-    const metadataRaw = await readFile(path.join(workflowRoot, "metadata.json"), "utf8");
-    const metadata = JSON.parse(metadataRaw) as WorkflowMetadata;
-
-    const [readme, config, template, workflow] = await Promise.all([
-      readOptional(path.join(workflowRoot, "README.md")),
-      readOptional(path.join(workflowRoot, "openci.config.json")),
-      readOptional(path.join(workflowRoot, "workflow.yml.tmpl")),
-      readOptional(path.join(workflowRoot, "workflow.yml")),
-    ]);
-
-    return {
-      metadata,
-      readme: readme ?? "",
-      config: config ?? undefined,
-      template: template ?? undefined,
-      workflow: workflow ?? undefined,
-    };
-  } catch (error) {
-    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-      return undefined;
-    }
-
-    throw error;
-  }
-}
-
-export async function readWorkflowBundleByAuthor(
-  author: string,
-  name: string,
-): Promise<WorkflowBundle | undefined> {
-  const bundle = await readWorkflowBundle(name);
-  if (!bundle) {
-    return undefined;
+  if (filter && filter !== "all") {
+    workflows = workflows.filter((w) => w.category === filter || w.provider === filter);
   }
 
-  return bundle.metadata.author === author ? bundle : undefined;
+  if (query) {
+    const q = query.toLowerCase();
+    workflows = workflows.filter(
+      (w) =>
+        w.displayName.toLowerCase().includes(q) ||
+        w.description.toLowerCase().includes(q) ||
+        w.source.toLowerCase().includes(q) ||
+        w.provider.toLowerCase().includes(q) ||
+        w.tags.some((t) => t.toLowerCase().includes(q)),
+    );
+  }
+
+  return workflows.sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
-async function readOptional(filePath: string): Promise<string | undefined> {
-  try {
-    return await readFile(filePath, "utf8");
-  } catch (error) {
-    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-      return undefined;
-    }
+export function getCatalogEntry(id: string): CatalogEntry | undefined {
+  return readCatalog().workflows.find((w) => w.id === id);
+}
 
-    throw error;
-  }
+export function getCategories(): Category[] {
+  return readCatalog().categories;
 }
