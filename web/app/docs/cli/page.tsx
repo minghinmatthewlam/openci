@@ -14,85 +14,80 @@ export default function CliPage(): React.ReactNode {
           <article className="docs-content">
             <h1>CLI Reference</h1>
             <p className="docs-intro">
-              The CLI is the primary way to install and manage AI-powered workflows for your
-              repositories.
+              The CLI installs and manages GitHub Actions workflows from any repository.
             </p>
 
             <section>
               <h2>Installation</h2>
-              <p>The CLI can be run directly with npx — no installation required:</p>
-              <CopyCommand value="npx openci add minghinmatthewlam/openci --workflow pr-review" />
+              <p>Run directly with npx — no global install required:</p>
+              <CopyCommand value="npx openci add anthropics/claude-code --workflow claude" />
             </section>
 
             <section>
               <h2>Commands</h2>
 
               <h3>add</h3>
-              <p>Install a workflow into your repo from any supported source:</p>
-              <CopyCommand value="npx openci add minghinmatthewlam/openci --workflow pr-review --provider claude" />
+              <p>Install a workflow from a GitHub repository:</p>
+              <CopyCommand value="npx openci add openai/codex --workflow issue-labeler" />
               <ul>
                 <li>
-                  <code>--workflow &lt;name&gt;</code> — select a workflow from a multi-workflow
-                  source
+                  <code>&lt;source&gt;</code> — GitHub <code>owner/repo</code>, git URL, or local
+                  path
                 </li>
                 <li>
-                  <code>--provider &lt;name&gt;</code> — choose a provider (claude, codex, glm,
-                  custom)
+                  <code>--workflow &lt;name&gt;</code> — select a specific workflow file (stem name,
+                  no extension)
                 </li>
                 <li>
-                  <code>--runtime &lt;name&gt;</code> — override the runtime (action, script)
+                  <code>--force</code> — overwrite an existing workflow without prompting
                 </li>
                 <li>
-                  <code>--runner &lt;name&gt;</code> — override the workflow runner
+                  <code>--dry-run</code> — print what would be written without writing files
                 </li>
                 <li>
-                  <code>--model &lt;name&gt;</code> — override the default model
+                  <code>--yes</code> — non-interactive mode, skip all prompts
                 </li>
                 <li>
-                  <code>--trigger &lt;event&gt;</code> — override smart workflow trigger
-                </li>
-                <li>
-                  <code>--branch &lt;name&gt;</code> — override smart workflow branch
-                </li>
-                <li>
-                  <code>--yes</code> — non-interactive mode
-                </li>
-                <li>
-                  <code>--dry-run</code> — print target path without writing files
-                </li>
-                <li>
-                  <code>--verbose</code> — show detection and render details
+                  <code>--verbose</code> — show detailed output during install
                 </li>
               </ul>
 
-              <h3>search</h3>
-              <p>Search official workflow metadata:</p>
-              <CopyCommand value="npx openci search review" />
-
               <h3>list</h3>
-              <p>Show locally installed workflows in the current repo:</p>
+              <p>Show all workflows installed via OpenCI in the current repo:</p>
               <CopyCommand value="npx openci list" />
 
               <h3>status</h3>
-              <p>Show local workflow health and filesystem state:</p>
+              <p>
+                Check the health of installed workflows. Reports drift between the local file and
+                the recorded source:
+              </p>
               <CopyCommand value="npx openci status" />
 
               <h3>update</h3>
               <p>
-                Refresh installed workflows from their recorded source metadata. Pass one or more
-                names to update specific workflows:
+                Pull the latest version of installed workflows from their source repos. Pass one or
+                more names to update specific workflows:
               </p>
-              <CopyCommand value="npx openci update pr-review" />
+              <CopyCommand value="npx openci update claude" />
+              <ul>
+                <li>
+                  <code>[workflows...]</code> — optional list of workflow names to update
+                </li>
+                <li>
+                  <code>--force</code> — overwrite even if local changes are detected
+                </li>
+              </ul>
 
-              <h3>info</h3>
-              <p>Inspect an official workflow:</p>
-              <CopyCommand value="npx openci info pr-review" />
+              <h3>remove</h3>
+              <p>Remove an installed workflow and its sidecar metadata:</p>
+              <CopyCommand value="npx openci remove claude" />
 
-              <h3>create</h3>
+              <h3>doctor</h3>
               <p>
-                Scaffold a new workflow. Add <code>--smart</code> for templated workflows:
+                Run diagnostics on your OpenCI setup. Checks for missing sidecar files, orphaned
+                metadata, and configuration issues:
               </p>
-              <CopyCommand value="npx openci create my-workflow --smart --yes" />
+              <CopyCommand value="npx openci doctor" />
             </section>
 
             <section>
@@ -122,7 +117,7 @@ export default function CliPage(): React.ReactNode {
                 prints only the created workflow path to stdout. Warnings and secret setup hints go
                 to stderr.
               </p>
-              <CopyCommand value="npx openci add minghinmatthewlam/openci --workflow pr-review --provider claude --yes" />
+              <CopyCommand value="npx openci add anthropics/claude-code --workflow claude --yes" />
             </section>
           </article>
         </div>

@@ -12,26 +12,67 @@ export default function FaqPage(): React.ReactNode {
 
           <article className="docs-content">
             <h1>FAQ</h1>
-            <p className="docs-intro">Common questions about OpenCI workflows and the CLI.</p>
+            <p className="docs-intro">Common questions about OpenCI and the CLI.</p>
 
             <section>
-              <h2>What are smart workflows?</h2>
+              <h2>What repos can I install from?</h2>
               <p>
-                Smart workflows use <code>openci.config.json</code> for local detection and
-                substitution when generating the installed YAML. They adapt to your repo's package
-                manager, validation command, branch, provider, runtime, and runner automatically.
-              </p>
-              <p>
-                Regular workflows are copied as-is and are best when the stack is fixed or the
-                workflow is intentionally opinionated.
+                Any GitHub repository that has workflow files in <code>.github/workflows/</code>.
+                Public repos work out of the box. Private repos are supported through your normal
+                git credentials (SSH keys, configured tokens, or any auth flow your local git
+                already uses). OpenCI does not prompt for credentials itself.
               </p>
             </section>
 
             <section>
-              <h2>Which providers are supported?</h2>
+              <h2>How does update detect local changes?</h2>
               <p>
-                OpenCI currently supports Claude, Codex, GLM, and custom providers. Each workflow
-                declares which providers it supports in its metadata.
+                When you install a workflow, OpenCI records a content hash in the sidecar metadata
+                at <code>.github/workflows/.openci/&lt;workflow&gt;.json</code>. On{" "}
+                <code>update</code>, it compares the current file hash to the recorded one. If they
+                differ, the CLI warns you that local changes exist and asks for confirmation before
+                overwriting. Use <code>--force</code> to skip the prompt.
+              </p>
+            </section>
+
+            <section>
+              <h2>What does doctor check?</h2>
+              <p>
+                The <code>doctor</code> command runs several diagnostics:
+              </p>
+              <ul>
+                <li>
+                  Missing sidecar metadata for workflow files that appear to be OpenCI-managed
+                </li>
+                <li>Orphaned sidecar files with no corresponding workflow</li>
+                <li>Source repo accessibility (can the recorded source still be reached?)</li>
+                <li>
+                  Configuration issues in the <code>.openci/</code> directory
+                </li>
+              </ul>
+            </section>
+
+            <section>
+              <h2>How do I find workflows?</h2>
+              <p>
+                The OpenCI catalog on the homepage lists verified workflows from popular open-source
+                repos. You can filter by category (code review, issue automation, security) or by AI
+                provider (Claude, Codex, Gemini). Each entry links directly to the source file on
+                GitHub.
+              </p>
+              <p>
+                You can also install from any repo you know about — the catalog is just a curated
+                starting point.
+              </p>
+            </section>
+
+            <section>
+              <h2>Where does OpenCI store metadata?</h2>
+              <p>
+                Per-workflow sidecar metadata is stored in{" "}
+                <code>.github/workflows/.openci/&lt;workflow&gt;.json</code>. This records the
+                source, workflow name, content hash, and install time so <code>list</code>,{" "}
+                <code>status</code>, and <code>update</code> work reliably.
               </p>
             </section>
 
@@ -41,34 +82,6 @@ export default function FaqPage(): React.ReactNode {
                 Yes. Private repos are supported through normal git credentials — SSH keys,
                 configured git credentials, or any auth flow your local git already uses. OpenCI
                 does not prompt for credentials itself.
-              </p>
-            </section>
-
-            <section>
-              <h2>Where does OpenCI store metadata?</h2>
-              <p>
-                Per-workflow sidecar metadata is stored in{" "}
-                <code>.github/workflows/.openci/&lt;workflow&gt;.json</code>. This records the
-                source, provider, runtime, runner, version, and install time so <code>list</code>,{" "}
-                <code>status</code>, and <code>update</code> work reliably.
-              </p>
-            </section>
-
-            <section>
-              <h2>How does discovery work?</h2>
-              <p>
-                The site lists official workflows from the public repository. It is a simple OSS
-                directory without hosted search or telemetry-backed rankings.
-              </p>
-            </section>
-
-            <section>
-              <h2>What is the difference between action and script runtimes?</h2>
-              <p>
-                Action runtime uses a GitHub Actions action (like{" "}
-                <code>uses: anthropics/claude-code-action</code>). Script runtime runs the AI agent
-                directly via a shell script in the workflow, which is useful for self-hosted runners
-                or custom setups.
               </p>
             </section>
           </article>
