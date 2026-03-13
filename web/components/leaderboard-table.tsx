@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { CatalogEntry } from "../lib/registry";
-import { buildInstallCommand } from "../lib/site";
 
 const PROVIDER_COLORS: Record<string, string> = {
   claude: "text-orange-400",
