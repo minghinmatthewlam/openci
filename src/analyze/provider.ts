@@ -29,7 +29,9 @@ export function detectProvider(yamlContent: string): ProviderInfo | undefined {
         model = yamlContent.match(MODEL_INPUT_RE)?.[1];
       }
 
-      return { name, action, model };
+      const result: ProviderInfo = { name, action };
+      if (model) result.model = model;
+      return result;
     }
   }
   return undefined;

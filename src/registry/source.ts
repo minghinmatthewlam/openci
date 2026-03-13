@@ -159,14 +159,16 @@ export async function fetchWorkflowFile(params: {
       throw new CliError(`Workflow '${stem}' not found in ${sourceLabel}.${suggestion}`);
     }
     const content = await readFile(path.join(dir, match.filename), "utf8");
-    return {
+    const commit = getCommitSha(root);
+    const result: WorkflowFile = {
       name: match.name,
       filename: match.filename,
       content,
       contentHash: computeHash(content),
       source: sourceLabel,
-      commit: getCommitSha(root),
     };
+    if (commit) result.commit = commit;
+    return result;
   }
 
   if (source.kind === "local") {
