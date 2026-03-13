@@ -1,5 +1,5 @@
 {
-  "name": "openci",
+  "name": "openci-app",
   "version": "0.1.0",
   "description": "Install GitHub Actions workflows from any repo",
   "license": "Apache-2.0",
