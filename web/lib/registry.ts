@@ -14,7 +14,6 @@ export interface RegistryEntry {
   defaultRunner?: string;
   smart: boolean;
   stacks: string[];
-  author?: string;
   repository?: string;
   publishedAt?: string;
 }
@@ -66,8 +65,6 @@ export async function listRegistryWorkflows(): Promise<RegistryEntry[]> {
         return {
           ...workflow,
           author: bundle?.metadata.author,
-          repository: bundle?.metadata.repository,
-          publishedAt: bundle?.metadata.publishedAt,
         };
       }),
   );
@@ -78,7 +75,7 @@ export async function readWorkflowBundle(name: string): Promise<WorkflowBundle |
 
   try {
     const metadataRaw = await readFile(path.join(workflowRoot, "metadata.json"), "utf8");
-    const metadata = withWorkflowDefaults(JSON.parse(metadataRaw) as Partial<WorkflowMetadata>);
+    const metadata = JSON.parse(metadataRaw) as WorkflowMetadata;
 
     const [readme, config, template, workflow] = await Promise.all([
       readOptional(path.join(workflowRoot, "README.md")),
@@ -101,25 +98,6 @@ export async function readWorkflowBundle(name: string): Promise<WorkflowBundle |
 
     throw error;
   }
-}
-
-function withWorkflowDefaults(metadata: Partial<WorkflowMetadata>): WorkflowMetadata {
-  return {
-    provider: [],
-    runtimes: [],
-    runners: [],
-    requiredSecrets: {},
-    triggers: [],
-    stacks: [],
-    smart: false,
-    version: "1.0.0",
-    author: "openci",
-    name: "",
-    displayName: "",
-    description: "",
-    tags: [],
-    ...metadata,
-  };
 }
 
 export async function readWorkflowBundleByAuthor(

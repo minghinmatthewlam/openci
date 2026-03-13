@@ -1,6 +1,13 @@
 # Security Scan
 
-Runs a security-focused PR scan with GLM on a self-hosted runner.
+Adds a security-focused AI review pass to pull requests.
+
+## Focus areas
+
+- leaked credentials
+- insecure route handlers
+- unsafe shell execution
+- auth bypasses and permission bugs
 
 ## Install
 

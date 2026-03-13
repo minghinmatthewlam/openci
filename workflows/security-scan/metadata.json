@@ -1,10 +1,10 @@
 {
   "name": "security-scan",
   "displayName": "Security Scan",
-  "description": "AI agent scans pull requests for security vulnerabilities.",
+  "description": "Scan pull requests for security vulnerabilities, unsafe patterns, and secret leaks.",
   "version": "1.0.0",
   "author": "openci",
-  "tags": ["security", "pull-request"],
+  "tags": ["security", "pull-request", "review"],
   "provider": ["glm"],
   "runtimes": ["script"],
   "runners": ["self-hosted-a8"],
@@ -16,5 +16,7 @@
   },
   "triggers": ["pull_request"],
   "stacks": ["any"],
-  "minGitHubActionsVersion": null
+  "minGitHubActionsVersion": null,
+  "repository": "minghinmatthewlam/openci",
+  "publishedAt": "2026-03-09"
 }

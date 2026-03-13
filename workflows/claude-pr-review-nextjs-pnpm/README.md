@@ -1,3 +1,15 @@
 # Claude PR Review (Next.js + pnpm)
 
-Pre-configured AI code review for Next.js projects using pnpm.
+Static workflow tuned for Next.js repositories using pnpm and Claude.
+
+## Why use it
+
+- zero detection logic
+- opinionated install commands
+- fast path when you know your stack already
+
+## Install
+
+```bash
+npx openci add minghinmatthewlam/openci --workflow claude-pr-review-nextjs-pnpm --provider claude
+```

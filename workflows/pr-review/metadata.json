@@ -4,7 +4,7 @@
   "description": "Automated code review on pull requests using an AI coding agent.",
   "version": "1.0.0",
   "author": "openci",
-  "tags": ["code-review", "pull-request", "ai-agent"],
+  "tags": ["code-review", "pull-request", "ai-agent", "automation"],
   "provider": ["claude", "codex"],
   "runtimes": ["action", "script"],
   "runners": ["github-ubuntu", "self-hosted-a8"],
@@ -17,5 +17,7 @@
   },
   "triggers": ["pull_request"],
   "stacks": ["any"],
-  "minGitHubActionsVersion": null
+  "minGitHubActionsVersion": null,
+  "repository": "minghinmatthewlam/openci",
+  "publishedAt": "2026-03-09"
 }

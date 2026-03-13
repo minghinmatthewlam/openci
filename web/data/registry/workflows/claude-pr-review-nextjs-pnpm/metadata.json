@@ -16,7 +16,6 @@
   },
   "triggers": ["pull_request"],
   "stacks": ["nextjs"],
-  "minGitHubActionsVersion": null,
   "repository": "community-contributor/workflows",
   "publishedAt": "2026-03-08"
 }

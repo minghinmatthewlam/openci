@@ -4,7 +4,7 @@
   "description": "Static workflow for Claude-powered PR review on Next.js projects using pnpm.",
   "version": "1.0.0",
   "author": "community-contributor",
-  "tags": ["code-review", "pull-request", "nextjs", "pnpm", "claude"],
+  "tags": ["code-review", "pull-request", "nextjs", "pnpm"],
   "provider": ["claude"],
   "runtimes": ["action"],
   "runners": ["github-ubuntu"],
@@ -15,5 +15,7 @@
     "claude": ["ANTHROPIC_API_KEY"]
   },
   "triggers": ["pull_request"],
-  "stacks": ["nextjs"]
+  "stacks": ["nextjs"],
+  "repository": "community-contributor/workflows",
+  "publishedAt": "2026-03-08"
 }

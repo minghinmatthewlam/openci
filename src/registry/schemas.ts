@@ -14,6 +14,8 @@ export const RegistryWorkflowSchema = z.object({
   defaultRunner: z.string().optional(),
   smart: z.boolean(),
   stacks: z.array(z.string()).default([]),
+  repository: z.string().optional(),
+  publishedAt: z.string().optional(),
 });
 
 export const RegistrySchema = z.object({
@@ -39,6 +41,8 @@ export const WorkflowMetadataSchema = z.object({
   triggers: z.array(z.string()),
   stacks: z.array(z.string()).optional().default([]),
   minGitHubActionsVersion: z.string().nullable().optional(),
+  repository: z.string().optional(),
+  publishedAt: z.string().optional(),
 });
 
 export type Registry = z.infer<typeof RegistrySchema>;

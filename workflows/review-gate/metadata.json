@@ -13,5 +13,7 @@
   "requiredSecrets": {},
   "triggers": ["pull_request"],
   "stacks": ["any"],
-  "minGitHubActionsVersion": null
+  "minGitHubActionsVersion": null,
+  "repository": "minghinmatthewlam/openci",
+  "publishedAt": "2026-03-09"
 }
