@@ -1,11 +1,18 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { clearCatalogCache } from "../lib/registry";
 import HomePage from "../app/page";
 import DocsPage from "../app/docs/page";
 import CatalogDetailPage from "../app/catalog/[id]/page";
 
 describe("route components", () => {
   beforeEach(() => {
-    process.env.OPENCI_CATALOG_PATH = "../catalog.json";
+    clearCatalogCache();
+    process.env.OPENCI_CATALOG_PATH = "catalog.json";
+  });
+
+  afterEach(() => {
+    delete process.env.OPENCI_CATALOG_PATH;
+    clearCatalogCache();
   });
 
   it("renders the homepage tree", async () => {

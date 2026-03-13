@@ -1,13 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getCatalogEntry, getCategories, listCatalogWorkflows, readCatalog } from "../lib/registry";
+import {
+  clearCatalogCache,
+  getCatalogEntry,
+  getCategories,
+  listCatalogWorkflows,
+  readCatalog,
+} from "../lib/registry";
 
 describe("catalog loader", () => {
   beforeEach(() => {
-    process.env.OPENCI_CATALOG_PATH = "../catalog.json";
+    clearCatalogCache();
+    process.env.OPENCI_CATALOG_PATH = "catalog.json";
   });
 
   afterEach(() => {
     delete process.env.OPENCI_CATALOG_PATH;
+    clearCatalogCache();
   });
 
   it("loads the catalog document", () => {
@@ -23,7 +31,7 @@ describe("catalog loader", () => {
     const names = workflows.map((w) => w.displayName);
 
     for (let i = 1; i < names.length; i++) {
-      expect(names[i].localeCompare(names[i - 1])).toBeGreaterThanOrEqual(0);
+      expect(names[i]!.localeCompare(names[i - 1]!)).toBeGreaterThanOrEqual(0);
     }
   });
 
