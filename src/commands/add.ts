@@ -1,169 +1,199 @@
 import type { Command } from "commander";
-import { access } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
+import {
+  extractSecrets,
+  detectProvider,
+  extractPermissions,
+  hasTimeout,
+  extractTriggers,
+  findConflicts,
+} from "../analyze/index.js";
 import { upsertInstallationMetadata } from "../manifest/store.js";
-import { resolveWorkflowBundle } from "../registry/source.js";
+import { fetchWorkflowFile, listAvailableWorkflows } from "../registry/source.js";
 import { isGhAuthenticated, isGhAvailable } from "../secrets/check.js";
 import { buildSecretInstructions } from "../secrets/prompt.js";
 import { atomicWrite } from "../utils/atomic-write.js";
 import { getGitRemoteUrl, getGitRepoRoot } from "../utils/git.js";
 import { createLogger } from "../utils/logger.js";
-import { renderWorkflow } from "./render-workflow.js";
 
-function hasRawFlag(command: Command, flag: string): boolean {
-  const rawArgs = (command.parent as (Command & { rawArgs?: string[] }) | undefined)?.rawArgs;
-  return rawArgs?.includes(flag) ?? false;
-}
-
-async function fileExists(path: string): Promise<boolean> {
+async function fileExists(filepath: string): Promise<boolean> {
   try {
-    await access(path);
+    const { access } = await import("node:fs/promises");
+    await access(filepath);
     return true;
   } catch {
     return false;
   }
 }
 
+async function getExistingWorkflowTriggers(
+  repoRoot: string,
+): Promise<Array<{ name: string; triggers: ReturnType<typeof extractTriggers> }>> {
+  const dir = join(repoRoot, ".github", "workflows");
+  try {
+    const files = await readdir(dir);
+    const results: Array<{ name: string; triggers: ReturnType<typeof extractTriggers> }> = [];
+    for (const file of files) {
+      if (file.endsWith(".yml") || file.endsWith(".yaml")) {
+        try {
+          const content = await readFile(join(dir, file), "utf8");
+          results.push({
+            name: file.replace(/\.ya?ml$/, ""),
+            triggers: extractTriggers(content),
+          });
+        } catch {
+          /* skip unreadable files */
+        }
+      }
+    }
+    return results;
+  } catch {
+    return [];
+  }
+}
+
 export function registerAddCommand(program: Command): void {
   program
     .command("add")
-    .description("Install a workflow into your repo")
-    .argument("<source>")
-    .option("--provider <name>", "Provider override")
-    .option("--runtime <name>", "Runtime override: action, script")
-    .option("--runner <name>", "Runner override")
-    .option("--model <name>", "Model override")
-    .option("--trigger <event>", "Workflow trigger override")
-    .option("--branch <name>", "Target branch override")
+    .description("Install a workflow from any repo")
+    .argument("<source>", "Source: owner/repo, git URL, or local path")
+    .option("--workflow <name>", "Workflow to install (omit to list available)")
+    .option("--force", "Overwrite existing workflow file")
     .option("--yes", "Non-interactive mode")
-    .option("--dry-run", "Show what would be installed without writing files")
-    .option("--verbose", "Show detection and substitution details")
-    .option("--workflow <name>", "Workflow to install from the source")
+    .option("--dry-run", "Show what would be installed without writing")
+    .option("--verbose", "Show additional details")
     .action(
       async (
         sourceArg: string,
         options: {
           workflow?: string;
-          provider?: string;
-          runtime?: "action" | "script";
-          runner?: string;
-          model?: string;
-          trigger?: string;
-          branch?: string;
+          force?: boolean;
           yes?: boolean;
           dryRun?: boolean;
           verbose?: boolean;
         },
-        command: Command,
       ) => {
-        const commandOptions = command.opts<{
-          provider?: string;
-          runtime?: "action" | "script";
-          runner?: string;
-          model?: string;
-          trigger?: string;
-          branch?: string;
-          yes?: boolean;
-          dryRun?: boolean;
-          verbose?: boolean;
-        }>();
-
-        const explicitProvider = hasRawFlag(command, "--provider")
-          ? commandOptions.provider
-          : undefined;
-        const yes = Boolean(commandOptions.yes);
-        const dryRun = Boolean(commandOptions.dryRun);
-        const verbose = Boolean(commandOptions.verbose);
+        const yes = Boolean(options.yes);
+        const dryRun = Boolean(options.dryRun);
+        const verbose = Boolean(options.verbose);
         const logger = createLogger({ yes, verbose });
         const cwd = process.cwd();
         const repoRoot = getGitRepoRoot(cwd);
-        const remoteUrl = getGitRemoteUrl(repoRoot);
-        const resolvedSource = await resolveWorkflowBundle({
+
+        // List mode: no --workflow specified
+        if (!options.workflow) {
+          const result = await listAvailableWorkflows({ cwd, sourceArg });
+          try {
+            if (result.workflows.length === 0) {
+              throw new (await import("../core/errors.js")).CliError(
+                `No workflows found in ${sourceArg}. The repo may not have a .github/workflows/ directory.`,
+              );
+            }
+            process.stdout.write(`Available workflows in ${sourceArg}:\n\n`);
+            for (const w of result.workflows) {
+              process.stdout.write(
+                `  ${w.name.padEnd(30)} openci add ${sourceArg} --workflow ${w.name}\n`,
+              );
+            }
+            process.stdout.write(`\n${result.workflows.length} workflow(s) found.\n`);
+          } finally {
+            await result.cleanup?.();
+          }
+          return;
+        }
+
+        // Install mode
+        const resolved = await fetchWorkflowFile({
           cwd,
           sourceArg,
           workflow: options.workflow,
         });
-
         try {
-          const { bundle } = resolvedSource;
-          const targetPath = join(repoRoot, ".github", "workflows", `${bundle.metadata.name}.yml`);
+          const { file } = resolved;
+          const targetPath = join(repoRoot, ".github", "workflows", file.filename);
 
-          // Warn about ignored flags on non-smart workflows
-          if (!bundle.metadata.smart) {
-            for (const flag of ["--runtime", "--runner", "--model", "--trigger", "--branch"]) {
-              if (hasRawFlag(command, flag)) {
-                logger.warn(
-                  `Ignoring ${flag} for copied-as-is workflow '${bundle.metadata.name}'.`,
-                );
-              }
+          // Check existing file
+          if (await fileExists(targetPath)) {
+            if (!options.force) {
+              const { CliError } = await import("../core/errors.js");
+              throw new CliError(`${file.filename} already exists. Use --force to overwrite.`);
             }
-          }
-
-          const result = await renderWorkflow(bundle, repoRoot, {
-            provider: explicitProvider,
-            runtime: commandOptions.runtime,
-            runner: commandOptions.runner,
-            model: commandOptions.model,
-            trigger: commandOptions.trigger,
-            branch: commandOptions.branch,
-          });
-
-          if (verbose && result.detected) {
-            logger.debug(`Detected values: ${JSON.stringify(result.detected, null, 2)}`);
-            logger.debug(`Resolved context: ${JSON.stringify(result.context, null, 2)}`);
-          }
-
-          const targetExists = await fileExists(targetPath);
-          if (targetExists) {
-            logger.warn(`Overwriting existing workflow at ${targetPath}.`);
+            logger.warn(`Overwriting existing ${file.filename}`);
           }
 
           if (dryRun) {
-            if (yes) {
-              if (verbose) {
-                logger.debug(`Dry run preview for ${targetPath}:\n${result.output}`);
-              }
-              logger.machineResult(targetPath);
-            } else {
-              process.stdout.write(`Would create ${targetPath}\n\n${result.output}\n`);
-            }
+            process.stdout.write(`Would install ${file.filename} from ${file.source}\n`);
           } else {
-            await atomicWrite(targetPath, result.output);
+            await atomicWrite(targetPath, file.content);
             await upsertInstallationMetadata(repoRoot, {
-              name: bundle.metadata.name,
-              source: bundle.sourceLabel,
-              provider: result.provider,
-              runtime: result.runtime,
-              runner: result.runner,
-              model: commandOptions.model,
-              trigger: commandOptions.trigger,
-              branch: commandOptions.branch,
-              smart: bundle.metadata.smart,
-              workflowVersion: bundle.metadata.version,
+              name: file.name,
+              source: file.source,
+              workflow: file.name,
+              commit: file.commit,
+              contentHash: file.contentHash,
               targetPath,
               installedAt: new Date().toISOString(),
             });
-
             if (yes) {
-              logger.machineResult(targetPath);
+              process.stdout.write(`${targetPath}\n`);
             } else {
-              process.stdout.write(`Created ${targetPath}\n`);
+              process.stdout.write(`Installed ${file.filename}\n`);
             }
           }
 
-          if (result.provider) {
-            const ghReady = isGhAvailable() && isGhAuthenticated();
-            for (const instruction of buildSecretInstructions(
-              bundle.metadata,
-              result.provider,
-              remoteUrl,
-              ghReady,
-            )) {
-              logger.warn(instruction);
+          // Post-install intelligence
+          if (!yes || verbose) {
+            const provider = detectProvider(file.content);
+            const secrets = extractSecrets(file.content);
+            const permissions = extractPermissions(file.content);
+            const timeout = hasTimeout(file.content);
+            const triggers = extractTriggers(file.content);
+
+            const lines: string[] = [""];
+            if (provider) {
+              lines.push(`  Provider:     ${provider.name} (${provider.action})`);
+              if (provider.model) lines.push(`  Model:        ${provider.model}`);
+            }
+            if (triggers.length > 0) {
+              lines.push(`  Triggers:     ${triggers.map((t) => t.event).join(", ")}`);
+            }
+            const permEntries = Object.entries(permissions);
+            if (permEntries.length > 0) {
+              lines.push(`  Permissions:  ${permEntries.map(([k, v]) => `${k}: ${v}`).join(", ")}`);
+            }
+            if (!timeout) {
+              lines.push(`  Warning:      No timeout-minutes set (GitHub default: 6 hours)`);
+            }
+
+            // Conflict detection
+            const existing = await getExistingWorkflowTriggers(repoRoot);
+            const conflicts = findConflicts(
+              file.name,
+              triggers,
+              existing.filter((e) => e.name !== file.name),
+            );
+            for (const conflict of conflicts) {
+              lines.push(`  Conflict:     ${conflict}`);
+            }
+
+            if (lines.length > 1) {
+              for (const line of lines) process.stdout.write(`${line}\n`);
+            }
+
+            // Secret instructions
+            if (secrets.length > 0 && !dryRun) {
+              const remoteUrl = getGitRemoteUrl(repoRoot);
+              const ghReady = isGhAvailable() && isGhAuthenticated();
+              const instructions = buildSecretInstructions(secrets, remoteUrl, ghReady);
+              process.stdout.write("\n");
+              for (const instruction of instructions) {
+                logger.warn(instruction);
+              }
             }
           }
         } finally {
-          await resolvedSource.cleanup?.();
+          await resolved.cleanup?.();
         }
       },
     );

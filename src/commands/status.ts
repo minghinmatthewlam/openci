@@ -16,40 +16,29 @@ export function registerStatusCommand(program: Command): void {
       let workflowFiles: string[] = [];
       try {
         workflowFiles = (await readdir(workflowsDir))
-          .filter((file) => file.endsWith(".yml") || file.endsWith(".yaml"))
-          .map((file) => join(".github", "workflows", file));
+          .filter((f) => f.endsWith(".yml") || f.endsWith(".yaml"))
+          .map((f) => join(".github", "workflows", f));
       } catch {
         workflowFiles = [];
       }
 
-      process.stdout.write("name\tprovider\truntime\trunner\tsource\tversion\tfile\tstatus\n");
+      process.stdout.write("name\tsource\tfile\tstatus\n");
 
-      if (installations.length === 0) {
-        for (const file of workflowFiles) {
-          const name = file.replace(/^\.github\/workflows\//, "").replace(/\.ya?ml$/, "");
-          process.stdout.write(
-            `${name}\tunknown\tunknown\tunknown\tunknown\tunknown\t${file}\tuntracked-file\n`,
-          );
-        }
-        return;
-      }
+      const trackedFiles = new Set(installations.map((i) => i.targetPath));
 
-      const trackedFiles = new Set(installations.map((item) => item.targetPath));
       for (const installation of installations) {
         const status = workflowFiles.includes(installation.targetPath)
           ? "installed"
           : "missing-file";
         process.stdout.write(
-          `${installation.name}\t${installation.provider ?? "none"}\t${installation.runtime ?? "none"}\t${installation.runner ?? "none"}\t${installation.source}\t${installation.workflowVersion}\t${installation.targetPath}\t${status}\n`,
+          `${installation.name}\t${installation.source}\t${installation.targetPath}\t${status}\n`,
         );
       }
 
       for (const file of workflowFiles) {
         if (!trackedFiles.has(file)) {
           const name = file.replace(/^\.github\/workflows\//, "").replace(/\.ya?ml$/, "");
-          process.stdout.write(
-            `${name}\tunknown\tunknown\tunknown\tunknown\tunknown\t${file}\tuntracked-file\n`,
-          );
+          process.stdout.write(`${name}\tunknown\t${file}\tuntracked\n`);
         }
       }
     });

@@ -1,0 +1,374 @@
+{
+  "version": 1,
+  "updatedAt": "2026-03-13",
+  "categories": [
+    { "id": "code-review", "displayName": "Code Review" },
+    { "id": "issue-automation", "displayName": "Issue Automation" },
+    { "id": "security", "displayName": "Security" },
+    { "id": "release", "displayName": "Release Management" },
+    { "id": "ci-automation", "displayName": "CI Automation" }
+  ],
+  "workflows": [
+    {
+      "id": "claude-code-assistant",
+      "displayName": "Claude Code Assistant",
+      "description": "Invoke Claude via @claude mentions in issues and PR comments.",
+      "source": "anthropics/claude-code",
+      "workflow": "claude",
+      "provider": "claude",
+      "category": "code-review",
+      "tags": ["pr-review", "issue-help", "claude-code-action"],
+      "sourceUrl": "https://github.com/anthropics/claude-code/blob/main/.github/workflows/claude.yml",
+      "triggers": ["issue_comment", "pull_request_review_comment", "issues", "pull_request_review"],
+      "secrets": ["ANTHROPIC_API_KEY"],
+      "highlights": [
+        "Responds to @claude mentions in issues and PR comments",
+        "Uses anthropics/claude-code-action with Claude Sonnet",
+        "Read-only permissions by default"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "claude-code-issue-triage",
+      "displayName": "Claude Issue Triage",
+      "description": "Automatically triage and label new issues using Claude.",
+      "source": "anthropics/claude-code",
+      "workflow": "claude-issue-triage",
+      "provider": "claude",
+      "category": "issue-automation",
+      "tags": ["triage", "labeling", "issue-management"],
+      "sourceUrl": "https://github.com/anthropics/claude-code/blob/main/.github/workflows/claude-issue-triage.yml",
+      "triggers": ["issues", "issue_comment"],
+      "secrets": ["ANTHROPIC_API_KEY"],
+      "highlights": [
+        "Triages newly opened issues with Claude Opus",
+        "Uses anthropics/claude-code-action",
+        "Concurrency-safe with issue-level grouping"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "claude-code-dedupe-issues",
+      "displayName": "Claude Duplicate Issue Detector",
+      "description": "Detect and close duplicate issues using Claude.",
+      "source": "anthropics/claude-code",
+      "workflow": "claude-dedupe-issues",
+      "provider": "claude",
+      "category": "issue-automation",
+      "tags": ["deduplication", "issue-management", "cleanup"],
+      "sourceUrl": "https://github.com/anthropics/claude-code/blob/main/.github/workflows/claude-dedupe-issues.yml",
+      "triggers": ["issues"],
+      "secrets": ["ANTHROPIC_API_KEY"],
+      "highlights": [
+        "Identifies duplicate issues against existing open issues",
+        "Powered by Claude via claude-code-action",
+        "Helps keep the issue tracker clean"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "claude-code-issue-sweep",
+      "displayName": "Issue Lifecycle Sweep",
+      "description": "Scheduled sweep to enforce issue lifecycle timeouts.",
+      "source": "anthropics/claude-code",
+      "workflow": "sweep",
+      "provider": "none",
+      "category": "issue-automation",
+      "tags": ["stale", "cleanup", "scheduled"],
+      "sourceUrl": "https://github.com/anthropics/claude-code/blob/main/.github/workflows/sweep.yml",
+      "triggers": ["schedule", "workflow_dispatch"],
+      "secrets": [],
+      "highlights": [
+        "Runs on a cron schedule (twice daily)",
+        "Enforces lifecycle timeouts on stale issues",
+        "Uses Bun to run custom sweep script"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "claude-code-auto-close-duplicates",
+      "displayName": "Auto-Close Duplicate Issues",
+      "description": "Scheduled job to find and close duplicate issues.",
+      "source": "anthropics/claude-code",
+      "workflow": "auto-close-duplicates",
+      "provider": "none",
+      "category": "issue-automation",
+      "tags": ["deduplication", "scheduled", "cleanup"],
+      "sourceUrl": "https://github.com/anthropics/claude-code/blob/main/.github/workflows/auto-close-duplicates.yml",
+      "triggers": ["schedule", "workflow_dispatch"],
+      "secrets": [],
+      "highlights": [
+        "Runs daily to find and close duplicate issues",
+        "Uses Bun with a custom deduplication script",
+        "Fully automated with no AI provider required"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "codex-issue-labeler",
+      "displayName": "Codex Issue Labeler",
+      "description": "Automatically label new issues using OpenAI Codex.",
+      "source": "openai/codex",
+      "workflow": "issue-labeler",
+      "provider": "codex",
+      "category": "issue-automation",
+      "tags": ["labeling", "triage", "openai"],
+      "sourceUrl": "https://github.com/openai/codex/blob/main/.github/workflows/issue-labeler.yml",
+      "triggers": ["issues"],
+      "secrets": ["CODEX_OPENAI_API_KEY"],
+      "highlights": [
+        "Labels issues by type (bug, enhancement, documentation)",
+        "Sub-product classification (CLI, extension, web, iOS)",
+        "Uses openai/codex-action with structured label taxonomy"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "codex-issue-deduplicator",
+      "displayName": "Codex Issue Deduplicator",
+      "description": "Find and flag duplicate issues using OpenAI Codex.",
+      "source": "openai/codex",
+      "workflow": "issue-deduplicator",
+      "provider": "codex",
+      "category": "issue-automation",
+      "tags": ["deduplication", "openai", "issue-management"],
+      "sourceUrl": "https://github.com/openai/codex/blob/main/.github/workflows/issue-deduplicator.yml",
+      "triggers": ["issues"],
+      "secrets": ["CODEX_OPENAI_API_KEY"],
+      "highlights": [
+        "Compares new issues against all existing issues",
+        "Uses openai/codex-action for semantic matching",
+        "Multi-step pipeline: gather, normalize, deduplicate"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "codex-close-stale-prs",
+      "displayName": "Close Stale Contributor PRs",
+      "description": "Automatically close inactive contributor pull requests.",
+      "source": "openai/codex",
+      "workflow": "close-stale-contributor-prs",
+      "provider": "none",
+      "category": "ci-automation",
+      "tags": ["stale", "pull-requests", "cleanup"],
+      "sourceUrl": "https://github.com/openai/codex/blob/main/.github/workflows/close-stale-contributor-prs.yml",
+      "triggers": ["schedule", "workflow_dispatch"],
+      "secrets": [],
+      "highlights": [
+        "Closes PRs inactive for 14+ days from external contributors",
+        "Runs daily on a cron schedule",
+        "Uses actions/github-script for GitHub API calls"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "gemini-dispatch",
+      "displayName": "Gemini CLI Dispatch",
+      "description": "Route @gemini-cli mentions to review, triage, or code fix workflows.",
+      "source": "google-github-actions/run-gemini-cli",
+      "workflow": "gemini-dispatch",
+      "provider": "gemini",
+      "category": "ci-automation",
+      "tags": ["dispatch", "gemini-cli", "routing"],
+      "sourceUrl": "https://github.com/google-github-actions/run-gemini-cli/blob/main/.github/workflows/gemini-dispatch.yml",
+      "triggers": ["pull_request_review_comment", "pull_request_review", "pull_request", "issues", "issue_comment"],
+      "secrets": ["APP_PRIVATE_KEY"],
+      "highlights": [
+        "Central dispatcher for all Gemini CLI workflows",
+        "Routes @gemini-cli mentions to specialized sub-workflows",
+        "Permission-gated to OWNER/MEMBER/COLLABORATOR"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "gemini-pr-review",
+      "displayName": "Gemini PR Review",
+      "description": "AI-powered pull request review using Gemini CLI.",
+      "source": "google-github-actions/run-gemini-cli",
+      "workflow": "gemini-review",
+      "provider": "gemini",
+      "category": "code-review",
+      "tags": ["pr-review", "gemini-cli", "google"],
+      "sourceUrl": "https://github.com/google-github-actions/run-gemini-cli/blob/main/.github/workflows/gemini-review.yml",
+      "triggers": ["workflow_call"],
+      "secrets": ["APP_PRIVATE_KEY"],
+      "highlights": [
+        "Reviews pull requests using google-github-actions/run-gemini-cli",
+        "Supports optional GitHub App identity token",
+        "Callable as a reusable workflow"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "gemini-issue-triage",
+      "displayName": "Gemini Issue Triage",
+      "description": "Triage and label issues using Gemini CLI.",
+      "source": "google-github-actions/run-gemini-cli",
+      "workflow": "gemini-triage",
+      "provider": "gemini",
+      "category": "issue-automation",
+      "tags": ["triage", "labeling", "gemini-cli"],
+      "sourceUrl": "https://github.com/google-github-actions/run-gemini-cli/blob/main/.github/workflows/gemini-triage.yml",
+      "triggers": ["workflow_call"],
+      "secrets": ["APP_PRIVATE_KEY"],
+      "highlights": [
+        "Labels issues using Gemini CLI with repo label taxonomy",
+        "Callable as a reusable workflow from gemini-dispatch",
+        "Reads all repo labels dynamically"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "gemini-issue-fixer",
+      "displayName": "Gemini Issue Fixer",
+      "description": "Automatically create PRs to fix issues using Gemini CLI.",
+      "source": "google-github-actions/run-gemini-cli",
+      "workflow": "gemini-issue-fixer",
+      "provider": "gemini",
+      "category": "issue-automation",
+      "tags": ["auto-fix", "gemini-cli", "pr-creation"],
+      "sourceUrl": "https://github.com/google-github-actions/run-gemini-cli/blob/main/.github/workflows/gemini-issue-fixer.yml",
+      "triggers": ["workflow_call"],
+      "secrets": ["APP_PRIVATE_KEY"],
+      "highlights": [
+        "Creates pull requests to fix issues using Gemini CLI",
+        "Writes code, commits, and opens PRs automatically",
+        "Callable as a reusable workflow with 30-minute timeout"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "gemini-scheduled-triage",
+      "displayName": "Gemini Scheduled Issue Triage",
+      "description": "Hourly scheduled triage for unlabeled issues using Gemini CLI.",
+      "source": "google-github-actions/run-gemini-cli",
+      "workflow": "gemini-scheduled-triage",
+      "provider": "gemini",
+      "category": "issue-automation",
+      "tags": ["triage", "scheduled", "gemini-cli"],
+      "sourceUrl": "https://github.com/google-github-actions/run-gemini-cli/blob/main/.github/workflows/gemini-scheduled-triage.yml",
+      "triggers": ["schedule", "workflow_dispatch"],
+      "secrets": ["APP_PRIVATE_KEY"],
+      "highlights": [
+        "Runs hourly to triage unlabeled issues",
+        "Batch-processes issues missed by event-based triage",
+        "Uses Gemini CLI with Google Cloud identity tokens"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "autogpt-claude-assistant",
+      "displayName": "Claude Code (AutoGPT)",
+      "description": "Claude assistant for issues and PRs in the AutoGPT repo.",
+      "source": "Significant-Gravitas/AutoGPT",
+      "workflow": "claude",
+      "provider": "claude",
+      "category": "code-review",
+      "tags": ["pr-review", "issue-help", "claude-code-action"],
+      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/claude.yml",
+      "triggers": ["issue_comment", "pull_request_review_comment", "issues", "pull_request_review"],
+      "secrets": ["ANTHROPIC_API_KEY"],
+      "highlights": [
+        "Responds to @claude mentions with write permissions",
+        "Permission-gated to OWNER/MEMBER/COLLABORATOR",
+        "45-minute timeout for complex tasks"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "autogpt-claude-ci-fix",
+      "displayName": "Auto-Fix CI Failures (AutoGPT)",
+      "description": "Use Claude to automatically fix CI failures on pull requests.",
+      "source": "Significant-Gravitas/AutoGPT",
+      "workflow": "claude-ci-failure-auto-fix",
+      "provider": "claude",
+      "category": "ci-automation",
+      "tags": ["ci-fix", "auto-fix", "claude-code-action"],
+      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/claude-ci-failure-auto-fix.yml",
+      "triggers": ["workflow_run"],
+      "secrets": ["ANTHROPIC_API_KEY"],
+      "highlights": [
+        "Triggers when CI fails on a pull request",
+        "Creates a fix branch and opens a new PR with Claude's fix",
+        "Includes Python/Poetry and Node.js setup for full test runs"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "autogpt-claude-dependabot",
+      "displayName": "Claude Dependabot Review (AutoGPT)",
+      "description": "Automatically review Dependabot PRs with Claude.",
+      "source": "Significant-Gravitas/AutoGPT",
+      "workflow": "claude-dependabot",
+      "provider": "claude",
+      "category": "security",
+      "tags": ["dependabot", "dependency-review", "claude-code-action"],
+      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/claude-dependabot.yml",
+      "triggers": ["pull_request"],
+      "secrets": ["ANTHROPIC_API_KEY"],
+      "highlights": [
+        "Reviews Dependabot PRs for breaking changes and security impacts",
+        "Looks up changelogs and assesses risk",
+        "Only triggers for dependabot[bot] actor"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "autogpt-docs-review",
+      "displayName": "Claude Docs Review (AutoGPT)",
+      "description": "Review documentation and block integration changes with Claude.",
+      "source": "Significant-Gravitas/AutoGPT",
+      "workflow": "docs-claude-review",
+      "provider": "claude",
+      "category": "code-review",
+      "tags": ["docs", "pr-review", "claude-code-action"],
+      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/docs-claude-review.yml",
+      "triggers": ["pull_request"],
+      "secrets": ["ANTHROPIC_API_KEY"],
+      "highlights": [
+        "Scoped to docs/integrations and backend/blocks paths",
+        "Validates block documentation stays in sync with code",
+        "Permission-gated to OWNER/MEMBER/COLLABORATOR"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "autogpt-codeql",
+      "displayName": "CodeQL Analysis (AutoGPT)",
+      "description": "Static security analysis with GitHub CodeQL for TypeScript and Python.",
+      "source": "Significant-Gravitas/AutoGPT",
+      "workflow": "codeql",
+      "provider": "none",
+      "category": "security",
+      "tags": ["codeql", "sast", "security-scanning"],
+      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/codeql.yml",
+      "triggers": ["push", "pull_request", "schedule"],
+      "secrets": [],
+      "highlights": [
+        "Scans TypeScript and Python with CodeQL",
+        "Runs on push, PR, and weekly schedule",
+        "Reports to GitHub Security tab"
+      ],
+      "addedAt": "2026-03-13"
+    },
+    {
+      "id": "superset-claude-assistant",
+      "displayName": "Claude PR Assistant (Superset)",
+      "description": "Claude assistant for PR comments in Apache Superset.",
+      "source": "apache/superset",
+      "workflow": "claude",
+      "provider": "claude",
+      "category": "code-review",
+      "tags": ["pr-review", "claude-code-action", "access-control"],
+      "sourceUrl": "https://github.com/apache/superset/blob/main/.github/workflows/claude.yml",
+      "triggers": ["issue_comment", "pull_request_review_comment"],
+      "secrets": ["ANTHROPIC_API_KEY"],
+      "highlights": [
+        "Responds to @claude mentions in PR comments",
+        "Allowlist-gated to specific maintainers",
+        "Denies access with a friendly comment for non-authorized users"
+      ],
+      "addedAt": "2026-03-13"
+    }
+  ]
+}

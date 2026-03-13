@@ -1,9 +1,8 @@
 import { Command } from "commander";
 import { registerAddCommand } from "./commands/add.js";
-import { registerCreateCommand } from "./commands/create.js";
-import { registerInfoCommand } from "./commands/info.js";
+import { registerDoctorCommand } from "./commands/doctor.js";
 import { registerListCommand } from "./commands/list.js";
-import { registerSearchCommand } from "./commands/search.js";
+import { registerRemoveCommand } from "./commands/remove.js";
 import { registerStatusCommand } from "./commands/status.js";
 import { registerUpdateCommand } from "./commands/update.js";
 
@@ -12,20 +11,18 @@ const CLI_VERSION = typeof __OPENCI_VERSION__ !== "undefined" ? __OPENCI_VERSION
 
 export function buildCli(version = CLI_VERSION): Command {
   const program = new Command();
-
   program
     .name("openci")
-    .description("Discover and install AI-powered GitHub Actions workflows")
+    .description("Install GitHub Actions workflows from any repo")
     .version(version)
     .showHelpAfterError();
 
   registerAddCommand(program);
-  registerSearchCommand(program);
   registerListCommand(program);
-  registerInfoCommand(program);
   registerStatusCommand(program);
   registerUpdateCommand(program);
-  registerCreateCommand(program);
+  registerRemoveCommand(program);
+  registerDoctorCommand(program);
 
   return program;
 }

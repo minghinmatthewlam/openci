@@ -1,18 +1,20 @@
 import type { Command } from "commander";
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CliError } from "../core/errors.js";
 import { listInstallationMetadata, upsertInstallationMetadata } from "../manifest/store.js";
-import { resolveWorkflowBundle } from "../registry/source.js";
+import { fetchWorkflowFile } from "../registry/source.js";
 import { atomicWrite } from "../utils/atomic-write.js";
 import { getGitRepoRoot } from "../utils/git.js";
-import { renderWorkflow } from "./render-workflow.js";
 
 export function registerUpdateCommand(program: Command): void {
   program
     .command("update")
-    .description("Update installed workflows from their source metadata")
-    .argument("[workflows...]")
-    .action(async (workflowNames: string[] = []) => {
+    .description("Update installed workflows from their source")
+    .argument("[workflows...]", "Specific workflows to update")
+    .option("--force", "Overwrite even if locally modified")
+    .action(async (workflowNames: string[] = [], options: { force?: boolean }) => {
       const repoRoot = getGitRepoRoot(process.cwd());
       const installations = await listInstallationMetadata(repoRoot);
 
@@ -23,7 +25,7 @@ export function registerUpdateCommand(program: Command): void {
 
       const selected =
         workflowNames.length > 0
-          ? installations.filter((installation) => workflowNames.includes(installation.name))
+          ? installations.filter((i) => workflowNames.includes(i.name))
           : installations;
 
       if (selected.length === 0) {
@@ -33,39 +35,64 @@ export function registerUpdateCommand(program: Command): void {
       const failures: Array<{ name: string; message: string }> = [];
 
       for (const installation of selected) {
-        let resolved: Awaited<ReturnType<typeof resolveWorkflowBundle>> | undefined;
-
+        let resolved: Awaited<ReturnType<typeof fetchWorkflowFile>> | undefined;
         try {
-          resolved = await resolveWorkflowBundle({
+          resolved = await fetchWorkflowFile({
             cwd: repoRoot,
             sourceArg: installation.source,
-            workflow: installation.name,
+            workflow: installation.workflow,
           });
 
-          const { bundle } = resolved;
+          const { file } = resolved;
           const targetPath = join(repoRoot, installation.targetPath);
 
-          const result = await renderWorkflow(bundle, repoRoot, {
-            provider: installation.provider,
-            runtime: installation.runtime,
-            runner: installation.runner,
-            model: installation.model,
-            trigger: installation.trigger,
-            branch: installation.branch,
-          });
+          // Check if local file was modified
+          let localContent: string;
+          try {
+            localContent = await readFile(targetPath, "utf8");
+          } catch {
+            // File missing — just write it
+            await atomicWrite(targetPath, file.content);
+            await upsertInstallationMetadata(repoRoot, {
+              ...installation,
+              commit: file.commit,
+              contentHash: file.contentHash,
+              targetPath,
+              installedAt: installation.installedAt,
+            });
+            process.stdout.write(`${installation.name}\trestored\n`);
+            continue;
+          }
 
-          await atomicWrite(targetPath, result.output);
+          const localHash = createHash("sha256").update(localContent).digest("hex");
+
+          // Check if upstream changed
+          if (localHash === file.contentHash) {
+            process.stdout.write(`${installation.name}\tup-to-date\n`);
+            continue;
+          }
+
+          // Check for local modifications
+          if (
+            installation.contentHash &&
+            localHash !== installation.contentHash &&
+            !options.force
+          ) {
+            process.stderr.write(
+              `${installation.name}\tskipped (locally modified, use --force to overwrite)\n`,
+            );
+            continue;
+          }
+
+          await atomicWrite(targetPath, file.content);
           await upsertInstallationMetadata(repoRoot, {
             ...installation,
-            provider: result.provider,
-            runtime: result.runtime,
-            runner: result.runner,
-            workflowVersion: bundle.metadata.version,
+            commit: file.commit,
+            contentHash: file.contentHash,
             targetPath,
-            installedAt: new Date().toISOString(),
+            installedAt: installation.installedAt,
           });
-
-          process.stdout.write(`${bundle.metadata.name}\tupdated\n`);
+          process.stdout.write(`${installation.name}\tupdated\n`);
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           failures.push({ name: installation.name, message });
@@ -77,7 +104,7 @@ export function registerUpdateCommand(program: Command): void {
 
       if (failures.length > 0) {
         throw new CliError(
-          `Failed to update ${failures.length} workflow(s): ${failures.map((failure) => failure.name).join(", ")}`,
+          `Failed to update ${failures.length} workflow(s): ${failures.map((f) => f.name).join(", ")}`,
         );
       }
     });
