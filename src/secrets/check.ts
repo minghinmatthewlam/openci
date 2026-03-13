@@ -16,3 +16,7 @@ export function isGhAvailable(): boolean {
 export function isGhAuthenticated(): boolean {
   return commandSucceeds(["auth", "status"]);
 }
+
+export function isGhReady(): boolean {
+  return isGhAvailable() && isGhAuthenticated();
+}

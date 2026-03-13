@@ -1,8 +1,5 @@
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { join } from "node:path";
 
 export interface CatalogEntry {
   id: string;
@@ -32,18 +29,11 @@ export interface Catalog {
   workflows: CatalogEntry[];
 }
 
-// __dirname is web/lib/, so ../../catalog.json reaches the repo root
-const CATALOG_PATH = process.env.OPENCI_CATALOG_PATH
-  ? join(process.cwd(), process.env.OPENCI_CATALOG_PATH)
-  : join(__dirname, "..", "..", "catalog.json");
-
 let catalogCache: Catalog | undefined;
 
-function resolveCatalogPath(): string {
-  if (process.env.OPENCI_CATALOG_PATH) {
-    return join(process.cwd(), process.env.OPENCI_CATALOG_PATH);
-  }
-  return CATALOG_PATH;
+function getCatalogPath(): string {
+  const base = process.env.OPENCI_CATALOG_PATH ?? "catalog.json";
+  return join(process.cwd(), base);
 }
 
 export function clearCatalogCache(): void {
@@ -52,7 +42,7 @@ export function clearCatalogCache(): void {
 
 export function readCatalog(): Catalog {
   if (catalogCache) return catalogCache;
-  const raw = readFileSync(resolveCatalogPath(), "utf8");
+  const raw = readFileSync(getCatalogPath(), "utf8");
   catalogCache = JSON.parse(raw) as Catalog;
   return catalogCache;
 }

@@ -1,6 +1,5 @@
 export interface TriggerInfo {
   event: string;
-  types?: string[];
 }
 
 export function extractTriggers(yamlContent: string): TriggerInfo[] {
@@ -16,10 +15,8 @@ export function extractTriggers(yamlContent: string): TriggerInfo[] {
     if (trimmed.startsWith("on:")) {
       inOn = true;
       onIndent = indent;
-      // Check for inline: on: push
       const inline = trimmed.slice("on:".length).trim();
       if (inline) {
-        // on: [push, pull_request] or on: push
         const events = inline
           .replace(/[[\]]/g, "")
           .split(",")
@@ -39,9 +36,8 @@ export function extractTriggers(yamlContent: string): TriggerInfo[] {
         inOn = false;
         continue;
       }
-      // Event line like "  pull_request:" or "  issues:"
       const eventMatch = trimmed.match(/^([\w_]+):/);
-      if (eventMatch && eventMatch[1] && indent === onIndent + 2) {
+      if (eventMatch?.[1] && indent === onIndent + 2) {
         triggers.push({ event: eventMatch[1] });
       }
     }
@@ -51,7 +47,6 @@ export function extractTriggers(yamlContent: string): TriggerInfo[] {
 }
 
 export function findConflicts(
-  newWorkflowName: string,
   newTriggers: TriggerInfo[],
   existing: Array<{ name: string; triggers: TriggerInfo[] }>,
 ): string[] {

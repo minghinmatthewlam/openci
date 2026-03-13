@@ -1,25 +1,26 @@
 import type { Command } from "commander";
-import { readFile, readdir } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  extractSecrets,
   detectProvider,
   extractPermissions,
-  hasTimeout,
+  extractSecrets,
   extractTriggers,
   findConflicts,
+  hasTimeout,
 } from "../analyze/index.js";
+import { CliError } from "../core/errors.js";
 import { upsertInstallationMetadata } from "../manifest/store.js";
 import { fetchWorkflowFile, listAvailableWorkflows } from "../registry/source.js";
-import { isGhAuthenticated, isGhAvailable } from "../secrets/check.js";
+import { isGhReady } from "../secrets/check.js";
 import { buildSecretInstructions } from "../secrets/prompt.js";
 import { atomicWrite } from "../utils/atomic-write.js";
 import { getGitRemoteUrl, getGitRepoRoot } from "../utils/git.js";
 import { createLogger } from "../utils/logger.js";
+import { isWorkflowFile, stemName } from "../utils/workflow.js";
 
 async function fileExists(filepath: string): Promise<boolean> {
   try {
-    const { access } = await import("node:fs/promises");
     await access(filepath);
     return true;
   } catch {
@@ -32,22 +33,18 @@ async function getExistingWorkflowTriggers(
 ): Promise<Array<{ name: string; triggers: ReturnType<typeof extractTriggers> }>> {
   const dir = join(repoRoot, ".github", "workflows");
   try {
-    const files = await readdir(dir);
-    const results: Array<{ name: string; triggers: ReturnType<typeof extractTriggers> }> = [];
-    for (const file of files) {
-      if (file.endsWith(".yml") || file.endsWith(".yaml")) {
+    const files = (await readdir(dir)).filter(isWorkflowFile);
+    const results = await Promise.all(
+      files.map(async (file) => {
         try {
           const content = await readFile(join(dir, file), "utf8");
-          results.push({
-            name: file.replace(/\.ya?ml$/, ""),
-            triggers: extractTriggers(content),
-          });
+          return { name: stemName(file), triggers: extractTriggers(content) };
         } catch {
-          /* skip unreadable files */
+          return undefined;
         }
-      }
-    }
-    return results;
+      }),
+    );
+    return results.filter((r): r is NonNullable<typeof r> => r !== undefined);
   } catch {
     return [];
   }
@@ -86,7 +83,7 @@ export function registerAddCommand(program: Command): void {
           const result = await listAvailableWorkflows({ cwd, sourceArg });
           try {
             if (result.workflows.length === 0) {
-              throw new (await import("../core/errors.js")).CliError(
+              throw new CliError(
                 `No workflows found in ${sourceArg}. The repo may not have a .github/workflows/ directory.`,
               );
             }
@@ -113,10 +110,8 @@ export function registerAddCommand(program: Command): void {
           const { file } = resolved;
           const targetPath = join(repoRoot, ".github", "workflows", file.filename);
 
-          // Check existing file
           if (await fileExists(targetPath)) {
             if (!options.force) {
-              const { CliError } = await import("../core/errors.js");
               throw new CliError(`${file.filename} already exists. Use --force to overwrite.`);
             }
             logger.warn(`Overwriting existing ${file.filename}`);
@@ -166,10 +161,8 @@ export function registerAddCommand(program: Command): void {
               lines.push(`  Warning:      No timeout-minutes set (GitHub default: 6 hours)`);
             }
 
-            // Conflict detection
             const existing = await getExistingWorkflowTriggers(repoRoot);
             const conflicts = findConflicts(
-              file.name,
               triggers,
               existing.filter((e) => e.name !== file.name),
             );
@@ -181,11 +174,9 @@ export function registerAddCommand(program: Command): void {
               for (const line of lines) process.stdout.write(`${line}\n`);
             }
 
-            // Secret instructions
             if (secrets.length > 0 && !dryRun) {
               const remoteUrl = getGitRemoteUrl(repoRoot);
-              const ghReady = isGhAvailable() && isGhAuthenticated();
-              const instructions = buildSecretInstructions(secrets, remoteUrl, ghReady);
+              const instructions = buildSecretInstructions(secrets, remoteUrl, isGhReady());
               process.stdout.write("\n");
               for (const instruction of instructions) {
                 logger.warn(instruction);

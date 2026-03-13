@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { CliError } from "../core/errors.js";
 
-function tryGit(args: string[], cwd: string): string | undefined {
+export function tryGit(args: string[], cwd: string): string | undefined {
   try {
     return execFileSync("git", args, {
       cwd,

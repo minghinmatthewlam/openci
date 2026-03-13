@@ -59,7 +59,7 @@ describe("findConflicts", () => {
   it("detects overlapping triggers", () => {
     const newTriggers = [{ event: "pull_request" }, { event: "push" }];
     const existing = [{ name: "ci", triggers: [{ event: "push" }, { event: "pull_request" }] }];
-    const warnings = findConflicts("pr-review", newTriggers, existing);
+    const warnings = findConflicts(newTriggers, existing);
     expect(warnings.length).toBe(1);
     expect(warnings[0]).toContain("ci");
     expect(warnings[0]).toContain("push");
@@ -68,7 +68,7 @@ describe("findConflicts", () => {
   it("returns empty when no overlaps", () => {
     const newTriggers = [{ event: "issues" }];
     const existing = [{ name: "ci", triggers: [{ event: "push" }] }];
-    const warnings = findConflicts("issue-triage", newTriggers, existing);
+    const warnings = findConflicts(newTriggers, existing);
     expect(warnings).toEqual([]);
   });
 
@@ -78,7 +78,7 @@ describe("findConflicts", () => {
       { name: "ci", triggers: [{ event: "push" }] },
       { name: "deploy", triggers: [{ event: "push" }] },
     ];
-    const warnings = findConflicts("lint", newTriggers, existing);
+    const warnings = findConflicts(newTriggers, existing);
     expect(warnings.length).toBe(2);
   });
 });

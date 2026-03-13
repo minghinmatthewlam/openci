@@ -1,8 +1,8 @@
-import { createHash } from "node:crypto";
 import { access, readFile, readdir } from "node:fs/promises";
-import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { CliError } from "../core/errors.js";
+import { tryGit } from "../utils/git.js";
+import { computeHash, isWorkflowFile, stemName } from "../utils/workflow.js";
 import { cloneGitRepo } from "./github.js";
 
 export interface WorkflowFile {
@@ -75,30 +75,6 @@ function parseSource(input: string, cwd: string): InstallSource {
   );
 }
 
-function getCommitSha(repoDir: string): string | undefined {
-  try {
-    return execFileSync("git", ["rev-parse", "HEAD"], {
-      cwd: repoDir,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-  } catch {
-    return undefined;
-  }
-}
-
-function computeHash(content: string): string {
-  return createHash("sha256").update(content).digest("hex");
-}
-
-function isWorkflowFile(filename: string): boolean {
-  return filename.endsWith(".yml") || filename.endsWith(".yaml");
-}
-
-function stemName(filename: string): string {
-  return filename.replace(/\.ya?ml$/, "");
-}
-
 async function findWorkflowsDir(root: string): Promise<string> {
   const dir = path.join(root, ".github", "workflows");
   try {
@@ -149,8 +125,8 @@ export async function fetchWorkflowFile(params: {
   async function resolveFromRoot(root: string, sourceLabel: string): Promise<WorkflowFile> {
     const dir = await findWorkflowsDir(root);
     const available = await listWorkflowFiles(dir);
-    const match = available.find((w) => w.name === stem);
-    if (!match) {
+    const found = available.find((w) => w.name === stem);
+    if (!found) {
       const names = available.map((w) => w.name);
       const suggestion =
         names.length > 0
@@ -158,17 +134,16 @@ export async function fetchWorkflowFile(params: {
           : "";
       throw new CliError(`Workflow '${stem}' not found in ${sourceLabel}.${suggestion}`);
     }
-    const content = await readFile(path.join(dir, match.filename), "utf8");
-    const commit = getCommitSha(root);
-    const result: WorkflowFile = {
-      name: match.name,
-      filename: match.filename,
+    const content = await readFile(path.join(dir, found.filename), "utf8");
+    const commit = tryGit(["rev-parse", "HEAD"], root);
+    return {
+      name: found.name,
+      filename: found.filename,
       content,
       contentHash: computeHash(content),
       source: sourceLabel,
+      ...(commit ? { commit } : {}),
     };
-    if (commit) result.commit = commit;
-    return result;
   }
 
   if (source.kind === "local") {

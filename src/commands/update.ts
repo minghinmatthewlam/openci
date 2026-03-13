@@ -1,5 +1,4 @@
 import type { Command } from "commander";
-import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CliError } from "../core/errors.js";
@@ -7,6 +6,7 @@ import { listInstallationMetadata, upsertInstallationMetadata } from "../manifes
 import { fetchWorkflowFile } from "../registry/source.js";
 import { atomicWrite } from "../utils/atomic-write.js";
 import { getGitRepoRoot } from "../utils/git.js";
+import { computeHash } from "../utils/workflow.js";
 
 export function registerUpdateCommand(program: Command): void {
   program
@@ -46,33 +46,33 @@ export function registerUpdateCommand(program: Command): void {
           const { file } = resolved;
           const targetPath = join(repoRoot, installation.targetPath);
 
-          // Check if local file was modified
-          let localContent: string;
+          let localContent: string | undefined;
           try {
             localContent = await readFile(targetPath, "utf8");
           } catch {
-            // File missing — just write it
+            // File missing — will restore below
+          }
+
+          if (!localContent) {
+            // File missing — restore it
             await atomicWrite(targetPath, file.content);
             await upsertInstallationMetadata(repoRoot, {
               ...installation,
               commit: file.commit,
               contentHash: file.contentHash,
               targetPath,
-              installedAt: installation.installedAt,
             });
             process.stdout.write(`${installation.name}\trestored\n`);
             continue;
           }
 
-          const localHash = createHash("sha256").update(localContent).digest("hex");
+          const localHash = computeHash(localContent);
 
-          // Check if upstream changed
           if (localHash === file.contentHash) {
             process.stdout.write(`${installation.name}\tup-to-date\n`);
             continue;
           }
 
-          // Check for local modifications
           if (
             installation.contentHash &&
             localHash !== installation.contentHash &&
@@ -90,7 +90,6 @@ export function registerUpdateCommand(program: Command): void {
             commit: file.commit,
             contentHash: file.contentHash,
             targetPath,
-            installedAt: installation.installedAt,
           });
           process.stdout.write(`${installation.name}\tupdated\n`);
         } catch (error) {

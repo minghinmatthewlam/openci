@@ -3,6 +3,7 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { listInstallationMetadata } from "../manifest/store.js";
 import { getGitRepoRoot } from "../utils/git.js";
+import { isWorkflowFile, stemName } from "../utils/workflow.js";
 
 export function registerStatusCommand(program: Command): void {
   program
@@ -16,7 +17,7 @@ export function registerStatusCommand(program: Command): void {
       let workflowFiles: string[] = [];
       try {
         workflowFiles = (await readdir(workflowsDir))
-          .filter((f) => f.endsWith(".yml") || f.endsWith(".yaml"))
+          .filter(isWorkflowFile)
           .map((f) => join(".github", "workflows", f));
       } catch {
         workflowFiles = [];
@@ -37,8 +38,8 @@ export function registerStatusCommand(program: Command): void {
 
       for (const file of workflowFiles) {
         if (!trackedFiles.has(file)) {
-          const name = file.replace(/^\.github\/workflows\//, "").replace(/\.ya?ml$/, "");
-          process.stdout.write(`${name}\tunknown\t${file}\tuntracked\n`);
+          const name = file.replace(/^\.github\/workflows\//, "");
+          process.stdout.write(`${stemName(name)}\tunknown\t${file}\tuntracked\n`);
         }
       }
     });
