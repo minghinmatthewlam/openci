@@ -1,6 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { mkdtemp } from "node:fs/promises";
+import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";

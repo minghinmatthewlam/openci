@@ -13,7 +13,7 @@ export function extractTriggers(yamlContent: string): TriggerInfo[] {
     const trimmed = line.trimStart();
     const indent = line.length - trimmed.length;
 
-    if (/^on:/.test(trimmed)) {
+    if (trimmed.startsWith("on:")) {
       inOn = true;
       onIndent = indent;
       // Check for inline: on: push
@@ -21,7 +21,7 @@ export function extractTriggers(yamlContent: string): TriggerInfo[] {
       if (inline) {
         // on: [push, pull_request] or on: push
         const events = inline
-          .replace(/[\[\]]/g, "")
+          .replace(/[[\]]/g, "")
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean);
