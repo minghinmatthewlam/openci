@@ -6,7 +6,7 @@
  * that generated files match the current state (used in CI).
  */
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -100,6 +100,14 @@ for (const name of workflowDirs) {
   }
 }
 
+// Detect stale workflow directories in web that no longer exist in source
+const sourceSet = new Set(workflowDirs);
+const staleWebDirs = existsSync(WEB_WORKFLOWS_DIR)
+  ? readdirSync(WEB_WORKFLOWS_DIR, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && !sourceSet.has(d.name))
+      .map((d) => d.name)
+  : [];
+
 if (checkMode) {
   let drifted = false;
   for (const [filePath, expected] of generated) {
@@ -115,6 +123,11 @@ if (checkMode) {
     }
   }
 
+  for (const name of staleWebDirs) {
+    console.error(`STALE: ${join(WEB_WORKFLOWS_DIR, name)} (no source workflow)`);
+    drifted = true;
+  }
+
   if (drifted) {
     console.error("\nRegistry data is out of sync. Run: npm run sync:registry");
     process.exit(1);
@@ -126,5 +139,12 @@ if (checkMode) {
     mkdirSync(dirname(filePath), { recursive: true });
     writeFileSync(filePath, content, "utf8");
   }
+
+  for (const name of staleWebDirs) {
+    const stalePath = join(WEB_WORKFLOWS_DIR, name);
+    rmSync(stalePath, { recursive: true });
+    console.log(`Removed stale: ${stalePath}`);
+  }
+
   console.log(`Synced ${generated.size} files from ${workflowDirs.length} workflows.`);
 }
