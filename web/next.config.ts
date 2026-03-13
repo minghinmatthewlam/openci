@@ -8,9 +8,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: configDir,
   },
-  experimental: {
-    optimizePackageImports: ["react-markdown", "remark-gfm"],
-  },
 };
 
 export default nextConfig;
