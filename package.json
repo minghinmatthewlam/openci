@@ -1,7 +1,7 @@
 {
   "name": "openci",
   "version": "0.1.0",
-  "description": "Discover and install AI-powered GitHub Actions workflows",
+  "description": "Install GitHub Actions workflows from any repo",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
@@ -33,10 +33,9 @@
   },
   "scripts": {
     "build": "tsup",
-    "lint:actions": "node scripts/actionlint.mjs",
-    "lint": "oxlint src web test scripts",
-    "format": "oxfmt src web test scripts '!web/.next/**' '!test/fixtures/detection/invalid-package-json/**'",
-    "format:check": "oxfmt --check src web test scripts '!web/.next/**' '!test/fixtures/detection/invalid-package-json/**'",
+    "lint": "oxlint src web test",
+    "format": "oxfmt src web test '!web/.next/**'",
+    "format:check": "oxfmt --check src web test '!web/.next/**'",
     "typecheck": "tsc --noEmit",
     "test": "npm run build && vitest run",
     "test:watch": "vitest",
@@ -44,8 +43,6 @@
     "web:build": "npm --prefix web run build",
     "web:start": "npm --prefix web run start",
     "web:test": "npm --prefix web run test",
-    "sync:registry": "node scripts/sync-registry.mjs",
-    "sync:check": "node scripts/sync-registry.mjs --check",
     "pack:check": "npm pack --dry-run",
     "prepublishOnly": "npm run typecheck && npm run test && npm run build && npm run pack:check",
     "prepare": "husky"
@@ -53,7 +50,6 @@
   "dependencies": {
     "commander": "14.0.3",
     "picocolors": "1.1.1",
-    "semver": "^7.7.4",
     "yocto-spinner": "1.1.0",
     "zod": "^4.3.6"
   },
@@ -63,7 +59,6 @@
   "devDependencies": {
     "@tsconfig/node24": "24.0.4",
     "@types/node": "24.10.15",
-    "@types/semver": "^7.7.1",
     "@vitest/coverage-v8": "^4.0.18",
     "actionlint": "^2.0.6",
     "husky": "^9.1.7",
