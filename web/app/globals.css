@@ -236,7 +236,7 @@ pre {
 .leaderboard-header,
 .leaderboard-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 160px;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 200px) 80px;
   gap: 16px;
   align-items: center;
 }
@@ -516,7 +516,7 @@ pre {
 
   .leaderboard-header,
   .leaderboard-row {
-    grid-template-columns: minmax(0, 1fr) 92px;
+    grid-template-columns: minmax(0, 1fr) 80px;
     gap: 10px;
   }
 }

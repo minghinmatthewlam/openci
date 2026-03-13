@@ -7,12 +7,13 @@ import { getCategories, listCatalogWorkflows } from "../lib/registry";
 
 export const dynamic = "force-dynamic";
 
-const ASCII_LOGO = ` ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗
-██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔════╝██║
-██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║     ██║
-██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║     ██║
-╚██████╔╝██║     ███████╗██║ ╚████║╚██████╗██║
- ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝`;
+const ASCII_LOGO = `
+  ___  ____  _____ _   _  ____ ___
+ / _ \\|  _ \\| ____| \\ | |/ ___|_ _|
+| | | | |_) |  _| |  \\| | |    | |
+| |_| |  __/| |___| |\\  | |___ | |
+ \\___/|_|   |_____|_| \\_|\\____|___|
+`.trim();
 
 const PROVIDER_FILTERS = [
   { label: "Claude", value: "claude" },
@@ -76,7 +77,7 @@ export default async function HomePage({
           </div>
 
           <div className="mb-10 w-full overflow-x-auto flex justify-center no-scrollbar">
-            <pre className="font-mono text-[0.55rem] sm:text-[0.7rem] md:text-xs lg:text-sm xl:text-base leading-tight text-white font-bold select-none text-left drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]">
+            <pre className="font-mono text-sm sm:text-base md:text-lg lg:text-xl leading-tight text-white font-bold select-none text-center drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
               {ASCII_LOGO}
             </pre>
           </div>

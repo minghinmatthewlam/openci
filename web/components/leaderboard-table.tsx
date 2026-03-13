@@ -6,7 +6,6 @@ const PROVIDER_COLORS: Record<string, string> = {
   codex: "text-green-400",
   gemini: "text-blue-400",
   copilot: "text-purple-400",
-  none: "text-zinc-500",
 };
 
 export function LeaderboardTable({
@@ -25,7 +24,7 @@ export function LeaderboardTable({
       <div className="leaderboard-header">
         <span>Workflow</span>
         <span className="hidden sm:inline">Source</span>
-        <span>Provider</span>
+        <span className="text-right">Provider</span>
       </div>
 
       {workflows.map((w) => (
@@ -37,9 +36,9 @@ export function LeaderboardTable({
               <span className="hidden md:inline"> &middot; {w.category}</span>
             </span>
           </span>
-          <span className="hidden sm:inline text-zinc-400 text-sm truncate">{w.source}</span>
-          <span className={PROVIDER_COLORS[w.provider] ?? PROVIDER_COLORS.none}>
-            {w.provider === "none" ? "---" : w.provider}
+          <span className="hidden sm:inline text-zinc-500 text-sm truncate">{w.source}</span>
+          <span className={`text-right text-sm ${PROVIDER_COLORS[w.provider] ?? "text-zinc-600"}`}>
+            {w.provider === "none" ? "" : w.provider}
           </span>
         </Link>
       ))}
