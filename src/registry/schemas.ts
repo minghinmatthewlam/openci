@@ -14,6 +14,7 @@ export const RegistryWorkflowSchema = z.object({
   defaultRunner: z.string().optional(),
   smart: z.boolean(),
   stacks: z.array(z.string()).default([]),
+  author: z.string().optional(),
   repository: z.string().optional(),
   publishedAt: z.string().optional(),
 });

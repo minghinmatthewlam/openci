@@ -14,6 +14,7 @@ export interface RegistryEntry {
   defaultRunner?: string;
   smart: boolean;
   stacks: string[];
+  author?: string;
   repository?: string;
   publishedAt?: string;
 }
@@ -57,17 +58,7 @@ export async function readRegistry(): Promise<RegistryDocument> {
 
 export async function listRegistryWorkflows(): Promise<RegistryEntry[]> {
   const registry = await readRegistry();
-  return Promise.all(
-    registry.workflows
-      .toSorted((left, right) => left.name.localeCompare(right.name))
-      .map(async (workflow) => {
-        const bundle = await readWorkflowBundle(workflow.name);
-        return {
-          ...workflow,
-          author: bundle?.metadata.author,
-        };
-      }),
-  );
+  return registry.workflows.toSorted((left, right) => left.name.localeCompare(right.name));
 }
 
 export async function readWorkflowBundle(name: string): Promise<WorkflowBundle | undefined> {

@@ -57,6 +57,7 @@ const REGISTRY_FIELDS = [
   "defaultRunner",
   "smart",
   "stacks",
+  "author",
   "repository",
   "publishedAt",
 ];
@@ -78,12 +79,11 @@ const registryJson = {
 };
 
 const registryContent = JSON.stringify(registryJson, null, 2) + "\n";
-const webRegistryContent = registryContent;
 
 // Collect all generated files for check or write
 const generated = new Map();
 generated.set(REGISTRY_PATH, registryContent);
-generated.set(join(WEB_REGISTRY_DIR, "registry.json"), webRegistryContent);
+generated.set(join(WEB_REGISTRY_DIR, "registry.json"), registryContent);
 
 for (const name of workflowDirs) {
   const srcDir = join(WORKFLOWS_DIR, name);
