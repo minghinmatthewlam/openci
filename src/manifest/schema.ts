@@ -1,18 +1,13 @@
 import { z } from "zod";
-import { RuntimeSchema } from "../registry/schemas.js";
 
-export const ManifestInstallationSchema = z.object({
+export const InstallationSchema = z.object({
   name: z.string(),
   source: z.string(),
-  provider: z.string().optional(),
-  runtime: RuntimeSchema.optional(),
-  runner: z.string().optional(),
-  model: z.string().optional(),
-  trigger: z.string().optional(),
-  branch: z.string().optional(),
-  smart: z.boolean(),
-  workflowVersion: z.string(),
+  workflow: z.string(),
+  commit: z.string().optional(),
+  contentHash: z.string().optional(),
   targetPath: z.string(),
   installedAt: z.string(),
 });
-export type ManifestInstallation = z.infer<typeof ManifestInstallationSchema>;
+
+export type Installation = z.infer<typeof InstallationSchema>;
