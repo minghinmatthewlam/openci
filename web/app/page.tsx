@@ -3,7 +3,7 @@ import { LeaderboardTable } from "../components/leaderboard-table";
 import { RotatingCommand } from "../components/rotating-command";
 import { SearchInput } from "../components/search-input";
 import { SiteHeader } from "../components/site-header";
-import { listRegistryWorkflows } from "../lib/registry";
+import { getCategories, listCatalogWorkflows } from "../lib/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -14,16 +14,24 @@ const ASCII_LOGO = ` ██████╗ ██████╗ █████
 ╚██████╔╝██║     ███████╗██║ ╚████║╚██████╗██║
  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝`;
 
-const FILTERS = [
-  { label: "All", value: "" },
-  { label: "Smart", value: "smart" },
-  { label: "By Provider", value: "provider" },
-] as const;
+const PROVIDER_FILTERS = [
+  { label: "Claude", value: "claude" },
+  { label: "Codex", value: "codex" },
+  { label: "Gemini", value: "gemini" },
+];
 
 function FilterTabs({ current, query }: { current: string; query: string }): React.ReactNode {
+  const categories = getCategories();
+
+  const filters = [
+    { label: "All", value: "" },
+    ...categories.map((c) => ({ label: c.displayName, value: c.id })),
+    ...PROVIDER_FILTERS,
+  ];
+
   return (
     <div className="filter-tabs">
-      {FILTERS.map(({ label, value }) => {
+      {filters.map(({ label, value }) => {
         const params = new URLSearchParams();
         if (query) params.set("q", query);
         if (value) params.set("filter", value);
@@ -51,42 +59,9 @@ export default async function HomePage({
   searchParams: Promise<{ q?: string; filter?: string }>;
 }): Promise<React.ReactNode> {
   const params = await searchParams;
-  const query = params.q?.trim().toLowerCase() ?? "";
+  const query = params.q?.trim() ?? "";
   const filter = params.filter ?? "";
-  const allWorkflows = await listRegistryWorkflows();
-
-  let filtered = allWorkflows.filter((workflow) => {
-    if (!query) return true;
-    return [
-      workflow.name,
-      workflow.displayName,
-      workflow.description,
-      ...workflow.tags,
-      ...workflow.provider,
-      ...workflow.runtimes,
-      ...workflow.runners,
-      ...workflow.stacks,
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(query);
-  });
-
-  if (filter === "smart") {
-    filtered = filtered.filter((w) => w.smart);
-  } else if (filter === "provider") {
-    filtered = filtered.toSorted((a, b) => {
-      const pa = a.provider[0] ?? "";
-      const pb = b.provider[0] ?? "";
-      return pa.localeCompare(pb);
-    });
-  }
-
-  const items = filtered.map((workflow) => ({
-    workflow,
-    href: `/${workflow.author ?? "openci"}/${workflow.name}`,
-    providers: workflow.provider,
-  }));
+  const workflows = listCatalogWorkflows(query || undefined, filter || undefined);
 
   return (
     <>
@@ -97,7 +72,7 @@ export default async function HomePage({
         <section className="py-20 flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-zinc-300 mb-8">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-            OpenCI v0.1.0 is now available
+            Install workflows from any repo
           </div>
 
           <div className="mb-10 w-full overflow-x-auto flex justify-center no-scrollbar">
@@ -107,15 +82,15 @@ export default async function HomePage({
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mb-6 max-w-2xl leading-snug">
-            AI Agents for your{" "}
+            The workflow installer for{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-500">
-              GitHub Workflows
+              GitHub Actions
             </span>
           </h2>
 
           <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mb-10 leading-relaxed">
-            The easiest way to discover, install, and manage AI-powered GitHub Actions. Bring
-            Claude, Codex, GLM, and custom providers into your pull requests and issue flows.
+            Discover and install production workflows from real repos. One command to add Claude,
+            Codex, Gemini, and more to your CI.
           </p>
 
           <div className="w-full max-w-md">
@@ -123,16 +98,13 @@ export default async function HomePage({
           </div>
         </section>
 
-        {/* Workflow list */}
+        {/* Workflow catalog */}
         <section className="leaderboard-section">
-          <p className="section-label">Official workflows</p>
+          <p className="section-label">Workflow catalog</p>
           <FilterTabs current={filter} query={query} />
           <SearchInput defaultValue={params.q} />
 
-          <LeaderboardTable
-            items={items}
-            emptyState="No official workflows match that query yet."
-          />
+          <LeaderboardTable workflows={workflows} emptyState="No workflows match that query." />
         </section>
       </main>
     </>
