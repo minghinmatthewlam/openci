@@ -9,62 +9,59 @@
  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝
 </pre>
 
-**AI-powered GitHub Actions workflows. One CLI.**
+**Install GitHub Actions workflows from any repo.**
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-green.svg)](https://nodejs.org/)
 
-[Quick Start](#quick-start) · [Commands](#commands) · [Workflow Types](#workflow-types) · [Create Workflows](#creating-workflows) · [FAQ](#faq)
+[Quick Start](#quick-start) · [Commands](#commands) · [FAQ](#faq)
 
 </div>
 
 ---
 
-OpenCI is an open-source CLI for installing AI-powered GitHub Actions workflows from official, local, and git-based sources.
+OpenCI is the package manager for GitHub Actions workflows. Install AI agent workflows from Anthropic, OpenAI, Google, and any public repo in one command.
 
 ```bash
-npx openci add minghinmatthewlam/openci --workflow pr-review
+npx openci add anthropics/claude-code --workflow claude-issue-triage
 ```
 
 ## Why OpenCI
 
-GitHub Actions workflows for AI agents are useful, but annoying to wire up repeatedly.
+AI agent workflows are the most useful CI automations today, but there's no way to install them from other repos. You have to find the YAML, copy it, figure out what secrets to set, and manually track updates.
 
 OpenCI gives you:
-- a consistent install flow for official, private, and local workflow sources
-- smart workflow rendering for provider, runtime, runner, package manager, and branch
-- local management metadata so installed workflows can be listed, inspected, and updated
+- **One-command install** from any repo's `.github/workflows/` directory
+- **Post-install intelligence** — secrets, provider, permissions, timeout warnings, conflict detection
+- **Lifecycle management** — list, status, update, remove, doctor
 
 ## Quick Start
 
-Install an official workflow:
+Install a workflow from any repo:
 
 ```bash
-npx openci add minghinmatthewlam/openci --workflow pr-review
+npx openci add anthropics/claude-code --workflow claude-issue-triage
 ```
 
-From a private repo:
+See what's available in a repo:
 
 ```bash
-npx openci add your-org/private-workflows --workflow pr-review
+npx openci add anthropics/claude-code
 ```
 
-From a local directory:
+Install from different providers:
 
 ```bash
-npx openci add ./workflows --workflow pr-review
+npx openci add openai/codex --workflow issue-labeler
+npx openci add google-github-actions/run-gemini-cli --workflow gemini-triage
 ```
 
-Check what's installed:
+Check what's installed and keep it healthy:
 
 ```bash
 npx openci list
 npx openci status
-```
-
-Update installed workflows:
-
-```bash
+npx openci doctor
 npx openci update
 ```
 
@@ -72,266 +69,155 @@ npx openci update
 
 ### `add`
 
-Install a workflow into your repo. The argument after `add` is the source:
+Install a workflow or list available workflows in a repo.
 
 ```bash
-openci add <source> --workflow <name>
+# List available workflows
+openci add anthropics/claude-code
+
+# Install a specific workflow
+openci add anthropics/claude-code --workflow claude-issue-triage
+
+# Overwrite existing
+openci add anthropics/claude-code --workflow claude --force
+
+# Preview without writing
+openci add anthropics/claude-code --workflow claude --dry-run
 ```
 
-Supported sources:
-- **GitHub shorthand:** `owner/repo`
-- **Git URL:** `git@github.com:owner/repo.git`, `https://github.com/owner/repo.git`
-- **Local path:** `./workflows`, `../shared-workflows`, `/abs/path`
-
-Flags:
+Sources: `owner/repo`, `git@github.com:owner/repo.git`, `https://...`, `./local-path`
 
 | Flag | Description |
 |------|-------------|
-| `--workflow <name>` | Select a workflow from a multi-workflow source |
-| `--provider <name>` | Provider: `claude`, `codex`, `glm`, `custom` |
-| `--runtime <name>` | Runtime: `action`, `script` |
-| `--runner <name>` | Override the workflow runner |
-| `--model <name>` | Override the default model |
-| `--trigger <event>` | Override smart workflow trigger |
-| `--branch <name>` | Override smart workflow branch |
+| `--workflow <name>` | Workflow to install (omit to list available) |
+| `--force` | Overwrite existing workflow file |
 | `--yes` | Non-interactive mode |
-| `--dry-run` | Print target path without writing files |
-| `--verbose` | Show detection and render details |
-
-### `search`
-
-Search official workflow metadata:
-
-```bash
-npx openci search review
-```
+| `--dry-run` | Show what would be installed without writing |
+| `--verbose` | Show additional details |
 
 ### `list`
 
-Show locally installed workflows:
+Show installed workflows:
 
 ```bash
-npx openci list
+openci list
 ```
 
 ### `status`
 
-Show workflow health and filesystem state — what's installed, source/provider/version, missing files, untracked workflows:
+Show workflow health — installed, missing, untracked:
 
 ```bash
-npx openci status
+openci status
 ```
 
 ### `update`
 
-Refresh installed workflows from their recorded source metadata. Pass names to update specific workflows, or omit to update all:
+Re-fetch workflows from their source. Detects local modifications and shows diffs:
 
 ```bash
-npx openci update
-npx openci update pr-review
-npx openci update pr-review security-scan
+openci update
+openci update claude-issue-triage
+openci update --force   # overwrite even if locally modified
 ```
 
-### `info`
+### `remove`
 
-Inspect an official workflow:
+Remove a workflow and its tracking metadata. Shows orphaned secrets:
 
 ```bash
-npx openci info pr-review
+openci remove claude-issue-triage
 ```
 
-### `create`
+### `doctor`
 
-Scaffold a new workflow. Add `--smart` for templated workflows with detection:
+Check health of installed workflows — file existence, secrets, timeouts:
 
 ```bash
-npx openci create my-workflow --yes
-npx openci create my-workflow --smart --yes
+openci doctor
 ```
 
-## Workflow Types
+## Post-Install Intelligence
 
-OpenCI supports two workflow types:
-- **Workflows** — copied as-is
-- **Smart workflows** — rendered from templates with local repo detection
+After installing a workflow, OpenCI analyzes the YAML and shows:
 
-### Workflows
+```
+Installed claude-issue-triage.yml
 
-Best when the stack is fixed, the workflow is opinionated, or no AI provider is needed:
+  Provider:     Claude (anthropics/claude-code-action@v1)
+  Model:        claude-opus-4-6
+  Triggers:     issues, issue_comment
+  Permissions:  contents: read, issues: write
 
-```text
-workflows/my-workflow/
-├── metadata.json
-├── workflow.yml
-└── README.md
+Required secret: ANTHROPIC_API_KEY
+  Run: gh secret set ANTHROPIC_API_KEY
 ```
 
-### Smart workflows
-
-Use `workflow.yml.tmpl` + `openci.config.json` for auto-detection and substitution:
-
-```text
-workflows/my-workflow/
-├── metadata.json
-├── openci.config.json
-├── workflow.yml.tmpl
-└── README.md
-```
-
-Typical substitutions: provider, runtime, runner, package manager install command, validation command, target branch.
-
-Use smart workflows when one definition should adapt to multiple repos or providers.
-
-## Install Sources
-
-### GitHub shorthand (recommended)
-
-```bash
-npx openci add owner/repo --workflow pr-review
-```
-
-### Private repos
-
-Supported through normal git credentials (SSH keys, configured credentials). OpenCI does not prompt for credentials — if `git clone` fails, the install fails with the clone error.
-
-```bash
-npx openci add owner/private-workflows --workflow pr-review
-npx openci add git@github.com:owner/private-workflows.git --workflow pr-review
-```
-
-### Git URL
-
-```bash
-npx openci add https://github.com/owner/repo.git --workflow pr-review
-npx openci add git@github.com:owner/repo.git --workflow pr-review
-```
-
-Git sources are cloned to a temp directory and cleaned up after install.
-
-### Local source
-
-```bash
-npx openci add ./workflows --workflow pr-review
-```
-
-Local sources are useful for development, testing before publishing, and internal shared directories.
+- **Secrets** — extracted from `${{ secrets.* }}` references
+- **Provider/model** — detected from `uses:` action references
+- **Permissions** — parsed from the `permissions:` block
+- **Timeout warnings** — flags missing `timeout-minutes`
+- **Conflict detection** — warns about trigger overlaps with existing workflows
 
 ## Non-Interactive / Agent Usage
 
 In `--yes` mode, the CLI never prompts. Successful `add` prints only the created path to stdout; warnings go to stderr.
 
 ```bash
-npx openci add minghinmatthewlam/openci --workflow pr-review --provider claude --yes
-```
-
-Override runtime and runner for script-based or self-hosted workflows:
-
-```bash
-npx openci add minghinmatthewlam/openci --workflow security-scan --provider glm --runtime script --runner self-hosted-a8 --yes
+npx openci add anthropics/claude-code --workflow claude-issue-triage --yes
 ```
 
 ## Local Management
 
-OpenCI stores per-workflow sidecar metadata at:
+OpenCI tracks installed workflows in sidecar files:
 
 ```text
 .github/workflows/.openci/<workflow>.json
 ```
 
-This records source, provider, runtime, runner, version, and install time so `list`, `status`, and `update` work reliably.
+This records source, commit SHA, content hash, and install time so `list`, `status`, `update`, and `remove` work reliably.
 
-## Creating Workflows
+## Private Repos
 
-### Start with a regular workflow
-
-If you're new to workflow authoring, start with a copied-as-is workflow:
+Any repo your local `git clone` can access works — SSH keys, HTTPS credentials, etc.
 
 ```bash
-npx openci create my-workflow --yes
+openci add your-org/private-workflows --workflow pr-review
+openci add git@github.com:your-org/private-workflows.git --workflow pr-review
 ```
 
-### Move to smart workflows when needed
+## FAQ
 
-```bash
-npx openci create my-workflow --smart --yes
-```
+**What repos can I install from?**
+Any public or private repo that has a `.github/workflows/` directory. If `git clone` can access it, OpenCI can install from it.
 
-### Contributor loop
+**How does update detect local changes?**
+OpenCI stores a SHA-256 hash of the workflow content at install time. On update, it compares the current file hash against the stored hash. If they differ, the file was locally modified and update will skip it unless you pass `--force`.
 
-1. Scaffold a workflow
-2. Edit the generated files
-3. Dry-run install locally: `npx openci add . --workflow my-workflow --dry-run --yes`
-4. Run the test suite
-5. Publish or submit changes
+**What does doctor check?**
+File existence, whether required secrets are set (via `gh secret list`), and whether `timeout-minutes` is configured.
 
-## Official Workflow Directory
-
-The web directory lives in [`web/`](web/) and provides:
-- official workflow homepage with filtering
-- workflow detail pages
-- CLI and FAQ docs
-
-It is fully OSS with no telemetry, hosted search, or external dependencies.
+**Where is metadata stored?**
+In `.github/workflows/.openci/<workflow>.json`, alongside the installed workflow files.
 
 ## Development
 
-Requirements: Node.js `>=20`, npm. Version pinned to [`24.14.0`](.nvmrc) in `.nvmrc`.
-
-### CLI
+Requirements: Node.js `>=20`, npm.
 
 ```bash
 npm install
-npm run lint:actions
-npm run lint
-npm run format:check
-npm run typecheck
 npm test
 npm run build
 node dist/index.js --help
 ```
 
-### Web app
+Web app:
 
 ```bash
 npm --prefix web ci
 npm --prefix web run test
 npm --prefix web run build
-npm --prefix web run dev
 ```
-
-## Publishing
-
-Published as [`openci`](https://www.npmjs.com/package/openci) on npm via the `bin` entry in [`package.json`](package.json).
-
-Before publishing:
-
-```bash
-npm run lint:actions && npm run lint && npm run format:check && npm run typecheck && npm test && npm run build && npm pack --dry-run
-```
-
-CI and release workflows:
-- [ci.yml](.github/workflows/ci.yml)
-- [release.yml](.github/workflows/release.yml) — uses npm trusted publishing with provenance
-
-Code is linted with `actionlint` (workflows) and `oxlint`/`oxfmt` (project).
-
-## FAQ
-
-**What providers are supported?**
-Claude, Codex, GLM, and custom. Each workflow declares supported providers in its metadata.
-
-**Can I use private repos?**
-Yes. Any repo your local `git clone` can access works — SSH keys, HTTPS credentials, etc.
-
-**Where is metadata stored?**
-In `.github/workflows/.openci/<workflow>.json`, alongside the installed workflow files.
-
-**What's the difference between action and script runtimes?**
-Action runtime uses a GitHub Action (e.g., `uses: anthropics/claude-code-action`). Script runtime runs the agent via shell commands — useful for self-hosted runners or custom setups.
-
-## Contributing
-
-Open an issue on [GitHub](https://github.com/minghinmatthewlam/openci/issues) for bugs and feature requests.
 
 ## License
 
