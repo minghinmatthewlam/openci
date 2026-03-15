@@ -20,7 +20,7 @@ export default function CliPage(): React.ReactNode {
             <section>
               <h2>Installation</h2>
               <p>Run directly with npx — no global install required:</p>
-              <CopyCommand value="npx openci add anthropics/claude-code --workflow claude" />
+              <CopyCommand value="npx openci-app add anthropics/claude-code --workflow claude" />
             </section>
 
             <section>
@@ -28,7 +28,7 @@ export default function CliPage(): React.ReactNode {
 
               <h3>add</h3>
               <p>Install a workflow from a GitHub repository:</p>
-              <CopyCommand value="npx openci add openai/codex --workflow issue-labeler" />
+              <CopyCommand value="npx openci-app add openai/codex --workflow issue-labeler" />
               <ul>
                 <li>
                   <code>&lt;source&gt;</code> — GitHub <code>owner/repo</code>, git URL, or local
@@ -54,21 +54,21 @@ export default function CliPage(): React.ReactNode {
 
               <h3>list</h3>
               <p>Show all workflows installed via OpenCI in the current repo:</p>
-              <CopyCommand value="npx openci list" />
+              <CopyCommand value="npx openci-app list" />
 
               <h3>status</h3>
               <p>
                 Check the health of installed workflows. Reports drift between the local file and
                 the recorded source:
               </p>
-              <CopyCommand value="npx openci status" />
+              <CopyCommand value="npx openci-app status" />
 
               <h3>update</h3>
               <p>
                 Pull the latest version of installed workflows from their source repos. Pass one or
                 more names to update specific workflows:
               </p>
-              <CopyCommand value="npx openci update claude" />
+              <CopyCommand value="npx openci-app update claude" />
               <ul>
                 <li>
                   <code>[workflows...]</code> — optional list of workflow names to update
@@ -80,14 +80,14 @@ export default function CliPage(): React.ReactNode {
 
               <h3>remove</h3>
               <p>Remove an installed workflow and its sidecar metadata:</p>
-              <CopyCommand value="npx openci remove claude" />
+              <CopyCommand value="npx openci-app remove claude" />
 
               <h3>doctor</h3>
               <p>
                 Run diagnostics on your OpenCI setup. Checks for missing sidecar files, orphaned
                 metadata, and configuration issues:
               </p>
-              <CopyCommand value="npx openci doctor" />
+              <CopyCommand value="npx openci-app doctor" />
             </section>
 
             <section>
@@ -117,7 +117,7 @@ export default function CliPage(): React.ReactNode {
                 prints only the created workflow path to stdout. Warnings and secret setup hints go
                 to stderr.
               </p>
-              <CopyCommand value="npx openci add anthropics/claude-code --workflow claude --yes" />
+              <CopyCommand value="npx openci-app add anthropics/claude-code --workflow claude --yes" />
             </section>
           </article>
         </div>

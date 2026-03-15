@@ -79,7 +79,7 @@ export default async function CatalogDetailPage({
             {entry.highlights.length > 0 && (
               <div className="content-card mt-8">
                 <div className="content-label">HIGHLIGHTS</div>
-                <ul className="list-disc list-inside space-y-2 text-zinc-300">
+                <ul className="list-disc space-y-2 text-zinc-300">
                   {entry.highlights.map((h) => (
                     <li key={h}>{h}</li>
                   ))}

@@ -76,10 +76,7 @@ export default async function HomePage({
           </div>
 
           <div className="mb-10 w-full overflow-x-auto flex justify-center no-scrollbar">
-            <pre
-              style={{ fontFamily: "'JetBrains Mono', monospace" }}
-              className="text-[0.55rem] sm:text-[0.7rem] md:text-xs lg:text-sm xl:text-base leading-tight text-white font-bold select-none text-left drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]"
-            >
+            <pre className="ascii-logo text-[0.55rem] sm:text-[0.7rem] md:text-xs lg:text-sm xl:text-base leading-tight text-white font-bold select-none text-left drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]">
               {ASCII_LOGO}
             </pre>
           </div>

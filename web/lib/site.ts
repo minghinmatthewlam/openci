@@ -5,5 +5,5 @@ export const docsSections = [
 ];
 
 export function buildInstallCommand(source: string, workflow: string): string {
-  return `npx openci add ${source} --workflow ${workflow}`;
+  return `npx openci-app add ${source} --workflow ${workflow}`;
 }

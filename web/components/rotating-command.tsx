@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { CopyCommand } from "./copy-command";
 
 const COMMANDS = [
-  "npx openci add anthropics/claude-code --workflow claude",
-  "npx openci add openai/codex --workflow issue-labeler",
-  "npx openci add apache/superset --workflow claude",
-  "npx openci list",
+  "npx openci-app add anthropics/claude-code --workflow claude",
+  "npx openci-app add openai/codex --workflow issue-labeler",
+  "npx openci-app add apache/superset --workflow claude",
+  "npx openci-app list",
 ];
 
 const INTERVAL_MS = 3500;

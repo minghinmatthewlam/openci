@@ -30,7 +30,7 @@ export default function DocsPage(): React.ReactNode {
             <section>
               <h2>Getting started</h2>
               <p>Install a workflow from any GitHub repository:</p>
-              <CopyCommand value="npx openci add anthropics/claude-code --workflow claude" />
+              <CopyCommand value="npx openci-app add anthropics/claude-code --workflow claude" />
               <p>
                 This downloads the workflow file into <code>.github/workflows/</code> and records
                 sidecar metadata in <code>.github/workflows/.openci/</code> for later updates.
