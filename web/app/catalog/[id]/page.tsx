@@ -94,7 +94,8 @@ export default async function CatalogDetailPage({
                 href={entry.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-zinc-300 hover:text-white underline underline-offset-2 break-all"
+                className="text-zinc-300 hover:text-white break-all"
+                style={{ textDecoration: "underline", textUnderlineOffset: "3px" }}
               >
                 {entry.source}
               </a>
