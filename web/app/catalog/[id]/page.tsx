@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyCommand } from "../../../components/copy-command";
@@ -6,6 +7,20 @@ import { getCatalogEntry } from "../../../lib/registry";
 import { buildInstallCommand } from "../../../lib/site";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const entry = getCatalogEntry(id);
+  if (!entry) return { title: "Not Found" };
+  return {
+    title: `${entry.displayName} — OpenCI`,
+    description: entry.description,
+  };
+}
 
 function ProviderBadge({ provider }: { provider: string }): React.ReactNode {
   const colors: Record<string, string> = {
@@ -62,7 +77,9 @@ export default async function CatalogDetailPage({
         <div className="detail-layout">
           <section className="detail-main">
             <div className="breadcrumbs">
-              <Link href="/">catalog</Link>
+              <Link href="/" className="hover:text-zinc-300 transition-colors">
+                catalog
+              </Link>
               <span>/</span>
               <span>{entry.id}</span>
             </div>

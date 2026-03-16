@@ -82,12 +82,12 @@ export default async function HomePage({
             </pre>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mb-6 max-w-2xl leading-snug">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mb-6 max-w-2xl leading-snug">
             The workflow installer for{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-500">
               GitHub Actions
             </span>
-          </h2>
+          </h1>
 
           <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mb-10 leading-relaxed">
             Discover and install production workflows from real repos. One command to add Claude,

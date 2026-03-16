@@ -249,6 +249,7 @@ pre {
   height: 34px;
   border-radius: 4px;
   cursor: pointer;
+  align-self: center;
 }
 
 .leaderboard-table {
@@ -306,6 +307,7 @@ pre {
 
 .filter-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   margin-top: 16px;
 }
@@ -391,6 +393,11 @@ pre {
   font-size: 14px;
 }
 
+.docs-link:hover {
+  color: var(--foreground);
+  transition: color 0.15s;
+}
+
 .docs-link.active {
   background: linear-gradient(90deg, #181818 0%, #232323 100%);
   color: var(--foreground);
@@ -436,6 +443,7 @@ pre {
   color: #a8a8a8;
   line-height: 1.7;
   overflow-wrap: anywhere;
+  margin-bottom: 12px;
 }
 
 /* ── Detail page ── */
@@ -489,6 +497,7 @@ pre {
 .detail-sidebar {
   border-left: 1px solid var(--border);
   padding-left: 26px;
+  padding-top: 6px;
 }
 
 .sidebar-block {
@@ -522,7 +531,7 @@ pre {
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 640px) {
   .page-shell {
     padding-inline: 16px;
   }

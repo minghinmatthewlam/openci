@@ -47,7 +47,7 @@ export default function FaqPage(): React.ReactNode {
                 <li>Orphaned sidecar files with no corresponding workflow</li>
                 <li>Source repo accessibility (can the recorded source still be reached?)</li>
                 <li>
-                  Configuration issues in the <code>.openci/</code> directory
+                  Configuration issues in the <code>.github/workflows/.openci/</code> directory
                 </li>
               </ul>
             </section>
