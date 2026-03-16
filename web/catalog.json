@@ -171,7 +171,13 @@
       "category": "ci-automation",
       "tags": ["dispatch", "gemini-cli", "routing"],
       "sourceUrl": "https://github.com/google-github-actions/run-gemini-cli/blob/main/.github/workflows/gemini-dispatch.yml",
-      "triggers": ["pull_request_review_comment", "pull_request_review", "pull_request", "issues", "issue_comment"],
+      "triggers": [
+        "pull_request_review_comment",
+        "pull_request_review",
+        "pull_request",
+        "issues",
+        "issue_comment"
+      ],
       "secrets": ["APP_PRIVATE_KEY"],
       "highlights": [
         "Central dispatcher for all Gemini CLI workflows",
