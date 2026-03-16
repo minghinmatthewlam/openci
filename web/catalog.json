@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-13",
+  "updatedAt": "2026-03-16",
   "categories": [
     { "id": "code-review", "displayName": "Code Review" },
     { "id": "issue-automation", "displayName": "Issue Automation" },
@@ -171,13 +171,7 @@
       "category": "ci-automation",
       "tags": ["dispatch", "gemini-cli", "routing"],
       "sourceUrl": "https://github.com/google-github-actions/run-gemini-cli/blob/main/.github/workflows/gemini-dispatch.yml",
-      "triggers": [
-        "pull_request_review_comment",
-        "pull_request_review",
-        "pull_request",
-        "issues",
-        "issue_comment"
-      ],
+      "triggers": ["pull_request_review_comment", "pull_request_review", "pull_request", "issues", "issue_comment"],
       "secrets": ["APP_PRIVATE_KEY"],
       "highlights": [
         "Central dispatcher for all Gemini CLI workflows",
@@ -263,99 +257,99 @@
       "addedAt": "2026-03-13"
     },
     {
-      "id": "autogpt-claude-assistant",
-      "displayName": "Claude Code (AutoGPT)",
-      "description": "Claude assistant for issues and PRs in the AutoGPT repo.",
-      "source": "Significant-Gravitas/AutoGPT",
-      "workflow": "claude",
-      "provider": "claude",
-      "category": "code-review",
-      "tags": ["pr-review", "issue-help", "claude-code-action"],
-      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/claude.yml",
-      "triggers": ["issue_comment", "pull_request_review_comment", "issues", "pull_request_review"],
-      "secrets": ["ANTHROPIC_API_KEY"],
-      "highlights": [
-        "Responds to @claude mentions with write permissions",
-        "Permission-gated to OWNER/MEMBER/COLLABORATOR",
-        "45-minute timeout for complex tasks"
-      ],
-      "addedAt": "2026-03-13"
-    },
-    {
-      "id": "autogpt-claude-ci-fix",
-      "displayName": "Auto-Fix CI Failures (AutoGPT)",
-      "description": "Use Claude to automatically fix CI failures on pull requests.",
-      "source": "Significant-Gravitas/AutoGPT",
-      "workflow": "claude-ci-failure-auto-fix",
-      "provider": "claude",
+      "id": "gemini-invoke",
+      "displayName": "Gemini Free-Form Invoke",
+      "description": "Run arbitrary Gemini CLI commands via @gemini-cli mentions.",
+      "source": "google-github-actions/run-gemini-cli",
+      "workflow": "gemini-invoke",
+      "provider": "gemini",
       "category": "ci-automation",
-      "tags": ["ci-fix", "auto-fix", "claude-code-action"],
-      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/claude-ci-failure-auto-fix.yml",
-      "triggers": ["workflow_run"],
-      "secrets": ["ANTHROPIC_API_KEY"],
+      "tags": ["gemini-cli", "free-form", "agent"],
+      "sourceUrl": "https://github.com/google-github-actions/run-gemini-cli/blob/main/.github/workflows/gemini-invoke.yml",
+      "triggers": ["workflow_call"],
+      "secrets": ["APP_PRIVATE_KEY", "GEMINI_API_KEY"],
       "highlights": [
-        "Triggers when CI fails on a pull request",
-        "Creates a fix branch and opens a new PR with Claude's fix",
-        "Includes Python/Poetry and Node.js setup for full test runs"
+        "Handles free-form @gemini-cli requests",
+        "Called from gemini-dispatch as a reusable workflow",
+        "Supports MCP servers and customizable settings"
       ],
-      "addedAt": "2026-03-13"
+      "addedAt": "2026-03-16"
     },
     {
-      "id": "autogpt-claude-dependabot",
-      "displayName": "Claude Dependabot Review (AutoGPT)",
-      "description": "Automatically review Dependabot PRs with Claude.",
-      "source": "Significant-Gravitas/AutoGPT",
-      "workflow": "claude-dependabot",
-      "provider": "claude",
-      "category": "security",
-      "tags": ["dependabot", "dependency-review", "claude-code-action"],
-      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/claude-dependabot.yml",
-      "triggers": ["pull_request"],
-      "secrets": ["ANTHROPIC_API_KEY"],
+      "id": "gemini-plan-execute",
+      "displayName": "Gemini Plan & Execute",
+      "description": "Plan and execute code changes with Gemini CLI.",
+      "source": "google-github-actions/run-gemini-cli",
+      "workflow": "gemini-plan-execute",
+      "provider": "gemini",
+      "category": "ci-automation",
+      "tags": ["gemini-cli", "code-generation", "plan-execute"],
+      "sourceUrl": "https://github.com/google-github-actions/run-gemini-cli/blob/main/.github/workflows/gemini-plan-execute.yml",
+      "triggers": ["workflow_call"],
+      "secrets": ["APP_PRIVATE_KEY", "GEMINI_API_KEY"],
       "highlights": [
-        "Reviews Dependabot PRs for breaking changes and security impacts",
-        "Looks up changelogs and assesses risk",
-        "Only triggers for dependabot[bot] actor"
+        "Plans and executes code changes via @gemini-cli /approve",
+        "Write permissions to create branches and commits",
+        "30-minute timeout with concurrency control"
       ],
-      "addedAt": "2026-03-13"
+      "addedAt": "2026-03-16"
     },
     {
-      "id": "autogpt-docs-review",
-      "displayName": "Claude Docs Review (AutoGPT)",
-      "description": "Review documentation and block integration changes with Claude.",
-      "source": "Significant-Gravitas/AutoGPT",
-      "workflow": "docs-claude-review",
-      "provider": "claude",
-      "category": "code-review",
-      "tags": ["docs", "pr-review", "claude-code-action"],
-      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/docs-claude-review.yml",
-      "triggers": ["pull_request"],
-      "secrets": ["ANTHROPIC_API_KEY"],
-      "highlights": [
-        "Scoped to docs/integrations and backend/blocks paths",
-        "Validates block documentation stays in sync with code",
-        "Permission-gated to OWNER/MEMBER/COLLABORATOR"
-      ],
-      "addedAt": "2026-03-13"
-    },
-    {
-      "id": "autogpt-codeql",
-      "displayName": "CodeQL Analysis (AutoGPT)",
-      "description": "Static security analysis with GitHub CodeQL for TypeScript and Python.",
-      "source": "Significant-Gravitas/AutoGPT",
-      "workflow": "codeql",
-      "provider": "none",
-      "category": "security",
-      "tags": ["codeql", "sast", "security-scanning"],
-      "sourceUrl": "https://github.com/Significant-Gravitas/AutoGPT/blob/main/.github/workflows/codeql.yml",
-      "triggers": ["push", "pull_request", "schedule"],
+      "id": "copilot-vscode",
+      "displayName": "Copilot Setup (VS Code)",
+      "description": "GitHub Copilot coding agent environment setup for VS Code.",
+      "source": "microsoft/vscode",
+      "workflow": "copilot-setup-steps",
+      "provider": "copilot",
+      "category": "ci-automation",
+      "tags": ["copilot", "setup", "vscode", "microsoft"],
+      "sourceUrl": "https://github.com/microsoft/vscode/blob/main/.github/workflows/copilot-setup-steps.yml",
+      "triggers": ["workflow_dispatch"],
       "secrets": [],
       "highlights": [
-        "Scans TypeScript and Python with CodeQL",
-        "Runs on push, PR, and weekly schedule",
-        "Reports to GitHub Security tab"
+        "Full VS Code dev environment setup for Copilot agent",
+        "Node.js, Electron, Playwright, system dependencies",
+        "From microsoft/vscode (182k stars)"
       ],
-      "addedAt": "2026-03-13"
+      "addedAt": "2026-03-16"
+    },
+    {
+      "id": "copilot-typescript",
+      "displayName": "Copilot Setup (TypeScript)",
+      "description": "GitHub Copilot coding agent setup for the TypeScript compiler.",
+      "source": "microsoft/TypeScript",
+      "workflow": "copilot-setup-steps",
+      "provider": "copilot",
+      "category": "ci-automation",
+      "tags": ["copilot", "setup", "typescript", "microsoft"],
+      "sourceUrl": "https://github.com/microsoft/TypeScript/blob/main/.github/workflows/copilot-setup-steps.yml",
+      "triggers": ["workflow_dispatch"],
+      "secrets": [],
+      "highlights": [
+        "Minimal Copilot setup for TypeScript compiler repo",
+        "Node.js + npm ci + dprint cache warmup",
+        "From microsoft/TypeScript (108k stars)"
+      ],
+      "addedAt": "2026-03-16"
+    },
+    {
+      "id": "copilot-playwright",
+      "displayName": "Copilot Setup (Playwright)",
+      "description": "GitHub Copilot coding agent setup for Playwright.",
+      "source": "microsoft/playwright",
+      "workflow": "copilot-setup-steps",
+      "provider": "copilot",
+      "category": "ci-automation",
+      "tags": ["copilot", "setup", "playwright", "microsoft"],
+      "sourceUrl": "https://github.com/microsoft/playwright/blob/main/.github/workflows/copilot-setup-steps.yml",
+      "triggers": ["workflow_dispatch"],
+      "secrets": [],
+      "highlights": [
+        "Sets up Node.js, builds Playwright, installs browser binaries",
+        "Prepares full test environment for Copilot agent",
+        "From microsoft/playwright (84k stars)"
+      ],
+      "addedAt": "2026-03-16"
     },
     {
       "id": "superset-claude-assistant",

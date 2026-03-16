@@ -23,7 +23,7 @@
 OpenCI is the package manager for GitHub Actions workflows. Install AI agent workflows from Anthropic, OpenAI, Google, and any public repo in one command.
 
 ```bash
-npx openci add anthropics/claude-code --workflow claude-issue-triage
+npx openci-app add anthropics/claude-code --workflow claude-issue-triage
 ```
 
 ## Why OpenCI
@@ -40,29 +40,29 @@ OpenCI gives you:
 Install a workflow from any repo:
 
 ```bash
-npx openci add anthropics/claude-code --workflow claude-issue-triage
+npx openci-app add anthropics/claude-code --workflow claude-issue-triage
 ```
 
 See what's available in a repo:
 
 ```bash
-npx openci add anthropics/claude-code
+npx openci-app add anthropics/claude-code
 ```
 
 Install from different providers:
 
 ```bash
-npx openci add openai/codex --workflow issue-labeler
-npx openci add google-github-actions/run-gemini-cli --workflow gemini-triage
+npx openci-app add openai/codex --workflow issue-labeler
+npx openci-app add google-github-actions/run-gemini-cli --workflow gemini-triage
 ```
 
 Check what's installed and keep it healthy:
 
 ```bash
-npx openci list
-npx openci status
-npx openci doctor
-npx openci update
+npx openci-app list
+npx openci-app status
+npx openci-app doctor
+npx openci-app update
 ```
 
 ## Commands
@@ -164,7 +164,7 @@ Required secret: ANTHROPIC_API_KEY
 In `--yes` mode, the CLI never prompts. Successful `add` prints only the created path to stdout; warnings go to stderr.
 
 ```bash
-npx openci add anthropics/claude-code --workflow claude-issue-triage --yes
+npx openci-app add anthropics/claude-code --workflow claude-issue-triage --yes
 ```
 
 ## Local Management

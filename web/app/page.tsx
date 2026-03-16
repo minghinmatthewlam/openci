@@ -18,6 +18,7 @@ const PROVIDER_FILTERS = [
   { label: "Claude", value: "claude" },
   { label: "Codex", value: "codex" },
   { label: "Gemini", value: "gemini" },
+  { label: "Copilot", value: "copilot" },
 ];
 
 function FilterTabs({ current, query }: { current: string; query: string }): React.ReactNode {
