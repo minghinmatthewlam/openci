@@ -18,10 +18,11 @@ describe("list command", () => {
       cwd: tempDir,
       stdio: "ignore",
     });
-    execFileSync("git", ["config", "user.name", "Test"], {});
-    execFileSync("git", ["config", "commit.gpgsign", "false"], {
+    execFileSync("git", ["config", "user.name", "Test"], {
       cwd: tempDir,
       stdio: "ignore",
+    });
+    execFileSync("git", ["config", "commit.gpgsign", "false"], {
       cwd: tempDir,
       stdio: "ignore",
     });
