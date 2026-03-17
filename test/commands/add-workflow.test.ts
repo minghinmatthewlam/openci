@@ -22,6 +22,10 @@ describe("add command", () => {
       cwd: tempDir,
       stdio: "ignore",
     });
+    execFileSync("git", ["config", "commit.gpgsign", "false"], {
+      cwd: tempDir,
+      stdio: "ignore",
+    });
     // Create an initial commit so git rev-parse works
     await writeFile(join(tempDir, "README.md"), "test", "utf8");
     execFileSync("git", ["add", "."], { cwd: tempDir, stdio: "ignore" });

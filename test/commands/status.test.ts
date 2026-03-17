@@ -22,6 +22,10 @@ describe("status command", () => {
       cwd: tempDir,
       stdio: "ignore",
     });
+    execFileSync("git", ["config", "commit.gpgsign", "false"], {
+      cwd: tempDir,
+      stdio: "ignore",
+    });
     await writeFile(join(tempDir, "README.md"), "test", "utf8");
     execFileSync("git", ["add", "."], { cwd: tempDir, stdio: "ignore" });
     execFileSync("git", ["commit", "-m", "init"], {

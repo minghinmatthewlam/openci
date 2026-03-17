@@ -18,7 +18,10 @@ describe("remove command", () => {
       cwd: tempDir,
       stdio: "ignore",
     });
-    execFileSync("git", ["config", "user.name", "Test"], {
+    execFileSync("git", ["config", "user.name", "Test"], {});
+    execFileSync("git", ["config", "commit.gpgsign", "false"], {
+      cwd: tempDir,
+      stdio: "ignore",
       cwd: tempDir,
       stdio: "ignore",
     });

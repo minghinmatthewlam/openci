@@ -26,6 +26,10 @@ describe("integration: add from local repo", () => {
       cwd: sourceRepo,
       stdio: "ignore",
     });
+    execFileSync("git", ["config", "commit.gpgsign", "false"], {
+      cwd: sourceRepo,
+      stdio: "ignore",
+    });
 
     const workflowsDir = join(sourceRepo, ".github", "workflows");
     await mkdir(workflowsDir, { recursive: true });
@@ -77,6 +81,10 @@ jobs:
       stdio: "ignore",
     });
     execFileSync("git", ["config", "user.name", "Test"], {
+      cwd: targetRepo,
+      stdio: "ignore",
+    });
+    execFileSync("git", ["config", "commit.gpgsign", "false"], {
       cwd: targetRepo,
       stdio: "ignore",
     });
