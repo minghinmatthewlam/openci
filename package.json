@@ -48,6 +48,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@matthewlam/openci-contracts": "0.1.1",
     "commander": "14.0.3",
     "picocolors": "1.1.1",
     "yocto-spinner": "1.1.0",

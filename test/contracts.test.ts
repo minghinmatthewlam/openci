@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createOpenCiApiClient, TelemetryInstallEventSchema } from "../src/contracts/index.js";
+import { createOpenCiApiClient, TelemetryInstallEventSchema } from "@matthewlam/openci-contracts";
 import { startHttpServer } from "./helpers/http.js";
 
 describe("@openci/contracts", () => {

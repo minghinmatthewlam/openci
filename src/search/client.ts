@@ -1,5 +1,5 @@
 import { CliError } from "../core/errors.js";
-import { createOpenCiApiClient, type SearchResponse } from "../contracts/index.js";
+import { createOpenCiApiClient, type SearchResponse } from "@matthewlam/openci-contracts";
 
 function getSearchUrl(): string {
   const value = process.env.OPENCI_SEARCH_URL?.trim();

@@ -1,5 +1,5 @@
 import { getDestinationRepoIdentity, getDestinationRepoVisibility } from "../github/identity.js";
-import { createOpenCiApiClient, type TelemetryInstallEvent } from "../contracts/index.js";
+import { createOpenCiApiClient, type TelemetryInstallEvent } from "@matthewlam/openci-contracts";
 
 function telemetryDisabled(): boolean {
   return process.env.OPENCI_DISABLE_TELEMETRY === "1" || process.env.DO_NOT_TRACK === "1";
