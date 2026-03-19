@@ -7,7 +7,7 @@ function telemetryDisabled(): boolean {
 
 function getTelemetryUrl(): string {
   const value = process.env.OPENCI_TELEMETRY_URL?.trim();
-  return value ? value : "https://openci.app";
+  return value ? value : "https://api.openci.app";
 }
 
 function buildDateBucket(): string {
