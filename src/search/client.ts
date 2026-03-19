@@ -3,7 +3,7 @@ import { createOpenCiApiClient, type SearchResponse } from "@matthewlam/openci-c
 
 function getSearchUrl(): string {
   const value = process.env.OPENCI_SEARCH_URL?.trim();
-  return value ? value : "https://openci.app";
+  return value ? value : "https://api.openci.app";
 }
 
 export async function searchCatalog(query: string): Promise<SearchResponse> {
