@@ -1,24 +1,11 @@
 import type { Command } from "commander";
-import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import pc from "picocolors";
 import { extractSecrets, hasTimeout } from "../analyze/index.js";
 import { listInstallationMetadata } from "../manifest/store.js";
-import { isGhAuthenticated, isGhAvailable } from "../secrets/check.js";
+import { getRepoSecretAccess, tryListRepoSecrets } from "../secrets/repo.js";
 import { getGitRepoRoot } from "../utils/git.js";
-
-function getGhSecrets(): Set<string> {
-  try {
-    const output = execFileSync("gh", ["secret", "list", "--json", "name", "--jq", ".[].name"], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-    return new Set(output.split("\n").filter(Boolean));
-  } catch {
-    return new Set();
-  }
-}
 
 export function registerDoctorCommand(program: Command): void {
   program
@@ -33,8 +20,8 @@ export function registerDoctorCommand(program: Command): void {
         return;
       }
 
-      const ghReady = isGhAvailable() && isGhAuthenticated();
-      const repoSecrets = ghReady ? getGhSecrets() : undefined;
+      const secretAccess = getRepoSecretAccess();
+      const repoSecrets = secretAccess === "ready" ? tryListRepoSecrets() : undefined;
 
       let healthyCount = 0;
 
