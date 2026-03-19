@@ -10,3 +10,4 @@ web/tsconfig.tsbuildinfo
 plans/
 .openci.json
 skills/*-workspace/
+.vercel

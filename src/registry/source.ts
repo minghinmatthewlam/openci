@@ -1,7 +1,8 @@
-import { execFileSync } from "node:child_process";
 import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { CliError } from "../core/errors.js";
+import { githubApiFetch } from "../github/api.js";
+import { parseGitHubRepoRef } from "../github/identity.js";
 import { tryGit } from "../utils/git.js";
 import { computeHash, isWorkflowFile, stemName } from "../utils/workflow.js";
 import { cloneGitRepo } from "./github.js";
@@ -29,81 +30,16 @@ interface GitHubSource {
   repo: string;
 }
 
-const GITHUB_SOURCE_RE =
-  /^(?:github:)?(?<owner>[A-Za-z0-9_.-]+)\/(?<repo>[A-Za-z0-9_.-]+?)(?:\.git)?$/;
-
 // ── GitHub API fast path ──
 
 function parseGitHubShorthand(input: string): GitHubSource | undefined {
   if (isLocalPath(input) || isGitUrl(input)) return undefined;
-  const match = input.match(GITHUB_SOURCE_RE);
-  if (match?.groups?.owner && match.groups.repo) {
-    return { owner: match.groups.owner, repo: match.groups.repo };
-  }
-  return undefined;
-}
-
-let cachedGhToken: string | undefined | null = null; // null = not yet resolved
-
-function getGhToken(): string | undefined {
-  if (cachedGhToken !== null) return cachedGhToken || undefined;
-
-  // Check env first (free, covers CI)
-  const envToken = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
-  if (envToken) {
-    cachedGhToken = envToken;
-    return envToken;
-  }
-
-  // Try gh CLI
-  try {
-    const token = execFileSync("gh", ["auth", "token"], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-    cachedGhToken = token || "";
-    return token || undefined;
-  } catch {
-    cachedGhToken = "";
-    return undefined;
-  }
-}
-
-async function githubApiFetch(
-  apiPath: string,
-  options?: { skipAuth?: boolean },
-): Promise<Response | undefined> {
-  if (process.env.OPENCI_NO_API) return undefined;
-
-  const url = `https://api.github.com${apiPath}`;
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github.v3+json",
-    "User-Agent": "openci-cli",
-  };
-
-  if (!options?.skipAuth) {
-    const token = getGhToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
-
-  try {
-    const res = await fetch(url, { headers, signal: AbortSignal.timeout(10_000) });
-
-    // On 401 with auth, retry without auth (stale token shouldn't break public repos)
-    if (res.status === 401 && !options?.skipAuth && headers.Authorization) {
-      return githubApiFetch(apiPath, { skipAuth: true });
-    }
-
-    if (!res.ok) return undefined;
-    return res;
-  } catch {
-    return undefined;
-  }
+  return parseGitHubRepoRef(input);
 }
 
 async function tryListViaApi(
   gh: GitHubSource,
-  sourceLabel: string,
+  _sourceLabel: string,
 ): Promise<AvailableWorkflow[] | undefined> {
   const res = await githubApiFetch(`/repos/${gh.owner}/${gh.repo}/contents/.github/workflows`);
   if (!res) return undefined;
@@ -195,12 +131,12 @@ function parseSource(input: string, cwd: string): InstallSource {
     return { kind: "local", root, sourceLabel: root };
   }
 
-  const match = input.match(GITHUB_SOURCE_RE);
-  if (match?.groups?.owner && match.groups.repo) {
+  const repo = parseGitHubRepoRef(input);
+  if (repo) {
     return {
       kind: "git",
-      repoUrl: `https://github.com/${match.groups.owner}/${match.groups.repo}.git`,
-      sourceLabel: `${match.groups.owner}/${match.groups.repo}`,
+      repoUrl: `https://github.com/${repo.owner}/${repo.repo}.git`,
+      sourceLabel: `${repo.owner}/${repo.repo}`,
     };
   }
 

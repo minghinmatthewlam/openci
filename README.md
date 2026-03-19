@@ -31,6 +31,7 @@ npx openci-app add anthropics/claude-code --workflow claude-issue-triage
 AI agent workflows are the most useful CI automations today, but there's no way to install them from other repos. You have to find the YAML, copy it, figure out what secrets to set, and manually track updates.
 
 OpenCI gives you:
+
 - **One-command install** from any repo's `.github/workflows/` directory
 - **Post-install intelligence** — secrets, provider, permissions, timeout warnings, conflict detection
 - **Lifecycle management** — list, status, update, remove, doctor
@@ -47,6 +48,12 @@ See what's available in a repo:
 
 ```bash
 npx openci-app add anthropics/claude-code
+```
+
+Search the hosted workflow catalog:
+
+```bash
+npx openci-app search triage
 ```
 
 Install from different providers:
@@ -81,19 +88,37 @@ openci add anthropics/claude-code --workflow claude-issue-triage
 # Overwrite existing
 openci add anthropics/claude-code --workflow claude --force
 
+# Inspect or configure required repo secrets after install
+openci add anthropics/claude-code --workflow claude-issue-triage --setup
+openci add anthropics/claude-code --workflow claude-issue-triage --setup --copy-env ANTHROPIC_API_KEY
+
 # Preview without writing
 openci add anthropics/claude-code --workflow claude --dry-run
 ```
 
 Sources: `owner/repo`, `git@github.com:owner/repo.git`, `https://...`, `./local-path`
 
-| Flag | Description |
-|------|-------------|
-| `--workflow <name>` | Workflow to install (omit to list available) |
-| `--force` | Overwrite existing workflow file |
-| `--yes` | Non-interactive mode |
-| `--dry-run` | Show what would be installed without writing |
-| `--verbose` | Show additional details |
+| Flag                    | Description                                            |
+| ----------------------- | ------------------------------------------------------ |
+| `--workflow <name>`     | Workflow to install (omit to list available)           |
+| `--force`               | Overwrite existing workflow file                       |
+| `--yes`                 | Non-interactive mode                                   |
+| `--dry-run`             | Show what would be installed without writing           |
+| `--setup`               | Inspect required repository secrets after install      |
+| `--copy-env <NAME>`     | Copy a same-named local env var into a repo secret     |
+| `--secret <NAME=value>` | Set a repository secret from an explicit value         |
+| `--all-from-env`        | Copy any same-named local env vars for missing secrets |
+| `--json`                | Emit structured JSON to stdout                         |
+| `--verbose`             | Show additional details                                |
+
+### `search`
+
+Search the OpenCI workflow catalog:
+
+```bash
+openci search triage
+openci search review --json
+```
 
 ### `list`
 
@@ -167,6 +192,13 @@ In `--yes` mode, the CLI never prompts. Successful `add` prints only the created
 npx openci-app add anthropics/claude-code --workflow claude-issue-triage --yes
 ```
 
+For agent-safe structured output:
+
+```bash
+npx openci-app add anthropics/claude-code --workflow claude-issue-triage --setup --json
+npx openci-app search triage --json
+```
+
 ## Local Management
 
 OpenCI tracks installed workflows in sidecar files:
@@ -210,6 +242,8 @@ npm test
 npm run build
 node dist/index.js --help
 ```
+
+Search and telemetry endpoints are configured with `OPENCI_SEARCH_URL` and `OPENCI_TELEMETRY_URL`. The hosted product backend now lives in the private platform repo; this OSS repo only ships the CLI.
 
 Web app:
 

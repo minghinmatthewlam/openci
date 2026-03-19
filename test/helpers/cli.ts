@@ -5,6 +5,7 @@ export interface CliRunResult {
   stdout: string;
   stderr: string;
   error: unknown;
+  exitCode: number | undefined;
 }
 
 export async function runCli(
@@ -17,6 +18,8 @@ export async function runCli(
   let stdout = "";
   let stderr = "";
   let error: unknown;
+  let exitCode: number | undefined;
+  const previousExitCode = process.exitCode;
   const previousCwd = process.cwd();
   const previousEnv = { ...process.env };
 
@@ -35,6 +38,7 @@ export async function runCli(
   }) as typeof process.stderr.write);
 
   try {
+    process.exitCode = 0;
     if (options.cwd) {
       process.chdir(options.cwd);
     }
@@ -45,6 +49,7 @@ export async function runCli(
   } catch (caught) {
     error = caught;
   } finally {
+    exitCode = typeof process.exitCode === "number" ? process.exitCode : undefined;
     process.chdir(previousCwd);
     for (const key of Object.keys(process.env)) {
       if (!(key in previousEnv)) {
@@ -52,9 +57,10 @@ export async function runCli(
       }
     }
     Object.assign(process.env, previousEnv);
+    process.exitCode = previousExitCode;
     stdoutSpy.mockRestore();
     stderrSpy.mockRestore();
   }
 
-  return { stdout, stderr, error };
+  return { stdout, stderr, error, exitCode };
 }

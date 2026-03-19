@@ -18,6 +18,11 @@ describe("CLI help", () => {
     expect(result.stdout).toContain("add");
   });
 
+  it("registers search command", async () => {
+    const result = await runCli(["--help"]);
+    expect(result.stdout).toContain("search");
+  });
+
   it("registers list command", async () => {
     const result = await runCli(["--help"]);
     expect(result.stdout).toContain("list");
@@ -43,9 +48,8 @@ describe("CLI help", () => {
     expect(result.stdout).toContain("doctor");
   });
 
-  it("does not register old commands (search, info, create)", async () => {
+  it("does not register old commands (info, create)", async () => {
     const result = await runCli(["--help"]);
-    expect(result.stdout).not.toContain("search");
     expect(result.stdout).not.toContain("info");
     expect(result.stdout).not.toContain("create");
   });
