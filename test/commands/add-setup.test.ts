@@ -336,4 +336,61 @@ jobs:
     expect(result.error).toBeUndefined();
     expect(telemetryServer.requests).toHaveLength(0);
   });
+
+  it("suppresses telemetry for private source repos", async () => {
+    execFileSync("git", ["remote", "add", "origin", "https://github.com/acme/target.git"], {
+      cwd: targetRepo,
+      stdio: "ignore",
+    });
+
+    const workflowContent = await readFile(
+      join(sourceRepoFixture, ".github", "workflows", "pr-review.yml"),
+      "utf8",
+    );
+
+    githubServer = await startHttpServer((req, res) => {
+      res.setHeader("Content-Type", "application/json");
+      const url = req.url ?? "/";
+      if (url === "/repos/owner/private-repo") {
+        res.end(JSON.stringify({ private: true }));
+        return;
+      }
+      if (url === "/repos/acme/target") {
+        res.end(JSON.stringify({ private: false }));
+        return;
+      }
+      if (url === "/repos/owner/private-repo/contents/.github/workflows/pr-review.yml") {
+        res.end(
+          JSON.stringify({
+            name: "pr-review.yml",
+            encoding: "base64",
+            content: Buffer.from(workflowContent).toString("base64"),
+          }),
+        );
+        return;
+      }
+      if (url === "/repos/owner/private-repo/commits?per_page=1") {
+        res.end(JSON.stringify([{ sha: "abc123" }]));
+        return;
+      }
+      res.statusCode = 404;
+      res.end(JSON.stringify({ message: "not found" }));
+    });
+
+    telemetryServer = await startHttpServer((_req, res) => {
+      res.statusCode = 204;
+      res.end();
+    });
+
+    const result = await runCli(["add", "owner/private-repo", "--workflow", "pr-review", "--yes"], {
+      cwd: targetRepo,
+      env: {
+        OPENCI_GITHUB_API_URL: githubServer.url,
+        OPENCI_TELEMETRY_URL: ` ${telemetryServer.url} `,
+      },
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(telemetryServer.requests).toHaveLength(0);
+  });
 });
