@@ -220,6 +220,34 @@ openci add git@github.com:your-org/private-workflows.git --workflow pr-review
 openci add https://github.com/your-org/private-workflows.git --workflow pr-review
 ```
 
+## Telemetry & Privacy
+
+OpenCI sends a minimal install telemetry event only for identifiable GitHub installs where both the source repo and destination repo are public.
+
+Telemetry is not sent for:
+
+- private source repos
+- private destination repos
+- local-path installs
+- installs where the repo identity cannot be determined
+
+Disable telemetry entirely with:
+
+```bash
+OPENCI_DISABLE_TELEMETRY=1
+DO_NOT_TRACK=1
+```
+
+The telemetry payload includes only:
+
+- `event` (`install_success`)
+- `slug`
+- `cliVersion`
+- `dateBucket`
+- `destinationRepo`
+
+OpenCI does not send workflow file contents, secrets, secret values, or local filesystem paths.
+
 ## FAQ
 
 **What repos can I install from?**
