@@ -5,4 +5,3 @@
 - Scope CLI flags to the narrowest command that uses them. Do not add root/global flags for command-specific behavior.
 - Installed workflow state lives in `.github/workflows/.openci/`. Do not reintroduce a repo-root manifest.
 - The CLI installs `.yml`/`.yaml` files from any repo's `.github/workflows/` directory. No metadata.json, no templates, no detection, no provider registry.
-- Do not touch any files in `web/` from the CLI agent.

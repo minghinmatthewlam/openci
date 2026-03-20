@@ -95,4 +95,75 @@ steps:
     expect(result.stdout).toContain("MY_SECRET");
     expect(result.stdout).toContain("may no longer be needed");
   });
+
+  it("reports secrets still used by other workflows", async () => {
+    const workflowsDir = join(tempDir, ".github", "workflows");
+    await mkdir(workflowsDir, { recursive: true });
+
+    await upsertInstallationMetadata(tempDir, {
+      name: "ci",
+      source: "owner/repo",
+      workflow: "ci",
+      requiredSecrets: ["SHARED_SECRET", "UNIQUE_SECRET"],
+      targetPath: join(workflowsDir, "ci.yml"),
+      installedAt: "2026-01-01T00:00:00.000Z",
+    });
+    await upsertInstallationMetadata(tempDir, {
+      name: "other",
+      source: "owner/repo",
+      workflow: "other",
+      requiredSecrets: ["SHARED_SECRET"],
+      targetPath: join(workflowsDir, "other.yml"),
+      installedAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    const result = await runCli(["remove", "ci"], { cwd: tempDir });
+    expect(result.stdout).toContain("UNIQUE_SECRET");
+    expect(result.stdout).toContain("may no longer be needed");
+    expect(result.stdout).toContain("SHARED_SECRET");
+    expect(result.stdout).toContain("still used by other workflows");
+  });
+
+  it("uses metadata-backed secrets when the workflow file is already missing", async () => {
+    const workflowsDir = join(tempDir, ".github", "workflows");
+    await mkdir(workflowsDir, { recursive: true });
+
+    await upsertInstallationMetadata(tempDir, {
+      name: "ci",
+      source: "owner/repo",
+      workflow: "ci",
+      requiredSecrets: ["MY_SECRET"],
+      targetPath: join(workflowsDir, "ci.yml"),
+      installedAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    const result = await runCli(["remove", "ci"], { cwd: tempDir });
+    expect(result.stdout).toContain("MY_SECRET");
+    expect(result.stdout).toContain("may no longer be needed");
+  });
+
+  it("prefers live workflow secrets over stale metadata when the file still exists", async () => {
+    const workflowsDir = join(tempDir, ".github", "workflows");
+    await mkdir(workflowsDir, { recursive: true });
+
+    await writeFile(
+      join(workflowsDir, "ci.yml"),
+      "on: push\nsteps:\n  - run: echo hi\n    env:\n      TOKEN: ${{ secrets.LIVE_SECRET }}\n",
+      "utf8",
+    );
+
+    await upsertInstallationMetadata(tempDir, {
+      name: "ci",
+      source: "owner/repo",
+      workflow: "ci",
+      requiredSecrets: ["STALE_SECRET"],
+      targetPath: join(workflowsDir, "ci.yml"),
+      installedAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    const result = await runCli(["remove", "ci"], { cwd: tempDir });
+    expect(result.stdout).toContain("LIVE_SECRET");
+    expect(result.stdout).toContain("may no longer be needed");
+    expect(result.stdout).not.toContain("STALE_SECRET");
+  });
 });

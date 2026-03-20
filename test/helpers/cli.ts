@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { buildCli } from "../../src/cli.js";
+import pkg from "../../package.json" with { type: "json" };
 
 export interface CliRunResult {
   stdout: string;
@@ -45,7 +46,7 @@ export async function runCli(
     if (options.env) {
       Object.assign(process.env, options.env);
     }
-    await buildCli("0.1.0").parseAsync(args, { from: "user" });
+    await buildCli(pkg.version).parseAsync(args, { from: "user" });
   } catch (caught) {
     error = caught;
   } finally {

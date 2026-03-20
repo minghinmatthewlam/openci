@@ -3,12 +3,25 @@ import { readFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { CliError } from "../core/errors.js";
 import { extractSecrets } from "../analyze/index.js";
+import type { Installation } from "../manifest/schema.js";
 import {
   deleteInstallationMetadata,
   listInstallationMetadata,
   readInstallationMetadata,
 } from "../manifest/store.js";
 import { getGitRepoRoot } from "../utils/git.js";
+
+async function getInstallationSecrets(
+  repoRoot: string,
+  installation: Installation,
+): Promise<string[]> {
+  try {
+    const content = await readFile(join(repoRoot, installation.targetPath), "utf8");
+    return extractSecrets(content);
+  } catch {
+    return installation.requiredSecrets ?? [];
+  }
+}
 
 export function registerRemoveCommand(program: Command): void {
   program
@@ -24,14 +37,7 @@ export function registerRemoveCommand(program: Command): void {
       }
 
       const targetPath = join(repoRoot, installation.targetPath);
-
-      let removedSecrets: string[] = [];
-      try {
-        const content = await readFile(targetPath, "utf8");
-        removedSecrets = extractSecrets(content);
-      } catch {
-        /* file may already be missing */
-      }
+      const removedSecrets = await getInstallationSecrets(repoRoot, installation);
 
       try {
         await unlink(targetPath);
@@ -46,14 +52,7 @@ export function registerRemoveCommand(program: Command): void {
       if (removedSecrets.length > 0) {
         const remaining = await listInstallationMetadata(repoRoot);
         const secretSets = await Promise.all(
-          remaining.map(async (r) => {
-            try {
-              const content = await readFile(join(repoRoot, r.targetPath), "utf8");
-              return extractSecrets(content);
-            } catch {
-              return [];
-            }
-          }),
+          remaining.map((r) => getInstallationSecrets(repoRoot, r)),
         );
         const allRemainingSecrets = new Set(secretSets.flat());
 

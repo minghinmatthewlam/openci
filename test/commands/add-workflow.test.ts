@@ -76,6 +76,7 @@ describe("add command", () => {
     expect(data.name).toBe("pr-review");
     expect(data.source).toBe(sourceRepoFixture);
     expect(data.contentHash).toBeTruthy();
+    expect(data.requiredSecrets).toEqual(["ANTHROPIC_API_KEY"]);
   });
 
   it("refuses to overwrite without --force", async () => {

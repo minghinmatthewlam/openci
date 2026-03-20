@@ -510,6 +510,8 @@ export function registerAddCommand(program: Command): void {
           return;
         }
 
+        const requiredSecrets = extractSecrets(file.content);
+
         await atomicWrite(targetPath, file.content);
         await upsertInstallationMetadata(repoRoot, {
           name: file.name,
@@ -517,12 +519,12 @@ export function registerAddCommand(program: Command): void {
           workflow: file.name,
           commit: file.commit,
           contentHash: file.contentHash,
+          requiredSecrets,
           targetPath,
           installedAt: new Date().toISOString(),
         });
 
         const slug = await maybeTrackInstall(file, repoRoot);
-        const requiredSecrets = extractSecrets(file.content);
         const setupResult = await runSetup(file.source, file.name, requiredSecrets, options);
 
         if (json) {

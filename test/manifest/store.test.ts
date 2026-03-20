@@ -107,6 +107,7 @@ describe("manifest/store", () => {
       workflow: "ci",
       commit: "abc123",
       contentHash: "def456",
+      requiredSecrets: ["ALPHA", "BETA"],
       targetPath: join(tempDir, ".github", "workflows", "ci.yml"),
       installedAt: "2026-01-01T00:00:00.000Z",
     });
@@ -115,5 +116,26 @@ describe("manifest/store", () => {
     const data = JSON.parse(raw);
     expect(data.commit).toBe("abc123");
     expect(data.contentHash).toBe("def456");
+    expect(data.requiredSecrets).toEqual(["ALPHA", "BETA"]);
+  });
+
+  it("reads legacy metadata without requiredSecrets", async () => {
+    const sidecarDir = getInstallationMetadataDir(tempDir);
+    await mkdir(sidecarDir, { recursive: true });
+    await writeFile(
+      join(sidecarDir, "legacy.json"),
+      JSON.stringify({
+        name: "legacy",
+        source: "owner/repo",
+        workflow: "legacy",
+        targetPath: ".github/workflows/legacy.yml",
+        installedAt: "2026-01-01T00:00:00.000Z",
+      }),
+      "utf8",
+    );
+
+    const result = await readInstallationMetadata(tempDir, "legacy");
+    expect(result).toBeDefined();
+    expect(result!.requiredSecrets).toBeUndefined();
   });
 });

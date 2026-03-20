@@ -12,7 +12,7 @@
 **Install GitHub Actions workflows from any repo.**
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D20-green.svg)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D24-green.svg)](https://nodejs.org/)
 
 [Quick Start](#quick-start) · [Commands](#commands) · [FAQ](#faq)
 
@@ -96,7 +96,7 @@ openci add anthropics/claude-code --workflow claude-issue-triage --setup --copy-
 openci add anthropics/claude-code --workflow claude --dry-run
 ```
 
-Sources: `owner/repo`, `git@github.com:owner/repo.git`, `https://...`, `./local-path`
+Sources: `owner/repo`, `github:owner/repo`, `git@github.com:owner/repo.git`, `https://...`, `./local-path`
 
 | Flag                    | Description                                            |
 | ----------------------- | ------------------------------------------------------ |
@@ -138,7 +138,7 @@ openci status
 
 ### `update`
 
-Re-fetch workflows from their source. Detects local modifications and shows diffs:
+Re-fetch workflows from their source. Detects local modifications and skips overwriting them unless you pass `--force`:
 
 ```bash
 openci update
@@ -148,7 +148,7 @@ openci update --force   # overwrite even if locally modified
 
 ### `remove`
 
-Remove a workflow and its tracking metadata. Shows orphaned secrets:
+Remove a workflow and its tracking metadata. Reports secrets that may no longer be needed and secrets still used by other managed workflows:
 
 ```bash
 openci remove claude-issue-triage
@@ -156,7 +156,7 @@ openci remove claude-issue-triage
 
 ### `doctor`
 
-Check health of installed workflows — file existence, secrets, timeouts:
+Check installed workflow health — file existence, secrets, and timeouts — and summarize results as healthy, warning, or error:
 
 ```bash
 openci doctor
@@ -186,7 +186,7 @@ Required secret: ANTHROPIC_API_KEY
 
 ## Non-Interactive / Agent Usage
 
-In `--yes` mode, the CLI never prompts. Successful `add` prints only the created path to stdout; warnings go to stderr.
+In `--yes` mode, the CLI never prompts. Successful `add` prints the created path to stdout. Warnings go to stderr unless you also pass `--verbose`, which prints install analysis to stdout.
 
 ```bash
 npx openci-app add anthropics/claude-code --workflow claude-issue-triage --yes
@@ -199,6 +199,8 @@ npx openci-app add anthropics/claude-code --workflow claude-issue-triage --setup
 npx openci-app search triage --json
 ```
 
+When setup cannot fully configure required secrets, `add --setup` still installs the workflow but exits with code `2`. In JSON mode this is reported as `installed_setup_incomplete` or `installed_setup_unavailable`.
+
 ## Local Management
 
 OpenCI tracks installed workflows in sidecar files:
@@ -207,15 +209,15 @@ OpenCI tracks installed workflows in sidecar files:
 .github/workflows/.openci/<workflow>.json
 ```
 
-This records source, commit SHA, content hash, and install time so `list`, `status`, `update`, and `remove` work reliably.
+This records source, commit SHA, content hash, required secrets, and install time so `list`, `status`, `update`, and `remove` work reliably.
 
 ## Private Repos
 
-Any repo your local `git clone` can access works — SSH keys, HTTPS credentials, etc.
+Public repos work with shorthand like `owner/repo`. For private repos, prefer an explicit git URL such as SSH if that is how your local git is authenticated.
 
 ```bash
-openci add your-org/private-workflows --workflow pr-review
 openci add git@github.com:your-org/private-workflows.git --workflow pr-review
+openci add https://github.com/your-org/private-workflows.git --workflow pr-review
 ```
 
 ## FAQ
@@ -234,7 +236,7 @@ In `.github/workflows/.openci/<workflow>.json`, alongside the installed workflow
 
 ## Development
 
-Requirements: Node.js `>=20`, npm.
+Requirements: Node.js `>=24`, npm.
 
 ```bash
 npm install
@@ -243,15 +245,7 @@ npm run build
 node dist/index.js --help
 ```
 
-Search and telemetry endpoints are configured with `OPENCI_SEARCH_URL` and `OPENCI_TELEMETRY_URL`. The hosted product backend now lives in the private platform repo; this OSS repo only ships the CLI.
-
-Web app:
-
-```bash
-npm --prefix web ci
-npm --prefix web run test
-npm --prefix web run build
-```
+Search and telemetry endpoints are configured with `OPENCI_SEARCH_URL` and `OPENCI_TELEMETRY_URL`. The hosted product backend and web app now live in the private `openci-platform` repo; this OSS repo ships the CLI only.
 
 ## License
 

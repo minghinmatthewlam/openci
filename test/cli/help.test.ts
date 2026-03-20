@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import pkg from "../../package.json" with { type: "json" };
 import { runCli } from "../helpers/cli.js";
 
 describe("CLI help", () => {
@@ -10,7 +11,7 @@ describe("CLI help", () => {
 
   it("shows version with --version", async () => {
     const result = await runCli(["--version"]);
-    expect(result.stdout).toContain("0.1.0");
+    expect(result.stdout).toContain(pkg.version);
   });
 
   it("registers add command", async () => {

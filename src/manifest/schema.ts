@@ -6,6 +6,7 @@ export const InstallationSchema = z.object({
   workflow: z.string(),
   commit: z.string().optional(),
   contentHash: z.string().optional(),
+  requiredSecrets: z.array(z.string()).optional(),
   targetPath: z.string(),
   installedAt: z.string(),
 });

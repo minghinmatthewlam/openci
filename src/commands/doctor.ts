@@ -7,6 +7,12 @@ import { listInstallationMetadata } from "../manifest/store.js";
 import { getRepoSecretAccess, tryListRepoSecrets } from "../secrets/repo.js";
 import { getGitRepoRoot } from "../utils/git.js";
 
+type HealthStatus = "healthy" | "warning" | "error";
+
+function escalateWarning(status: HealthStatus): HealthStatus {
+  return status === "error" ? status : "warning";
+}
+
 export function registerDoctorCommand(program: Command): void {
   program
     .command("doctor")
@@ -22,13 +28,16 @@ export function registerDoctorCommand(program: Command): void {
 
       const secretAccess = getRepoSecretAccess();
       const repoSecrets = secretAccess === "ready" ? tryListRepoSecrets() : undefined;
-
-      let healthyCount = 0;
+      const counts: Record<HealthStatus, number> = {
+        healthy: 0,
+        warning: 0,
+        error: 0,
+      };
 
       for (const installation of installations) {
         process.stdout.write(`\n${installation.name}\n`);
         const targetPath = join(repoRoot, installation.targetPath);
-        let healthy = true;
+        let status: HealthStatus = "healthy";
 
         // Check file exists
         let content: string;
@@ -39,7 +48,8 @@ export function registerDoctorCommand(program: Command): void {
           process.stdout.write(
             `  ${pc.red("\u2717")} File missing at ${installation.targetPath}\n`,
           );
-          healthy = false;
+          status = "error";
+          counts[status]++;
           continue;
         }
 
@@ -53,7 +63,7 @@ export function registerDoctorCommand(program: Command): void {
               process.stdout.write(
                 `  ${pc.red("\u2717")} ${secret} is not set \u2192 gh secret set ${secret}\n`,
               );
-              healthy = false;
+              status = "error";
             }
           }
         } else if (secrets.length > 0) {
@@ -61,6 +71,7 @@ export function registerDoctorCommand(program: Command): void {
           for (const secret of secrets) {
             process.stdout.write(`    Requires: ${secret}\n`);
           }
+          status = escalateWarning(status);
         }
 
         // Check timeout
@@ -70,11 +81,15 @@ export function registerDoctorCommand(program: Command): void {
           process.stdout.write(
             `  ${pc.yellow("!")} No timeout-minutes (GitHub default: 6 hours)\n`,
           );
+          status = escalateWarning(status);
         }
 
-        if (healthy) healthyCount++;
+        process.stdout.write(`  Summary: ${status}\n`);
+        counts[status]++;
       }
 
-      process.stdout.write(`\n${healthyCount} of ${installations.length} workflow(s) healthy.\n`);
+      process.stdout.write(
+        `\nSummary: ${counts.healthy} healthy, ${counts.warning} warning, ${counts.error} error.\n`,
+      );
     });
 }

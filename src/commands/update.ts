@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { extractSecrets } from "../analyze/index.js";
 import { CliError } from "../core/errors.js";
 import { listInstallationMetadata, upsertInstallationMetadata } from "../manifest/store.js";
 import { fetchWorkflowFile } from "../registry/source.js";
@@ -45,6 +46,7 @@ export function registerUpdateCommand(program: Command): void {
 
           const { file } = resolved;
           const targetPath = join(repoRoot, installation.targetPath);
+          const requiredSecrets = extractSecrets(file.content);
 
           let localContent: string | undefined;
           try {
@@ -60,6 +62,7 @@ export function registerUpdateCommand(program: Command): void {
               ...installation,
               commit: file.commit,
               contentHash: file.contentHash,
+              requiredSecrets,
               targetPath,
             });
             process.stdout.write(`${installation.name}\trestored\n`);
@@ -69,7 +72,27 @@ export function registerUpdateCommand(program: Command): void {
           const localHash = computeHash(localContent);
 
           if (localHash === file.contentHash) {
+            if (
+              installation.commit !== file.commit ||
+              installation.contentHash !== file.contentHash ||
+              JSON.stringify(installation.requiredSecrets ?? []) !== JSON.stringify(requiredSecrets)
+            ) {
+              await upsertInstallationMetadata(repoRoot, {
+                ...installation,
+                commit: file.commit,
+                contentHash: file.contentHash,
+                requiredSecrets,
+                targetPath,
+              });
+            }
             process.stdout.write(`${installation.name}\tup-to-date\n`);
+            continue;
+          }
+
+          if (!installation.contentHash && !options.force) {
+            process.stderr.write(
+              `${installation.name}\tskipped (missing baseline hash, use --force to overwrite)\n`,
+            );
             continue;
           }
 
@@ -89,6 +112,7 @@ export function registerUpdateCommand(program: Command): void {
             ...installation,
             commit: file.commit,
             contentHash: file.contentHash,
+            requiredSecrets,
             targetPath,
           });
           process.stdout.write(`${installation.name}\tupdated\n`);

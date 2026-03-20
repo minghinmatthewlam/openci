@@ -29,20 +29,17 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "build": "tsup",
-    "lint": "oxlint src web test",
-    "format": "oxfmt src web test '!web/.next/**'",
-    "format:check": "oxfmt --check src web test '!web/.next/**'",
+    "lint": "oxlint src test",
+    "format": "oxfmt src test",
+    "format:check": "oxfmt --check src test",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && vitest run",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "web:dev": "npm --prefix web run dev",
-    "web:build": "npm --prefix web run build",
-    "web:start": "npm --prefix web run start",
-    "web:test": "npm --prefix web run test",
     "pack:check": "npm pack --dry-run",
     "prepublishOnly": "npm run typecheck && npm run test && npm run build && npm run pack:check",
     "prepare": "husky"
@@ -69,6 +66,5 @@
     "tsup": "8.5.1",
     "typescript": "5.9.3",
     "vitest": "4.0.18"
-  },
-  "packageManager": "yarn@4.1.1+sha512.ec40d0639bb307441b945d9467139cbb88d14394baac760b52eca038b330d16542d66fef61574271534ace5a200518dabf3b53a85f1f9e4bfa37141b538a9590"
+  }
 }
