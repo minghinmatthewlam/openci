@@ -16,6 +16,34 @@ export interface GitRepoSource {
   sourceLabel: string;
 }
 
+function isSshRepoUrl(repoUrl: string): boolean {
+  return repoUrl.startsWith("git@") || repoUrl.startsWith("ssh://");
+}
+
+function buildNonInteractiveSshCommand(existingCommand?: string): string {
+  const sshFlags = "-o BatchMode=yes -o StrictHostKeyChecking=accept-new";
+  if (!existingCommand) return `ssh ${sshFlags}`;
+
+  const trimmed = existingCommand.trim();
+  if (!trimmed.startsWith("ssh")) return trimmed;
+
+  const sanitized = trimmed
+    .replace(/\s+-o\s+BatchMode=\S+/g, "")
+    .replace(/\s+-o\s+StrictHostKeyChecking=\S+/g, "")
+    .trim();
+
+  const sshArgs = sanitized === "ssh" ? "" : sanitized.slice(3).trim();
+  return ["ssh", sshFlags, sshArgs].filter(Boolean).join(" ");
+}
+
+export function buildGitCloneEnv(repoUrl: string): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, GIT_TERMINAL_PROMPT: "0" };
+  if (isSshRepoUrl(repoUrl)) {
+    env.GIT_SSH_COMMAND = buildNonInteractiveSshCommand(env.GIT_SSH_COMMAND);
+  }
+  return env;
+}
+
 export async function cloneGitRepo(source: GitRepoSource): Promise<ClonedRepo> {
   const repoUrls = [source.repoUrl, ...(source.fallbackRepoUrls ?? [])];
   const errors: Array<{ repoUrl: string; stderr: string }> = [];
@@ -27,7 +55,7 @@ export async function cloneGitRepo(source: GitRepoSource): Promise<ClonedRepo> {
     try {
       execFileSync("git", ["clone", "--depth", "1", "--quiet", repoUrl, repoDir], {
         stdio: ["ignore", "ignore", "pipe"],
-        env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+        env: buildGitCloneEnv(repoUrl),
       });
 
       return {

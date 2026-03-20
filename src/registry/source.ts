@@ -122,8 +122,7 @@ function isGitUrl(input: string): boolean {
     input.startsWith("ssh://") ||
     input.startsWith("https://") ||
     input.startsWith("http://") ||
-    input.startsWith("file://") ||
-    input.endsWith(".git")
+    input.startsWith("file://")
   );
 }
 
@@ -136,6 +135,10 @@ function parseSource(input: string, cwd: string): InstallSource {
     return { kind: "local", root, sourceLabel: root };
   }
 
+  if (isGitUrl(input)) {
+    return { kind: "git", repoUrl: input, sourceLabel: input };
+  }
+
   const repo = parseGitHubRepoRef(input);
   if (repo) {
     return {
@@ -146,10 +149,6 @@ function parseSource(input: string, cwd: string): InstallSource {
     };
   }
 
-  if (isGitUrl(input)) {
-    return { kind: "git", repoUrl: input, sourceLabel: input };
-  }
-
   throw new CliError(
     `Unsupported source '${input}'. Use owner/repo, github:owner/repo, a git URL, or a local path.`,
   );
@@ -157,13 +156,13 @@ function parseSource(input: string, cwd: string): InstallSource {
 
 // ── Clone fallback helpers ──
 
-async function findWorkflowsDir(root: string): Promise<string> {
+async function findWorkflowsDir(root: string, displayLabel = root): Promise<string> {
   const dir = path.join(root, ".github", "workflows");
   try {
     await access(dir);
     return dir;
   } catch {
-    throw new CliError(`No .github/workflows/ directory found in '${root}'.`);
+    throw new CliError(`No .github/workflows/ directory found in '${displayLabel}'.`);
   }
 }
 
@@ -184,7 +183,7 @@ export async function listAvailableWorkflows(params: {
   const source = parseSource(params.sourceArg, params.cwd);
 
   if (source.kind === "local") {
-    const dir = await findWorkflowsDir(source.root);
+    const dir = await findWorkflowsDir(source.root, source.sourceLabel);
     return { workflows: await listWorkflowFiles(dir) };
   }
 
@@ -198,7 +197,7 @@ export async function listAvailableWorkflows(params: {
 
   const cloned = await cloneGitRepo(source);
   try {
-    const dir = await findWorkflowsDir(cloned.path);
+    const dir = await findWorkflowsDir(cloned.path, source.sourceLabel);
     return { workflows: await listWorkflowFiles(dir), cleanup: cloned.cleanup };
   } catch (error) {
     await cloned.cleanup();
@@ -253,7 +252,7 @@ async function resolveFromClonePath(
   stem: string,
   sourceLabel: string,
 ): Promise<WorkflowFile> {
-  const dir = await findWorkflowsDir(root);
+  const dir = await findWorkflowsDir(root, sourceLabel);
   return resolveFromDir(dir, stem, sourceLabel, root);
 }
 

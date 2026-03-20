@@ -3,7 +3,7 @@ import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { cloneGitRepo } from "../../src/registry/github.js";
+import { buildGitCloneEnv, cloneGitRepo } from "../../src/registry/github.js";
 
 describe("cloneGitRepo", () => {
   let tempDir: string;
@@ -46,5 +46,44 @@ describe("cloneGitRepo", () => {
 
     await cloned.cleanup();
     await expect(access(cloned.path)).rejects.toThrow();
+  });
+
+  it("includes both attempted remotes when all clone URLs fail", async () => {
+    await expect(
+      cloneGitRepo({
+        repoUrl: join(tempDir, "missing-https.git"),
+        fallbackRepoUrls: [join(tempDir, "missing-ssh.git")],
+        sourceLabel: "owner/private-repo",
+      }),
+    ).rejects.toThrow(/owner\/private-repo[\s\S]*missing-https\.git[\s\S]*missing-ssh\.git/);
+  });
+
+  it("uses non-interactive SSH clone options for SSH remotes", () => {
+    const env = buildGitCloneEnv("git@github.com:owner/private-repo.git");
+    expect(env.GIT_TERMINAL_PROMPT).toBe("0");
+    expect(env.GIT_SSH_COMMAND).toContain("BatchMode=yes");
+    expect(env.GIT_SSH_COMMAND).toContain("StrictHostKeyChecking=accept-new");
+  });
+
+  it("preserves an existing GIT_SSH_COMMAND while adding non-interactive flags", () => {
+    const original = process.env.GIT_SSH_COMMAND;
+    process.env.GIT_SSH_COMMAND =
+      "ssh -i ~/.ssh/custom_key -p 2222 -o BatchMode=no -o StrictHostKeyChecking=no";
+
+    try {
+      const env = buildGitCloneEnv("git@github.com:owner/private-repo.git");
+      expect(env.GIT_SSH_COMMAND).toContain("-i ~/.ssh/custom_key");
+      expect(env.GIT_SSH_COMMAND).toContain("-p 2222");
+      expect(env.GIT_SSH_COMMAND).toContain("BatchMode=yes");
+      expect(env.GIT_SSH_COMMAND).toContain("StrictHostKeyChecking=accept-new");
+      expect(env.GIT_SSH_COMMAND).not.toContain("BatchMode=no");
+      expect(env.GIT_SSH_COMMAND).not.toContain("StrictHostKeyChecking=no");
+    } finally {
+      if (original === undefined) {
+        delete process.env.GIT_SSH_COMMAND;
+      } else {
+        process.env.GIT_SSH_COMMAND = original;
+      }
+    }
   });
 });

@@ -42,7 +42,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "pack:check": "npm pack --dry-run",
-    "prepublishOnly": "npm run typecheck && npm run test && npm run build && npm run pack:check",
+    "prepublishOnly": "npm run lint:workflows && npm run typecheck && npm run test && npm run build && npm run pack:check",
     "prepare": "husky"
   },
   "dependencies": {
@@ -67,5 +67,6 @@
     "tsup": "8.5.1",
     "typescript": "5.9.3",
     "vitest": "4.0.18"
-  }
+  },
+  "packageManager": "npm@11.9.0"
 }

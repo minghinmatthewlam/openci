@@ -187,18 +187,28 @@ describe("update command", () => {
       join(sourceRepo, ".github", "workflows", "ci.yml"),
       "utf8",
     );
+    const initialCommit = currentSourceCommit();
     const workflowPath = await installManagedWorkflow({
       content: initialContent,
-      commit: currentSourceCommit(),
+      commit: initialCommit,
       requiredSecrets: ["API_TOKEN"],
     });
+
+    const restoredContent =
+      "on: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n    timeout-minutes: 45\n    steps:\n      - run: echo restored\n        env:\n          TOKEN: ${{ secrets.RESTORED_SECRET }}\n";
+    const restoredCommit = await updateSourceWorkflow(restoredContent, "restore workflow");
 
     await rm(workflowPath, { force: true });
 
     const result = await runCli(["update"], { cwd: targetRepo });
     expect(result.error).toBeUndefined();
     expect(result.stdout).toContain("ci\trestored");
-    expect(await readFile(workflowPath, "utf8")).toContain("API_TOKEN");
+    expect(await readFile(workflowPath, "utf8")).toBe(restoredContent);
+
+    const metadata = await readInstallationMetadata(targetRepo, "ci");
+    expect(metadata?.commit).toBe(restoredCommit);
+    expect(metadata?.contentHash).toBe(computeHash(restoredContent));
+    expect(metadata?.requiredSecrets).toEqual(["RESTORED_SECRET"]);
   });
 
   it("skips locally modified workflows unless forced", async () => {
@@ -217,6 +227,7 @@ describe("update command", () => {
       "on: push\njobs:\n  local:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo local edits\n",
       "utf8",
     );
+    const originalMetadata = await readInstallationMetadata(targetRepo, "ci");
     await updateSourceWorkflow(
       "on: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n    timeout-minutes: 60\n    steps:\n      - run: echo upstream change\n        env:\n          TOKEN: ${{ secrets.UPSTREAM_SECRET }}\n",
       "upstream change",
@@ -226,6 +237,9 @@ describe("update command", () => {
     expect(result.error).toBeUndefined();
     expect(result.stderr).toContain("locally modified");
     expect(await readFile(workflowPath, "utf8")).toContain("local edits");
+
+    const metadata = await readInstallationMetadata(targetRepo, "ci");
+    expect(metadata).toEqual(originalMetadata);
   });
 
   it("overwrites locally modified workflows with --force", async () => {
