@@ -11,39 +11,52 @@ export interface ClonedRepo {
 }
 
 export interface GitRepoSource {
+  fallbackRepoUrls?: string[];
   repoUrl: string;
   sourceLabel: string;
 }
 
 export async function cloneGitRepo(source: GitRepoSource): Promise<ClonedRepo> {
-  const tempDir = await mkdtemp(join(tmpdir(), "openci-source-"));
-  const repoDir = join(tempDir, "repo");
+  const repoUrls = [source.repoUrl, ...(source.fallbackRepoUrls ?? [])];
+  const errors: Array<{ repoUrl: string; stderr: string }> = [];
 
-  try {
-    execFileSync("git", ["clone", "--depth", "1", "--quiet", source.repoUrl, repoDir], {
-      stdio: ["ignore", "ignore", "pipe"],
-      env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
-    });
-  } catch (error) {
-    await rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
+  for (const repoUrl of repoUrls) {
+    const tempDir = await mkdtemp(join(tmpdir(), "openci-source-"));
+    const repoDir = join(tempDir, "repo");
 
-    const stderr =
-      error && typeof error === "object" && "stderr" in error && error.stderr instanceof Buffer
-        ? error.stderr.toString("utf8").trim()
-        : "";
+    try {
+      execFileSync("git", ["clone", "--depth", "1", "--quiet", repoUrl, repoDir], {
+        stdio: ["ignore", "ignore", "pipe"],
+        env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+      });
 
-    throw new CliError(
-      stderr
-        ? `Failed to clone '${source.sourceLabel}'. ${stderr}`
-        : `Failed to clone '${source.sourceLabel}'. Ensure the repo exists and your git credentials are configured.`,
-    );
+      return {
+        path: repoDir,
+        sourceLabel: source.sourceLabel,
+        async cleanup() {
+          await rm(tempDir, { recursive: true, force: true });
+        },
+      };
+    } catch (error) {
+      await rm(tempDir, { recursive: true, force: true }).catch(() => undefined);
+      const stderr =
+        error && typeof error === "object" && "stderr" in error && error.stderr instanceof Buffer
+          ? error.stderr.toString("utf8").trim()
+          : "";
+      errors.push({ repoUrl, stderr });
+    }
   }
 
-  return {
-    path: repoDir,
-    sourceLabel: source.sourceLabel,
-    async cleanup() {
-      await rm(tempDir, { recursive: true, force: true });
-    },
-  };
+  const fallbackHint =
+    repoUrls.length > 1 ? " Tried GitHub clone fallback over HTTPS and SSH." : "";
+  const errorDetails = errors
+    .filter((entry) => entry.stderr)
+    .map((entry) => `${entry.repoUrl}: ${entry.stderr}`)
+    .join(" | ");
+
+  throw new CliError(
+    errorDetails
+      ? `Failed to clone '${source.sourceLabel}'.${fallbackHint} ${errorDetails}`
+      : `Failed to clone '${source.sourceLabel}'.${fallbackHint} Ensure the repo exists and your git credentials are configured.`,
+  );
 }

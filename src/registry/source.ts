@@ -23,7 +23,12 @@ export interface AvailableWorkflow {
 
 type InstallSource =
   | { kind: "local"; root: string; sourceLabel: string }
-  | { kind: "git"; repoUrl: string; sourceLabel: string };
+  | {
+      kind: "git";
+      repoUrl: string;
+      fallbackRepoUrls?: string[];
+      sourceLabel: string;
+    };
 
 interface GitHubSource {
   owner: string;
@@ -136,6 +141,7 @@ function parseSource(input: string, cwd: string): InstallSource {
     return {
       kind: "git",
       repoUrl: `https://github.com/${repo.owner}/${repo.repo}.git`,
+      fallbackRepoUrls: [`git@github.com:${repo.owner}/${repo.repo}.git`],
       sourceLabel: `${repo.owner}/${repo.repo}`,
     };
   }

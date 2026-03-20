@@ -213,7 +213,7 @@ This records source, commit SHA, content hash, required secrets, and install tim
 
 ## Private Repos
 
-Public repos work with shorthand like `owner/repo`. For private repos, prefer an explicit git URL such as SSH if that is how your local git is authenticated.
+Public repos work with shorthand like `owner/repo`. For GitHub shorthand, OpenCI tries the GitHub API first, then clone fallback over HTTPS and SSH. For private repos, an explicit SSH URL is still the most predictable choice when your access depends on SSH keys.
 
 ```bash
 openci add git@github.com:your-org/private-workflows.git --workflow pr-review
@@ -240,6 +240,7 @@ Requirements: Node.js `>=24`, npm.
 
 ```bash
 npm install
+npm run lint:workflows
 npm test
 npm run build
 node dist/index.js --help

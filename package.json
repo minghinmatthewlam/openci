@@ -34,6 +34,7 @@
   "scripts": {
     "build": "tsup",
     "lint": "oxlint src test",
+    "lint:workflows": "node scripts/actionlint.mjs",
     "format": "oxfmt src test",
     "format:check": "oxfmt --check src test",
     "typecheck": "tsc --noEmit",
