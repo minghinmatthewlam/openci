@@ -19,6 +19,15 @@ describe("CLI help", () => {
     expect(result.stdout).toContain("add");
   });
 
+  it("documents GitHub fallback and private SSH guidance in add help", async () => {
+    const result = await runCli(["add", "--help"]);
+    expect(result.stdout).toContain("owner/repo");
+    expect(result.stdout).toContain("github:owner/repo");
+    expect(result.stdout).toContain("git@github.com:owner/repo.git");
+    expect(result.stdout).toContain("HTTPS/SSH clone fallback");
+    expect(result.stdout).toContain("explicit SSH is the most predictable choice");
+  });
+
   it("registers search command", async () => {
     const result = await runCli(["--help"]);
     expect(result.stdout).toContain("search");

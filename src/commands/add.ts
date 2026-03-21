@@ -422,8 +422,13 @@ function buildListJsonResult(
 export function registerAddCommand(program: Command): void {
   program
     .command("add")
-    .description("Install a workflow from any repo")
-    .argument("<source>", "Source: owner/repo, git URL, or local path")
+    .description(
+      "Install a workflow from any repo. GitHub shorthand uses API lookup first, then HTTPS/SSH clone fallback.",
+    )
+    .argument(
+      "<source>",
+      "Source: owner/repo, github:owner/repo, git@github.com:owner/repo.git, https://..., or local path",
+    )
     .option("--workflow <name>", "Workflow to install (omit to list available)")
     .option("--force", "Overwrite existing workflow file")
     .option("--yes", "Non-interactive mode")
@@ -439,6 +444,10 @@ export function registerAddCommand(program: Command): void {
     .option("--secret <NAME=value>", "Set a repo secret from an explicit value", collectValues, [])
     .option("--all-from-env", "Copy any same-named local env vars for missing secrets")
     .option("--json", "Output JSON")
+    .addHelpText(
+      "after",
+      "\nFor private repos, explicit SSH is the most predictable choice when access depends on SSH keys.",
+    )
     .action(async (sourceArg: string, options: AddOptions) => {
       const yes = Boolean(options.yes);
       const dryRun = Boolean(options.dryRun);

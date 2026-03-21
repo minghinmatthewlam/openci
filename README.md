@@ -224,6 +224,8 @@ openci add https://github.com/your-org/private-workflows.git --workflow pr-revie
 
 OpenCI sends a minimal install telemetry event only for identifiable GitHub installs where both the source repo and destination repo are public.
 
+For a stable audit-oriented summary of the current behavior, see [PRIVACY.md](PRIVACY.md).
+
 Telemetry is not sent for:
 
 - private source repos
