@@ -72,6 +72,10 @@ npx openci-app doctor
 npx openci-app update
 ```
 
+## Repo Boundary
+
+This repo is the OSS CLI only. The hosted OpenCI web and API live in the separate private `openci-platform` monorepo, so this repo should not be linked as a Vercel project.
+
 ## Commands
 
 ### `add`
